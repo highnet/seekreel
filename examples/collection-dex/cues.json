@@ -1,0 +1,253 @@
+{
+  "duration": 43,
+  "sampleRate": 48000,
+  "bed": {
+    "tempo": 100,
+    "barsPerChord": 2,
+    "progression": [
+      {
+        "tones": [
+          "D3",
+          "F3",
+          "A3",
+          "C4"
+        ],
+        "root": "D2"
+      },
+      {
+        "tones": [
+          "F3",
+          "A3",
+          "Bb3",
+          "D4"
+        ],
+        "root": "Bb1"
+      },
+      {
+        "tones": [
+          "F3",
+          "A3",
+          "C4",
+          "E4"
+        ],
+        "root": "F2"
+      },
+      {
+        "tones": [
+          "E3",
+          "G3",
+          "C4",
+          "D4"
+        ],
+        "root": "C2"
+      }
+    ],
+    "figure": [
+      0,
+      2,
+      1,
+      3,
+      2,
+      0,
+      3,
+      1,
+      0,
+      2,
+      3,
+      1,
+      2,
+      3,
+      1,
+      0
+    ],
+    "dense": [
+      7.0,
+      39.0
+    ],
+    "bassFrom": 5.0,
+    "shaker": true
+  },
+  "cues": [
+    {
+      "at": 0.2,
+      "sound": "swell",
+      "note": "F2",
+      "dur": 1.8,
+      "gain": 0.7
+    },
+    {
+      "at": 2.4,
+      "sound": "tick"
+    },
+    {
+      "at": 5.0,
+      "sound": "tick"
+    },
+    {
+      "at": 7.6,
+      "sound": "tick"
+    },
+    {
+      "at": 9.75,
+      "sound": "shutter",
+      "gain": 0.9,
+      "pan": -0.05
+    },
+    {
+      "at": 10.95,
+      "sound": "pop"
+    },
+    {
+      "at": 13.4,
+      "sound": "tick"
+    },
+    {
+      "at": 13.55,
+      "sound": "whoosh"
+    },
+    {
+      "at": 16.4,
+      "sound": "tick"
+    },
+    {
+      "at": 17.3,
+      "sound": "pip",
+      "freq": 740,
+      "pan": -0.2
+    },
+    {
+      "at": 18.4,
+      "sound": "pip",
+      "freq": 850,
+      "pan": 0.0
+    },
+    {
+      "at": 19.5,
+      "sound": "pip",
+      "freq": 960,
+      "pan": 0.2
+    },
+    {
+      "at": 19.9,
+      "sound": "pad",
+      "note": "F3",
+      "dur": 5.0,
+      "gain": 1.0,
+      "pan": -0.2
+    },
+    {
+      "at": 19.9,
+      "sound": "pad",
+      "note": "C4",
+      "dur": 5.0,
+      "gain": 0.8,
+      "pan": 0.25
+    },
+    {
+      "at": 20.05,
+      "sound": "chime",
+      "note": "C5",
+      "dur": 1.5
+    },
+    {
+      "at": 20.75,
+      "sound": "stamp",
+      "gain": 0.8,
+      "pan": -0.1
+    },
+    {
+      "at": 21.15,
+      "sound": "stamp",
+      "gain": 0.55,
+      "pan": 0.05
+    },
+    {
+      "at": 21.5,
+      "sound": "stamp",
+      "gain": 0.4,
+      "pan": 0.15
+    },
+    {
+      "at": 27.0,
+      "sound": "tick"
+    },
+    {
+      "at": 30.5,
+      "sound": "tick"
+    },
+    {
+      "at": 34.0,
+      "sound": "tick"
+    },
+    {
+      "at": 34.55,
+      "sound": "tray",
+      "gain": 0.9,
+      "pan": -0.4
+    },
+    {
+      "at": 34.85,
+      "sound": "tray",
+      "gain": 0.85,
+      "pan": -0.27
+    },
+    {
+      "at": 35.15,
+      "sound": "tray",
+      "gain": 0.8,
+      "pan": -0.14
+    },
+    {
+      "at": 35.45,
+      "sound": "tray",
+      "gain": 0.75,
+      "pan": -0.01
+    },
+    {
+      "at": 35.75,
+      "sound": "tray",
+      "gain": 0.7,
+      "pan": 0.12
+    },
+    {
+      "at": 36.05,
+      "sound": "tray",
+      "gain": 0.65,
+      "pan": 0.25
+    },
+    {
+      "at": 36.35,
+      "sound": "tray",
+      "gain": 0.6,
+      "pan": 0.38
+    },
+    {
+      "at": 38.8,
+      "sound": "pad",
+      "note": "F3",
+      "dur": 4.2,
+      "gain": 1.1,
+      "pan": -0.15
+    },
+    {
+      "at": 38.8,
+      "sound": "pad",
+      "note": "A3",
+      "dur": 4.2,
+      "gain": 0.8,
+      "pan": 0.2
+    },
+    {
+      "at": 38.9,
+      "sound": "swell",
+      "note": "F2",
+      "dur": 2.2,
+      "gain": 0.8
+    }
+  ],
+  "master": {
+    "fadeIn": 0.15,
+    "fadeOut": 1.1,
+    "peak": 0.72
+  }
+}

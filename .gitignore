@@ -1,0 +1,11 @@
+node_modules/
+# Per-project render output, and the assets the fetch scripts pull down.
+out/
+probe/
+deliver/
+*.wav
+fonts/
+gsap.min.js
+grain.png
+__pycache__/
+*.pyc

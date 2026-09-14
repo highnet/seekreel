@@ -1,0 +1,17 @@
+{
+  "name": "reel",
+  "stage": "stage.html",
+  "duration": 6,
+  "fps": 24,
+  "width": 1080,
+  "height": 1080,
+  "out": "out",
+  "deliver": "deliver",
+  "poster": 3.0,
+  "audio": { "cues": "cues.json", "wav": "soundtrack.wav" },
+  "variants": [
+    { "name": "" },
+    { "name": "4x5", "scale": "1080:1080", "pad": "1080:1350:0:135:color=0x111315" },
+    { "name": "silent", "audio": false }
+  ]
+}

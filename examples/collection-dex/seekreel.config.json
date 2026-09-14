@@ -1,0 +1,15 @@
+{
+  "name": "collection-dex",
+  "stage": "stage.html",
+  "duration": 43,
+  "fps": 24,
+  "width": 1080,
+  "height": 1080,
+  "poster": 22.1,
+  "audio": { "cues": "cues.json", "wav": "soundtrack.wav" },
+  "variants": [
+    { "name": "" },
+    { "name": "4x5", "scale": "1080:1080", "pad": "1080:1350:0:135:color=0xedefec" },
+    { "name": "silent", "audio": false }
+  ]
+}

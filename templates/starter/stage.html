@@ -1,0 +1,93 @@
+<meta charset="utf-8">
+<title>seekreel starter</title>
+<style>
+  /* Nothing here is animated by CSS. Every moving value is set by the script
+     below from ?t=, because seeking is the only thing allowed to change the
+     picture — an animation with a clock of its own would render whatever
+     frame it happened to be on. */
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1080px; overflow: hidden; }
+  body {
+    background: #111315; color: #f2f4f3;
+    font: 400 18px/1.5 system-ui, -apple-system, sans-serif;
+  }
+  #stage { position: relative; width: 1080px; height: 1080px; overflow: hidden; }
+  #card {
+    position: absolute; inset: 150px;
+    display: grid; align-content: center; gap: 30px;
+    border: 1px solid #2b3033; background: #171a1d; padding: 76px;
+  }
+  h1 { font-size: 78px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.04; }
+  p { font-size: 26px; color: #9aa3a7; max-width: 24ch; }
+  #bar { height: 4px; background: #2b3033; }
+  #bar i { display: block; height: 100%; background: #6ee7b7; transform-origin: left center; }
+  .dot { position: absolute; top: 0; width: 26px; height: 26px; border-radius: 50%; background: #6ee7b7; }
+</style>
+
+<div id="stage">
+  <div id="card">
+    <h1 id="title">One frame<br>per seek.</h1>
+    <p id="sub">The film is a function of time. Ask for a timestamp, get exactly
+      the frame that belongs to it.</p>
+    <div id="bar"><i id="fill"></i></div>
+  </div>
+  <div class="dot" id="d0"></div>
+  <div class="dot" id="d1"></div>
+  <div class="dot" id="d2"></div>
+</div>
+
+<script>
+/*
+ * The contract seekreel relies on, and the whole of it:
+ *
+ *   1. read `t` (seconds) from the query string
+ *   2. draw the frame for that timestamp, synchronously
+ *   3. stamp data-seekreel-ready on <html> once the frame is final
+ *
+ * That is all. This starter does it in plain JavaScript and has no
+ * dependencies at all, so it renders on a machine with no network. An
+ * animation library is a very good idea once a film has more than a handful
+ * of moves — examples/collection-dex drives a forty-three second one off a
+ * paused GSAP timeline and a single .time(t) — but nothing here requires one,
+ * and a canvas draw or a chart library would satisfy the contract equally.
+ */
+const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+
+/** Progress through [a, b], clamped — the only timing primitive needed. */
+const span = (a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
+const outExpo = (x) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const inOutSine = (x) => -(Math.cos(Math.PI * x) - 1) / 2;
+
+const set = (id, styles) => Object.assign(document.getElementById(id).style, styles);
+
+/* The card arrives, then leaves. */
+const arrive = outExpo(span(0.1, 1.0));
+const leave = span(5.2, 5.9);
+set("card", {
+  opacity: String(arrive * (1 - leave)),
+  transform: `translateY(${(24 * (1 - arrive) - 16 * leave).toFixed(2)}px)`,
+});
+
+/* Its contents follow, staggered. */
+[["title", 0.35], ["sub", 0.6]].forEach(([id, at]) => {
+  const g = outExpo(span(at, at + 0.8));
+  set(id, { opacity: String(g), transform: `translateY(${(18 * (1 - g)).toFixed(2)}px)` });
+});
+
+/* A measure that fills across the middle of the film. */
+set("fill", { transform: `scaleX(${inOutSine(span(1.2, 4.6)).toFixed(4)})` });
+
+/* Three dots falling, each a quarter-second behind the last. */
+for (let i = 0; i < 3; i++) {
+  const g = inOutSine(span(0.8 + i * 0.25, 4.0 + i * 0.25));
+  set(`d${i}`, {
+    opacity: String(Math.min(1, g * 6)),
+    left: `${120 + i * 60}px`,
+    transform: `translateY(${(120 + g * 800).toFixed(1)}px)`,
+  });
+}
+
+/* Told you so. */
+document.documentElement.setAttribute("data-seekreel-ready", "1");
+</script>

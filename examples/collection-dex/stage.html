@@ -1,0 +1,954 @@
+<meta charset="utf-8">
+<title>Collection Dex — promo stage</title>
+<style>
+@font-face{font-family:Archivo;src:url("fonts/archivo.ttf")format("truetype");font-weight:100 900;font-stretch:62% 125%;font-display:block}
+@font-face{font-family:"Fira Mono";src:url("fonts/firamono.ttf")format("truetype");font-weight:400;font-display:block}
+
+:root{
+  --foam:#edefec; --tray:#ffffff; --lattice:#cbcfc9; --lattice-strong:#a6aba4;
+  --ink:#15181a; --ink-soft:#575e5b; --pin:#878e94;
+  --determination-card:#e0968c; --determination-card-edge:#c9776b;
+  --slip:#faf7ee; --slip-edge:#e3ddcc;
+  --determination:#a83227; --determination-soft:#f7e7e4;
+  --muted:#e4e7e2; --effective:#3f6b4a; --resisted:#a4453a;
+}
+*{margin:0;padding:0;box-sizing:border-box;border:0 solid var(--lattice)}
+html,body{width:1080px;height:1080px;overflow:hidden;background:var(--foam)}
+body{font-family:Archivo,system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+
+#stage{position:relative;width:1080px;height:1080px;overflow:hidden;background:var(--foam);
+  background-image:
+    linear-gradient(to bottom right,rgb(255 255 255/.55),transparent 55%),
+    repeating-linear-gradient(0deg,rgb(21 24 26/.022) 0 1px,transparent 1px 6px),
+    repeating-linear-gradient(90deg,rgb(21 24 26/.022) 0 1px,transparent 1px 6px);
+}
+.slip{background:var(--slip);border:1px solid var(--slip-edge);color:var(--ink)}
+.slip-det{background:var(--determination-card);border:1px solid var(--determination-card-edge);color:var(--ink)}
+.lab{font-stretch:82%;letter-spacing:.06em;text-transform:uppercase;font-weight:400}
+.fig{font-family:"Fira Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.pin{position:relative}
+.pin::before{content:"";position:absolute;top:0;left:50%;width:1px;height:.75rem;translate:-50% 0;background:var(--pin)}
+.pin::after{content:"";position:absolute;top:-.1875rem;left:50%;width:.4375rem;height:.4375rem;translate:-50% 0;border-radius:50%;background:var(--pin);box-shadow:0 1px 1px rgb(21 24 26/.35)}
+.holder{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--pin);background:var(--slip);
+  padding:8px 10px;box-shadow:inset 0 1px 0 var(--tray),inset 0 2px 2px rgb(21 24 26/.14)}
+.holder svg{width:22px;height:22px;flex:none}
+.holder b{font-size:17px;font-weight:600;letter-spacing:-.025em;line-height:1}
+
+/* ---------- cold open ---------- */
+#cold{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:var(--foam);
+  background-image:linear-gradient(to bottom right,rgb(255 255 255/.55),transparent 55%)}
+#cold .inner{text-align:center;max-width:760px}
+#cold .holder{padding:13px 17px;gap:11px}
+#cold .holder svg{width:31px;height:31px}
+#cold .holder b{font-size:25px}
+#cold h1{margin-top:46px;font-size:82px;font-weight:600;line-height:1.02;letter-spacing:-.035em}
+#cold p{margin-top:26px;font-size:24px;line-height:1.45;color:var(--ink-soft)}
+#coldLat{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:180px;
+  gap:1px;background:var(--lattice-strong);opacity:.16}
+#coldLat span{background:var(--tray)}
+
+/* ---------- left copy column ---------- */
+#copy{position:absolute;left:72px;top:126px;width:474px;z-index:3}
+#lines{margin-top:60px}
+#l1{font-size:56px;font-weight:600;line-height:1.06;letter-spacing:-.03em}
+#l2{margin-top:20px;font-size:20px;line-height:1.5;color:var(--ink-soft);max-width:27ch}
+#rule{margin-top:36px;height:2px;background:var(--ink);transform-origin:left center}
+#step{margin-top:18px;font-size:13px;color:var(--ink-soft)}
+
+/* ---------- device ---------- */
+#device{position:absolute;left:600px;top:123px;width:424px;height:834px;
+  background:var(--ink);border-radius:6px;padding:12px;
+  box-shadow:0 4px 6px rgb(21 24 26/.10),0 26px 48px -18px rgb(21 24 26/.40)}
+#scr{position:relative;width:400px;height:810px;overflow:hidden;background:var(--foam);
+  background-image:repeating-linear-gradient(0deg,rgb(21 24 26/.022) 0 1px,transparent 1px 6px),
+                   repeating-linear-gradient(90deg,rgb(21 24 26/.022) 0 1px,transparent 1px 6px)}
+.view{position:absolute;inset:0;overflow:hidden}
+.roll{position:absolute;left:0;right:0;top:0}
+
+/* app header inside the phone */
+.hdr{position:relative;z-index:3;border-bottom:2px solid var(--pin);background:var(--tray);
+  box-shadow:inset 0 -4px 0 var(--tray),inset 0 -5px 0 var(--lattice-strong);padding:10px 14px 12px}
+.hdr-row{display:flex;align-items:center;gap:10px}
+.hdr .holder{padding:6px 8px;gap:7px}
+.hdr .holder svg{width:18px;height:18px}
+.hdr .holder b{font-size:14px}
+.hdr p{margin-top:7px;font-size:12px;line-height:1.35;color:var(--ink-soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;font-size:13px;border-radius:2px}
+.btn-red{background:var(--determination);color:#fff}
+.btn-ghost{background:var(--tray);border:1px solid var(--lattice-strong);color:var(--ink)}
+.pad{padding:16px 14px}
+.ttl{font-size:13px;font-weight:600;letter-spacing:-.025em}
+.icn{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- login ---------- */
+.login{padding:40px 26px}
+.login .lede{margin-top:30px;font-size:23px;font-weight:600;letter-spacing:-.025em;line-height:1.25}
+.login .sub{margin-top:10px;font-size:12.5px;line-height:1.55;color:var(--ink-soft)}
+.fieldlab{display:block;margin-top:26px;font-size:10px;color:var(--ink-soft)}
+.field{margin-top:6px;height:36px;border:1px solid var(--lattice-strong);background:var(--tray);
+  display:flex;align-items:center;padding:0 10px;font-size:13px;gap:2px}
+.caret{width:1.5px;height:16px;background:var(--determination)}
+.sent{margin-top:16px;padding:10px 12px;font-size:12px;line-height:1.5}
+
+/* ---------- photo / viewfinder ---------- */
+.photo{position:absolute;inset:0}
+.grain{position:absolute;inset:0;opacity:.16;mix-blend-mode:multiply;background-image:url("grain.png");background-size:200px 200px}
+.vign{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 42%,transparent 42%,rgb(21 24 26/.30))}
+.modes{position:absolute;left:10px;right:10px;top:10px;display:flex;gap:4px}
+.modes div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 5px;
+  background:rgb(250 247 238/.92);border:1px solid var(--slip-edge);font-size:9px}
+.modes div.on{background:var(--ink);border-color:var(--ink);color:var(--foam)}
+.hint{position:absolute;left:10px;right:10px;top:66px;padding:7px 9px;font-size:10px}
+.toggles{position:absolute;left:10px;right:10px;bottom:118px;display:flex;gap:6px}
+.toggles div{flex:1;display:flex;align-items:center;gap:6px;padding:7px 9px;background:rgb(250 247 238/.92);
+  border:1px solid var(--slip-edge);font-size:9px}
+.sw{width:22px;height:12px;flex:none;border:1px solid var(--lattice-strong);background:var(--tray);position:relative}
+.sw.on{background:var(--determination);border-color:var(--determination)}
+.sw i{position:absolute;top:1px;left:1px;width:8px;height:8px;background:var(--tray);border:1px solid var(--lattice-strong)}
+.sw.on i{left:11px;border-color:var(--determination)}
+.shutter{position:absolute;left:0;right:0;bottom:0;height:104px;background:var(--tray);border-top:1px solid var(--lattice-strong);
+  display:flex;align-items:center;justify-content:center}
+.shutter .ring{width:60px;height:60px;border:3px solid var(--determination);border-radius:50%;display:grid;place-items:center}
+.shutter .ring i{width:42px;height:42px;background:var(--determination);border-radius:50%;display:block}
+#crosshair{position:absolute;width:1px;height:1px}
+#crosshair .h,#crosshair .v{position:absolute;background:#fff;box-shadow:0 0 0 1px rgb(21 24 26/.45)}
+#crosshair .h{left:-44px;width:88px;height:2px;top:-1px}
+#crosshair .v{top:-44px;height:88px;width:2px;left:-1px}
+#crosshair .ring{position:absolute;left:-33px;top:-33px;width:66px;height:66px;border:2px solid #fff;
+  box-shadow:0 0 0 1px rgb(21 24 26/.4),inset 0 0 0 1px rgb(21 24 26/.25)}
+#crosshair .dot{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;
+  background:var(--determination);box-shadow:0 0 0 2.5px #fff,0 0 0 4px rgb(21 24 26/.35)}
+#ripple{position:absolute;border:2px solid #fff;border-radius:50%;translate:-50% -50%;width:12px;height:12px}
+#flash{position:absolute;inset:0;background:#fff}
+
+/* ---------- progress ---------- */
+.pbar{height:6px;background:var(--muted)}
+.pbar i{display:block;height:100%;background:var(--determination);transform-origin:left center}
+.stage-row{display:flex;gap:10px;padding:11px 0;align-items:flex-start;border-top:1px solid var(--lattice)}
+.stage-row .tick{width:14px;height:14px;flex:none;margin-top:2px;border:1px solid var(--lattice-strong);background:var(--tray);
+  display:grid;place-items:center;font-size:9px;color:var(--tray);position:relative}
+.stage-row .tick b{position:absolute;inset:-1px;background:var(--ink);color:var(--tray);display:grid;place-items:center;
+  font-size:9px;font-weight:400;transform-origin:center}
+.stage-row .nm{font-size:13px;font-weight:600;letter-spacing:-.02em}
+.stage-row .dt{font-size:11px;line-height:1.45;color:var(--ink-soft);margin-top:2px}
+
+/* ---------- entry ---------- */
+.plate{position:relative;display:grid;place-items:center;aspect-ratio:1;border:1px solid var(--lattice-strong);background:var(--tray)}
+.plate .no{position:absolute;top:8px;left:8px;font-size:11px;color:var(--ink-soft)}
+.name{font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1.15;white-space:nowrap}
+.species{font-size:13px;color:var(--ink-soft);margin-top:4px}
+.slips{display:flex;flex-direction:column;align-items:flex-start;margin-top:14px}
+.slips span{font-size:10px;padding:5px 8px;line-height:1;border:1px solid var(--slip-edge);background:var(--slip)}
+.slips span+span{margin-top:-1px}
+.types{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.chip{font-size:10px;line-height:1;padding:4px 6px;border:1px solid var(--slip-edge);background:var(--slip);display:inline-block}
+.dl{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;border-top:1px solid var(--lattice);margin-top:16px;padding-top:14px}
+.dl dt{font-size:11px;color:var(--ink-soft)}
+.dl dd{font-size:13px;margin-top:1px}
+.sect{border-top:1px solid var(--lattice);margin-top:18px;padding-top:15px}
+.prose{font-size:13px;line-height:1.6}
+.flav{font-size:12px;line-height:1.55;padding:9px 11px;margin-top:12px}
+.sr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sr .k{width:34px;flex:none;font-size:10px;color:var(--ink-soft)}
+.sr .m{flex:1;height:6px;background:var(--muted)}
+.sr .m i{display:block;height:100%;background:var(--ink-soft);transform-origin:left center}
+.sr .v{width:26px;flex:none;text-align:right;font-size:12px}
+.mv{padding:11px 0;border-top:1px solid rgb(203 207 201/.6)}
+.mv:first-of-type{border-top:0;padding-top:0}
+.mv .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mv .nm{font-size:13px;font-weight:500}
+.mv .cat{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--ink-soft)}
+.mv .ef{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin-top:5px}
+.mv .fg{display:flex;gap:14px;margin-top:6px;font-size:11px;color:var(--ink-soft)}
+.mv .fg b{font-weight:400;opacity:.7;margin-right:5px}
+.mv .fg span i{font-style:normal;color:var(--ink)}
+.agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--lattice-strong);
+  background:var(--lattice-strong);margin-top:12px}
+.agrid span{background:var(--tray);color:var(--ink-soft);min-height:40px;display:flex;align-items:center;
+  justify-content:center;text-align:center;font-size:9px;line-height:1.2;padding:4px}
+.agrid span.here{background:var(--ink);color:var(--foam);font-weight:600}
+
+/* ---------- type chart ---------- */
+.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.legend span.k{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--ink-soft)}
+.legend i{width:17px;height:17px;display:grid;place-items:center;font-size:9px;color:#fff;font-style:normal}
+.mx{border:1px solid var(--lattice-strong);background:var(--tray)}
+.mx table{border-collapse:separate;border-spacing:0;width:100%}
+.mx th,.mx td{border-right:1px solid var(--lattice);border-bottom:1px solid var(--lattice);height:30px;
+  font-size:8.5px;text-align:center;padding:0 2px}
+.mx th.corner{background:var(--foam);width:62px;color:var(--ink-soft);font-weight:400;font-size:8px;line-height:1.3}
+.mx th.col{color:#fff;font-weight:400;writing-mode:vertical-rl;height:74px;padding:4px 0}
+.mx th.row{color:#fff;font-weight:400;text-align:left;padding-left:5px;width:62px}
+.mx td.e{background:var(--effective);color:#fff}
+.mx td.r{background:var(--resisted);color:#fff}
+.mx td span{font-family:"Fira Mono",monospace;font-size:9px}
+
+/* ---------- scene builder ---------- */
+.stagebox{position:relative;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--lattice-strong);background:#cfe2ef}
+.stagebox svg.bd{position:absolute;inset:0;width:100%;height:100%}
+.stagebox .sp{position:absolute;transform-origin:50% 100%}
+.stagebox .sp svg{width:100%;height:100%}
+.selring{position:absolute;border:1px dashed var(--determination);pointer-events:none}
+.selring i{position:absolute;width:9px;height:9px;background:var(--tray);border:1px solid var(--determination)}
+.picker{display:flex;gap:5px;margin-top:12px;overflow:hidden}
+.picker div{width:56px;height:42px;flex:none;border:1px solid var(--lattice-strong);overflow:hidden;position:relative}
+.picker div.on{outline:2px solid var(--determination);outline-offset:1px}
+.picker div svg{width:100%;height:100%;display:block}
+.strip{display:flex;gap:5px;margin-top:10px}
+.strip div{width:52px;height:52px;flex:none;border:1px solid var(--lattice);background:var(--tray);display:grid;place-items:center}
+.strip div svg{width:80%;height:80%}
+
+/* ---------- drawer in the phone (filters) ---------- */
+.srch{display:flex;align-items:center;gap:7px;height:32px;border:1px solid var(--lattice-strong);background:var(--tray);padding:0 9px;font-size:12px;color:var(--ink-soft)}
+.frow{display:grid;grid-template-columns:46px 1fr;gap:6px;align-items:start;margin-top:9px}
+.frow>.lab{font-size:9px;color:var(--ink-soft);padding-top:3px}
+.frow .chips{display:flex;flex-wrap:wrap;gap:4px}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--lattice-strong);
+  border-top:1px solid var(--lattice-strong);border-bottom:1px solid var(--lattice-strong);margin-top:14px}
+.pcell{background:var(--tray);aspect-ratio:1;display:flex;flex-direction:column}
+.pcell .no{font-size:9px;color:var(--ink-soft);position:absolute;top:5px;left:6px}
+.pcell .w{position:relative;flex:1;min-height:0;display:grid;place-items:center;padding:16px 12px 6px}
+.pcell .w svg{width:100%;height:100%}
+.pcell .s{margin:0 5px 5px;height:40px;padding:5px 7px}
+.pcell .s .n{font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcell .s .b{display:flex;gap:3px;margin-top:4px}
+.pcell .s .b span{font-size:8px;line-height:1;padding:2px 4px;border:1px solid var(--slip-edge);background:var(--slip)}
+
+/* ---------- empty drawer ---------- */
+.empty{margin:26px 14px 0;border:1px dashed var(--lattice-strong);background:var(--tray);
+  padding:44px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.empty h2{font-size:17px;font-weight:600;letter-spacing:-.025em}
+.empty p{font-size:12.5px;line-height:1.6;color:var(--ink-soft);max-width:24ch}
+.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--lattice-strong);
+  border-top:1px solid var(--lattice-strong);margin-top:24px}
+.vgrid span{background:var(--tray);aspect-ratio:1}
+.vgrid span.wide{grid-column:span 2;aspect-ratio:2/1}
+
+/* ---------- full-bleed drawer ---------- */
+#drawer{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:269.75px;gap:1px;background:var(--lattice-strong);
+  border-top:1px solid var(--lattice-strong);border-bottom:1px solid var(--lattice-strong)}
+.cell{position:relative;background:var(--tray);display:flex;flex-direction:column}
+.cell.wide{grid-column:span 2}
+.cell .no{position:absolute;top:9px;left:11px;font-size:13px;color:var(--ink-soft);z-index:1}
+.well{position:relative;flex:1;min-height:0;display:grid;place-items:center;padding:30px 26px 12px}
+.well svg{width:100%;height:100%}
+.cslip{margin:0 9px 9px;height:70px;padding:9px 11px}
+.cslip .n{font-size:19px;font-weight:500;line-height:1.15;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cslip .b{display:flex;gap:5px;margin-top:8px}
+.cslip .b span{font-size:11px;line-height:1;padding:3px 6px;border:1px solid var(--slip-edge);background:var(--slip)}
+
+/* ---------- outro ---------- */
+#outro{position:absolute;inset:0;z-index:6;display:grid;place-items:center;background:rgb(237 239 236/.62)}
+#outro .box{text-align:center;background:var(--slip);border:1px solid var(--slip-edge);
+  padding:56px 72px 62px;box-shadow:0 3px 4px rgb(21 24 26/.07),0 34px 60px -22px rgb(21 24 26/.45)}
+#outro .holder{padding:14px 18px;gap:12px}
+#outro .holder svg{width:34px;height:34px}
+#outro .holder b{font-size:28px}
+#outro .tag{margin-top:26px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.2}
+#outro .sub{margin-top:14px;font-size:17px;color:var(--ink-soft)}
+#outro .url{margin-top:34px;display:inline-block;font-size:15px;padding:10px 14px;
+  background:var(--tray);border:1px solid var(--lattice-strong)}
+</style>
+
+<div id="stage">
+  <div id="copy">
+    <div class="holder" id="wordmark"></div>
+    <div id="lines"><div id="l1"></div><div id="l2"></div><div id="rule"></div><div id="step" class="lab fig"></div></div>
+  </div>
+  <div id="device"><div id="scr"></div></div>
+  <div id="drawer"></div>
+  <div id="cold"><div id="coldLat"></div><div class="inner">
+    <div class="holder" id="wordmark0"></div>
+    <h1>Everything<br>is a creature.</h1>
+    <p>A mug, a bollard, a cloud. It just has not been catalogued yet.</p>
+  </div></div>
+  <div id="outro"><div class="box">
+    <div class="holder" id="wordmark2"></div>
+    <div class="tag">Everything you photograph<br>is a creature.</div>
+    <div class="sub">Collection Dex — a field dex for the real world.</div>
+    <div class="url slip fig">collectiondex.com</div>
+  </div></div>
+</div>
+
+<script src="gsap.min.js"></script>
+<script>
+/* ===========================================================================
+ * One frame per load.
+ *
+ * GSAP builds the whole film as a paused master timeline, and the render is a
+ * single seek to ?t= seconds. Nothing is driven by the ticker and there are no
+ * callbacks, so a frame is a pure function of its timestamp: it can be
+ * examined on its own, re-rendered on its own, and the film is repeatable
+ * rather than something somebody has to record again by hand.
+ *
+ * Motion is GSAP's (easing, stagger, timeline structure). The copy column's
+ * words are plain JS, because text is not a tweened property and a callback
+ * would not survive a seek.
+ * ======================================================================== */
+const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+gsap.config({force3D:false});
+const el=(tag,cls,html)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(html!=null)n.innerHTML=html;return n;};
+
+const MARK=`<svg viewBox="0 0 32 32" fill="none">
+  <rect x="4.5" y="6.5" width="23" height="21" fill="#ffffff" stroke="#a6aba4"/>
+  <rect x="11" y="13" width="10" height="8" fill="#575e5b"/>
+  <rect x="15.5" y="6" width="1" height="7" fill="#878e94"/>
+  <circle cx="16" cy="5.5" r="3" fill="#15181a"/></svg>`;
+for(const id of ["wordmark","wordmark0","wordmark2"])
+  document.getElementById(id).innerHTML = MARK+"<b>Collection Dex</b>";
+for(let i=0;i<36;i++) coldLat.appendChild(el("span"));
+
+/* the six determination inks, hashed exactly as lib/typing.ts hashes them */
+const INKS=["#44403c","#115e59","#0c4a6e","#78350f","#4c1d95","#064e3b"];
+function paletteIndex(name){let h=0x811c9dc5;const k=name.trim().toLowerCase();
+  for(let i=0;i<k.length;i++){h^=k.charCodeAt(i);h=Math.imul(h,0x01000193);}
+  return Math.abs(h)%6;}
+const inkFor=n=>INKS[paletteIndex(n)];
+const fillFor=n=>INKS[paletteIndex(n)];
+const RARITY_INK={common:"#57534e",uncommon:"#065f46",rare:"#0c4a6e",epic:"#4c1d95",legendary:"#15181a"};
+
+/* lucide-ish glyphs, drawn rather than imported */
+const ICON={
+  crosshair:'<circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
+  square:'<rect x="4" y="4" width="16" height="16" rx="1"/>',
+  circle:'<circle cx="12" cy="12" r="8"/>',
+  maximize:'<path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/>',
+  camera:'<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/>',
+  search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+  swords:'<path d="M4 4l9 9M4 8V4h4M20 4l-9 9M20 8V4h-4M8 20l4-4 4 4"/>',
+  sparkles:'<path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z"/>',
+  shield:'<path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/>',
+  mail:'<rect x="3" y="6" width="18" height="12" rx="1"/><path d="M3 8l9 6 9-6"/>',
+  pin:'<path d="M12 21s6-6 6-10a6 6 0 1 0-12 0c0 4 6 10 6 10z"/><circle cx="12" cy="11" r="2"/>',
+  scissors:'<circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><path d="M20 4L8.5 16M20 20L8.5 8"/>',
+};
+const ico=n=>`<svg class="icn" viewBox="0 0 24 24">${ICON[n]}</svg>`;
+
+/* ===================== pixel sprites ===================== */
+function spriteSVG(rows,pal){
+  const w=Math.max(...rows.map(r=>r.length)), h=rows.length;
+  let out=`<svg viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" style="filter:drop-shadow(0 3px 2px rgb(21 24 26/.18))">`;
+  for(let y=0;y<h;y++){const r=rows[y];let x=0;
+    while(x<r.length){const c=r[x];
+      if(c==="."||c===undefined){x++;continue;}
+      let n=1;while(r[x+n]===c)n++;
+      out+=`<rect x="${x}" y="${y}" width="${n}" height="1" fill="${pal[c]}"/>`;
+      x+=n;}}
+  return out+"</svg>";
+}
+const HYD_PAL={k:"#1b1d1e",r:"#b5392e",R:"#8a2a21",h:"#d9564a",s:"#8f979a",w:"#d8dcdb",e:"#0d0f10"};
+const HYDRANT=[
+"........................","..........kkkk..........",".........khhhhk.........",
+"........khhhhhhk........","........kkkkkkkk........","......kkhhhhhhhhkk......",
+".....khhrrrrrrrrhhk.....","....khrrrrrrrrrrrrhk....","...kkkkkkkkkkkkkkkkkk...",
+"...ksssrrrrrrrrrrsssk...","..kkskwkrrrrrrrrkwkskk..","..kswwwkreekreekkwwwsk..",
+"..kswwwkreekreekkwwwsk..","..kkskwkrrrrrrrrkwkskk..","...ksssrRRRRRRRRsssk....",
+"....kkkkrrrrrrrrkkkk....","......khrrrrrrrrhk......","......khrrhhrrrrhk......",
+"......khrrrrrrrrhk......","......kRRRRRRRRRRk......",".....kkkkkkkkkkkkkk.....",
+"....ksssssssssssssk.....","....kkkkkkkkkkkkkkk.....","........................"];
+
+function grid(n,f="."){return Array.from({length:n},()=>Array(n).fill(f));}
+function put(g,x,y,w,h,c){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(g[j]&&g[j][i]!==undefined)g[j][i]=c;}
+function blob(g,cx,cy,rx,ry,c){for(let y=0;y<g.length;y++)for(let x=0;x<g.length;x++){
+  const dx=(x+.5-cx)/rx,dy=(y+.5-cy)/ry;if(dx*dx+dy*dy<=1)g[y][x]=c;}}
+function outline(g){const n=g.length,o=g.map(r=>r.slice());
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){if(g[y][x]!==".")continue;
+    const near=[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>g[y+b]&&g[y+b][x+a]&&g[y+b][x+a]!=="."&&g[y+b][x+a]!=="k");
+    if(near)o[y][x]="k";}
+  return o;}
+/*
+ * Every sprite is normalised to one 24-square canvas, the way the product
+ * normalises its own: at a fixed tray size a smaller canvas renders visibly
+ * larger pixels, which is the one way a grid of identical trays can still
+ * come out uneven. Drawn on 18 because the shapes are easier to reason about
+ * there, then centred on 24.
+ */
+const CANVAS=24, INNER=18, PAD=(CANVAS-INNER)/2;
+const mk=b=>{const g=grid(INNER);b(g);
+  const rows=outline(g).map(r=>r.join(""));
+  const edge=".".repeat(PAD), blank=".".repeat(CANVAS);
+  return [...Array(PAD).fill(blank),...rows.map(r=>edge+r+edge),...Array(PAD).fill(blank)];};
+
+const FILLERS=[
+ {name:"Grumblewick",rarity:"uncommon",al:"CN",pal:{k:"#1b1d1e",a:"#b07c4e",b:"#8a5f3a",c:"#e8d9c2",e:"#15181a"},
+  rows:mk(g=>{blob(g,9,10,5.4,5.2,"a");blob(g,9,8.4,4.6,3.4,"c");put(g,4,4,2,3,"a");put(g,12,4,2,3,"a");
+    put(g,6,8,2,2,"e");put(g,10,8,2,2,"e");put(g,8,11,2,1,"b");put(g,5,14,3,2,"b");put(g,10,14,3,2,"b");})},
+ {name:"Stanchling",rarity:"common",al:"LN",pal:{k:"#1b1d1e",a:"#4c5358",b:"#31373b",c:"#6f777c",e:"#0d0f10"},
+  rows:mk(g=>{put(g,7,3,4,2,"c");put(g,6,5,6,9,"a");put(g,6,5,2,9,"c");put(g,8,8,1,2,"e");put(g,10,8,1,2,"e");
+    put(g,5,14,8,2,"b");})},
+ {name:"Cuppary",rarity:"common",al:"NG",pal:{k:"#1b1d1e",a:"#e6e9e6",b:"#b9c0bd",c:"#3f6b8a",e:"#15181a"},
+  rows:mk(g=>{put(g,4,6,9,8,"a");put(g,4,6,9,2,"c");put(g,13,8,3,4,"b");put(g,14,9,1,2,".");
+    put(g,6,10,1,2,"e");put(g,10,10,1,2,"e");put(g,4,14,9,1,"b");})},
+ {name:"Verglow",rarity:"rare",al:"CG",pal:{k:"#1b1d1e",a:"#d4652f",b:"#a44a20",c:"#e8e2d4",e:"#15181a"},
+  rows:mk(g=>{put(g,8,3,2,2,"a");put(g,7,5,4,3,"a");put(g,6,8,6,2,"c");put(g,5,10,8,4,"a");
+    put(g,7,11,1,2,"e");put(g,10,11,1,2,"e");put(g,3,14,12,2,"b");})},
+ {name:"Lumenspill",rarity:"epic",al:"TN",pal:{k:"#1b1d1e",a:"#e9d38a",b:"#c9a94e",c:"#fbf3d6"},
+  rows:mk(g=>{blob(g,9,9,5.6,5.6,"b");blob(g,9,9,4.2,4.2,"a");blob(g,8,8,2.2,2.2,"c");})},
+ {name:"Kerbcoo",rarity:"common",al:"CN",pal:{k:"#1b1d1e",a:"#7d858c",b:"#565d63",c:"#3f6b6b",e:"#15181a",o:"#b07c4e"},
+  rows:mk(g=>{blob(g,9,10,5,4,"a");blob(g,6,6.5,2.6,2.6,"a");put(g,5,6,1,1,"e");put(g,3,7,2,1,"o");
+    put(g,5,4,2,2,"c");blob(g,11,10,3.2,2.4,"b");put(g,7,14,2,2,"o");put(g,11,14,2,2,"o");})},
+];
+const SP=Object.fromEntries(FILLERS.map(f=>[f.name,spriteSVG(f.rows,f.pal)]));
+SP.Hydrantica=spriteSVG(HYDRANT,HYD_PAL);
+
+/* The lattice runs on past the content on any screen short enough to show
+   it — the drawer is never finished, and that is true of every page in it. */
+function latBand(view,{h=88,rows=0}={}){
+  const b=el("div");
+  Object.assign(b.style,{position:"absolute",left:0,right:0,bottom:0,display:"grid",
+    gridTemplateColumns:"repeat(2,1fr)",gridAutoRows:h+"px",gap:"1px",
+    background:"var(--lattice-strong)",borderTop:"1px solid var(--lattice-strong)"});
+  for(let i=0;i<rows*2;i++) b.appendChild(el("span",null,"")).style.background="var(--tray)";
+  const w=el("span");Object.assign(w.style,{background:"var(--tray)",gridColumn:"span 2"});
+  b.appendChild(w);
+  view.appendChild(b);
+}
+
+/* ===================== the specimen the film follows ===================== */
+const HERO={no:"#007",name:"Hydrantica",species:"Pressurised pavement dweller",
+  rarity:"uncommon",al:"lawful neutral",cat:"Municipal fixture",
+  types:["Ferrous","Hydro"],h:"71 cm",w:"84.0 kg",place:"Kerbside, Neubau, Vienna",
+  hab:"Bolted to kerbsides; dormant for years at a time.",
+  desc:"Squat, bolted down and permanently full. It does not move and has never needed to — everything it has to offer is delivered under pressure, through the two ports on its flanks.",
+  flav:"Sits out every winter without complaint. Resents being painted.",
+  stats:[["HP",78],["ATK",52],["DEF",94],["SPD",9],["SPC",61]],
+  moves:[
+    {n:"Mains Pressure",ty:"Hydro",cat:"special",ic:"sparkles",pwr:85,acc:95,pp:10,
+     ef:"Opens both ports at once. Loses power if used twice in a row."},
+    {n:"Bolt Down",ty:"Ferrous",cat:"status",ic:"shield",pwr:0,acc:100,pp:20,
+     ef:"Cannot be moved or swapped out for three turns."},
+    {n:"Kerb Check",ty:"Ferrous",cat:"physical",ic:"swords",pwr:60,acc:100,pp:25,
+     ef:"Always strikes first against anything lighter than it."},
+    {n:"Winter Standing",ty:"Domestic",cat:"status",ic:"shield",pwr:0,acc:100,pp:15,
+     ef:"Ignores weather for the rest of the encounter."}],
+  weak:["Saline","Voltaic"],resist:["Thermal","Textile"]};
+
+/* ===================== views ===================== */
+const scr=document.getElementById("scr");
+const views={};
+function view(name,html){const v=el("div","view");v.dataset.v=name;v.innerHTML=html;scr.appendChild(v);views[name]=v;return v;}
+const HDRBAR=(right="",count="")=>`
+  <div class="hdr"><div class="hdr-row"><div class="holder">${MARK}<b>Collection Dex</b>
+    ${count?`<span class="fig" style="font-size:11px;color:var(--ink-soft)">${count}</span>`:""}</div>
+    ${right?`<div style="margin-left:auto;display:flex;gap:6px;align-items:center">${right}</div>`:""}</div>
+    <p>Photograph anything. It comes back drawn, named and filed under a number.</p></div>`;
+const CAPBTN=`<span class="btn btn-red">${ico("camera")}Capture</span>`;
+
+/* --- 1. sign in --- */
+view("login",`
+  ${HDRBAR()}
+  <div class="login">
+    <div class="lede">Open your drawer.</div>
+    <div class="sub">Sign in by email. There is no password — the link in your
+      inbox is the whole of it.</div>
+    <span class="fieldlab lab">Email</span>
+    <div class="field"><span id="loginEmail"></span><span class="caret" id="loginCaret"></span></div>
+    <div class="btn btn-red" style="width:100%;margin-top:14px;height:38px">${ico("mail")}Send me a link</div>
+    <div class="sent slip" id="loginSent">Check your inbox. The link signs you
+      straight in and then expires.</div>
+  </div>`);
+
+/* --- 2. the empty drawer --- */
+view("empty",`
+  ${HDRBAR(CAPBTN,"0")}
+  <div class="empty">
+    <h2>The drawer is empty</h2>
+    <p>Photograph something and pick out the part you mean. Anything counts —
+      the drawer does not care what it is.</p>
+    <span class="btn btn-red" style="height:38px;padding:0 14px">${ico("camera")}Catch the first one</span>
+  </div>
+  <div class="vgrid" id="emptyVacant"></div>`);
+{const v=document.getElementById("emptyVacant");
+ for(let i=0;i<4;i++)v.appendChild(el("span"));
+ v.appendChild(el("span","wide"));}
+
+/* --- 3+4. the viewfinder, and the mark landing on it --- */
+const PHOTO=`<svg class="photo" viewBox="0 0 400 810" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9bcb4"/><stop offset="1" stop-color="#9ea39b"/></linearGradient>
+    <linearGradient id="pave" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8e938d"/><stop offset="1" stop-color="#a8ada6"/></linearGradient>
+  </defs>
+  <rect width="400" height="470" fill="url(#wall)"/>
+  <g opacity=".5" stroke="#7f857d" stroke-width="2">
+    <path d="M0 120h400M0 250h400M0 380h400"/><path d="M70 0v470M210 0v470M330 0v470"/></g>
+  <rect y="440" width="400" height="40" fill="#7c827b"/>
+  <rect y="470" width="400" height="340" fill="url(#pave)"/>
+  <g opacity=".45" stroke="#7a807a" stroke-width="2">
+    <path d="M0 560h400M0 660h400M0 770h400"/><path d="M120 470v340M280 470v340"/></g>
+  <ellipse cx="200" cy="690" rx="120" ry="26" fill="#4f544f" opacity=".35"/>
+  ${VECTOR_HYDRANT()}
+  <g opacity=".55"><rect x="18" y="300" width="44" height="170" fill="#8b9089"/>
+    <rect x="336" y="330" width="52" height="140" fill="#8b9089"/></g>
+</svg>`;
+function VECTOR_HYDRANT(){return `<g>
+    <rect x="150" y="560" width="100" height="120" rx="6" fill="#a83227"/>
+    <rect x="150" y="560" width="26" height="120" fill="#c04a3c" opacity=".7"/>
+    <rect x="140" y="548" width="120" height="20" rx="4" fill="#8e2a21"/>
+    <rect x="164" y="512" width="72" height="42" rx="10" fill="#a83227"/>
+    <rect x="176" y="496" width="48" height="22" rx="8" fill="#8e2a21"/>
+    <circle cx="126" cy="602" r="20" fill="#8e2a21"/><circle cx="274" cy="602" r="20" fill="#8e2a21"/>
+    <circle cx="126" cy="602" r="10" fill="#4a1a14"/><circle cx="274" cy="602" r="10" fill="#4a1a14"/>
+    <rect x="132" y="672" width="136" height="18" rx="4" fill="#6f231b"/></g>`;}
+
+const MODES=[["crosshair","Point",1],["square","Box",0],["circle","Circle",0],["maximize","Whole",0]];
+view("camera",`
+  ${PHOTO}<div class="grain"></div><div class="vign"></div>
+  <div class="modes">${MODES.map(([i,l,on])=>
+    `<div class="${on?"on":""}"><span>${ico(i)}</span><span class="lab">${l}</span></div>`).join("")}</div>
+  <div class="hint slip lab" id="camHint">Mark the subject. Its edges are found for you.</div>
+  <div class="toggles">
+    <div><span class="sw on"><i></i></span><span class="lab">${"Cut background"}</span></div>
+    <div><span class="sw on"><i></i></span><span class="lab">Record place</span></div>
+  </div>
+  <div class="shutter"><div class="ring" id="shutterRing"><i></i></div></div>
+  <div id="crosshair" style="left:200px;top:600px"><div class="ring"></div><div class="h"></div><div class="v"></div><div class="dot"></div></div>
+  <div id="ripple" style="left:200px;top:600px"></div>
+  <div id="flash"></div>`);
+
+/* --- 5. is this the one? --- */
+view("confirm",`
+  ${HDRBAR()}
+  <div class="pad">
+    <div class="plate pin" id="cutPlate">
+      <div id="cutWrap" style="width:74%;height:74%;display:grid;place-items:center">
+        <svg viewBox="0 0 200 220" style="width:100%;height:100%;filter:drop-shadow(0 3px 2px rgb(21 24 26/.18))">
+          <g transform="translate(-100,-490)">${VECTOR_HYDRANT()}</g></svg>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <div style="font-size:17px;font-weight:600;letter-spacing:-.025em">Is this the one?</div>
+      <p style="font-size:12.5px;line-height:1.6;color:var(--ink-soft);margin:8px auto 0;max-width:26ch">
+        Only this gets catalogued. Nothing is spent until you say yes, and it
+        keeps — you can come back to it later.</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <div class="btn btn-red" style="flex:1;height:38px">Catalogue this</div>
+      <div class="btn btn-ghost" style="height:38px;padding:0 14px">${ico("scissors")}Re-mark</div>
+    </div>
+  </div>`);
+
+/* --- 6. being determined --- */
+const STAGES=[
+  ["Lifted out of the photo","Cut free of its background — the cutout you confirmed."],
+  ["Working out what it is","Identifying the specimen and writing its dex entry — name, typing, stats."],
+  ["Drawing the sprite","Redrawing it as pixel art, now that we know what it actually is."]];
+view("progress",`
+  ${HDRBAR(`<span class="btn slip-det" style="height:26px;font-size:9px" class="lab">1 being determined</span>`)}
+  <div class="pad">
+    <div class="ttl">Being determined</div>
+    <div class="pbar" style="margin-top:12px"><i id="pfill"></i></div>
+    <div class="fig" id="pnum" style="font-size:11px;color:var(--ink-soft);margin-top:7px">&nbsp;</div>
+    <div style="margin-top:8px">${STAGES.map((s,i)=>
+      `<div class="stage-row" data-i="${i}"><div class="tick"><b>✓</b></div>
+       <div><div class="nm">${s[0]}</div><div class="dt">${s[1]}</div></div></div>`).join("")}</div>
+    <div class="slip" style="padding:9px 11px;font-size:12px;line-height:1.55;margin-top:14px">
+      You can walk away from this. Nothing you have paid for disappears.</div>
+  </div>`);
+
+/* --- 7. the entry, read all the way down --- */
+{
+  const slips=[[HERO.rarity,RARITY_INK[HERO.rarity]],[HERO.al,"#15181a"],[HERO.cat,"#15181a"]];
+  const AL=[["lawful good","neutral good","chaotic good"],
+            ["lawful neutral","true neutral","chaotic neutral"],
+            ["lawful evil","neutral evil","chaotic evil"]];
+  view("entry",`${HDRBAR(CAPBTN,"7")}
+  <div class="roll" id="entryRoll" style="top:96px">
+   <div class="pad">
+    <div class="plate pin" id="ePlate"><div class="no fig">${HERO.no}</div>
+      <div id="eSprite" style="width:78%;height:78%">${SP.Hydrantica}</div></div>
+    <div style="overflow:hidden;margin-top:18px"><div id="eName" class="name">${HERO.name}</div></div>
+    <div id="eSpec" class="species">${HERO.species}</div>
+    <div id="eSlips" class="slips">${slips.map(([s,c])=>
+      `<span class="lab" style="color:${c}">${s}</span>`).join("")}</div>
+    <div id="eTypes" class="types">${HERO.types.map(x=>
+      `<span class="chip lab" style="color:${inkFor(x)}">${x}</span>`).join("")}</div>
+    <dl id="eDl" class="dl">
+      <div><dt>Height</dt><dd class="fig">${HERO.h}</dd></div>
+      <div><dt>Weight</dt><dd class="fig">${HERO.w}</dd></div>
+      <div style="grid-column:span 2"><dt>Locality</dt><dd>${HERO.place}</dd></div>
+      <div style="grid-column:span 2"><dt>Habitat</dt><dd style="line-height:1.5">${HERO.hab}</dd></div>
+    </dl>
+    <div id="eProse" class="sect"><p class="prose">${HERO.desc}</p>
+      <div class="flav slip">${HERO.flav}</div></div>
+    <div id="eStats" class="sect"><div class="ttl" style="margin-bottom:12px">Base stats</div>
+      ${HERO.stats.map(([k,v])=>`<div class="sr"><span class="k lab">${k}</span>
+        <span class="m"><i data-v="${v}" style="width:${v}%"></i></span>
+        <span class="v fig">${v}</span></div>`).join("")}
+      <div class="sr" style="border-top:1px solid var(--lattice);padding-top:9px;margin-bottom:0">
+        <span class="k lab">Total</span><span class="v fig" style="margin-left:auto;color:var(--ink-soft)">294</span></div></div>
+    <div id="eMoves" class="sect"><div class="ttl" style="margin-bottom:10px">Moves</div>
+      ${HERO.moves.map(m=>`<div class="mv"><div class="top"><span class="nm">${m.n}</span>
+        <span class="chip lab" style="color:${inkFor(m.ty)}">${m.ty}</span>
+        <span class="cat lab">${ico(m.ic)}${m.cat}</span></div>
+        <p class="ef">${m.ef}</p>
+        <div class="fg fig"><span><b>PWR</b><i>${m.pwr||"—"}</i></span><span><b>ACC</b><i>${m.acc}</i></span><span><b>PP</b><i>${m.pp}</i></span></div>
+      </div>`).join("")}</div>
+    <div id="eMatch" class="sect"><div class="ttl" style="margin-bottom:10px">Matchups</div>
+      <div style="font-size:11px;color:var(--ink-soft)">Weak to</div>
+      <div class="types" style="margin-top:6px">${HERO.weak.map(x=>`<span class="chip lab" style="color:${inkFor(x)}">${x}</span>`).join("")}</div>
+      <div style="font-size:11px;color:var(--ink-soft);margin-top:12px">Resists</div>
+      <div class="types" style="margin-top:6px">${HERO.resist.map(x=>`<span class="chip lab" style="color:${inkFor(x)}">${x}</span>`).join("")}</div></div>
+    <div id="eAlign" class="sect" style="padding-bottom:26px"><div class="ttl">Alignment</div>
+      <div class="agrid">${AL.flat().map(a=>
+        `<span class="lab${a===HERO.al?" here":""}">${a}</span>`).join("")}</div></div>
+   </div>
+  </div>`);
+}
+
+/* --- 8. the chart the collection grew --- */
+{
+  const TYPES=["Ferrous","Hydro","Textile","Domestic","Thermal","Saline","Voltaic","Whimsy"];
+  /* A small, consistent slice of a real chart: offence is read off the
+     defensive profiles, exactly as buildChart does. */
+  const WEAK={Ferrous:["Saline","Voltaic"],Hydro:["Voltaic"],Textile:["Thermal"],
+    Domestic:["Thermal","Whimsy"],Thermal:["Hydro","Saline"],Saline:["Ferrous"],
+    Voltaic:["Ferrous"],Whimsy:["Domestic"]};
+  const RES={Ferrous:["Thermal","Textile"],Hydro:["Hydro","Thermal"],Textile:["Textile","Whimsy"],
+    Domestic:["Domestic"],Thermal:["Ferrous","Textile"],Saline:["Hydro","Saline"],
+    Voltaic:["Voltaic","Whimsy"],Whimsy:["Whimsy","Hydro"]};
+  const cell=(atk,def)=>WEAK[def]?.includes(atk)?['e','2']:RES[def]?.includes(atk)?['r','½']:['','·'];
+  view("chart",`${HDRBAR(CAPBTN,"7")}
+  <div class="pad">
+    <div class="ttl" style="margin-bottom:9px">Type chart</div>
+    <div class="legend">
+      <span class="k"><i style="background:var(--effective)">2</i>Hits hard</span>
+      <span class="k"><i style="background:var(--resisted)">½</i>Shrugged off</span>
+      <span class="k"><i style="background:var(--tray);border:1px solid var(--lattice);color:var(--ink-soft)">·</i>Even</span>
+    </div>
+    <div class="mx" id="mxBox"><table><thead><tr>
+      <th class="corner lab"><div>Defends →</div><div style="text-align:right">Attacks ↓</div></th>
+      ${TYPES.map(d=>`<th class="col lab" style="background:${fillFor(d)}">${d}</th>`).join("")}
+    </tr></thead><tbody>
+      ${TYPES.map(a=>`<tr data-r><th class="row lab" style="background:${fillFor(a)}">${a}</th>
+        ${TYPES.map(d=>{const [c,g]=cell(a,d);return `<td class="${c}"><span>${g}</span></td>`;}).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    <div class="ttl" style="margin-top:16px;margin-bottom:8px">In words</div>
+    <div id="mxWords">${TYPES.slice(0,4).map(ty=>`
+      <div class="wline" style="padding:7px 0;border-top:1px solid var(--lattice);font-size:11.5px;line-height:1.5">
+        <span class="chip lab" style="color:${inkFor(ty)}">${ty}</span>
+        <span style="color:var(--ink-soft)"> is hurt by ${WEAK[ty].join(" and ")},
+        and shrugs off ${RES[ty].join(" and ")}.</span></div>`).join("")}</div>
+    <p style="font-size:11.5px;line-height:1.55;color:var(--ink-soft);margin-top:12px">
+      Every type here was coined by the creature that first needed it, and read
+      back against every type named before it.</p>
+  </div>`);
+}
+
+/* --- 9. a habitat group --- */
+{
+  const BD=`<svg class="bd" viewBox="0 0 1600 1200" preserveAspectRatio="none">
+    <rect width="1600" height="1200" fill="#bfe0ef"/>
+    <circle cx="1280" cy="230" r="86" fill="#fdf3cf"/>
+    <g fill="#ffffff" opacity=".92">
+      <ellipse cx="360" cy="250" rx="150" ry="60"/><circle cx="258" cy="262" r="52"/><circle cx="470" cy="266" r="46"/><circle cx="340" cy="200" r="58"/>
+      <ellipse cx="1020" cy="160" rx="110" ry="44"/><circle cx="948" cy="170" r="38"/><circle cx="1090" cy="172" r="34"/>
+    </g>
+    <path d="M0 760 L240 560 L430 760 Z" fill="#93a6a0"/>
+    <path d="M330 760 L600 500 L860 760 Z" fill="#7f948e"/>
+    <path d="M600 500 L720 620 L860 760 L600 760 Z" fill="#6d827c" opacity=".7"/>
+    <rect y="740" width="1600" height="460" fill="#8fb872"/>
+    <rect y="740" width="1600" height="26" fill="#7da563"/>
+    <g fill="#6f231b" opacity=".12"><ellipse cx="800" cy="1060" rx="700" ry="80"/></g>
+    <g fill="#3f5f33">
+      <rect x="1180" y="600" width="26" height="150"/><path d="M1193 470 L1270 620 L1116 620 Z"/><path d="M1193 530 L1290 700 L1096 700 Z"/>
+      <rect x="1400" y="640" width="20" height="110"/><path d="M1410 540 L1470 660 L1350 660 Z"/>
+    </g>
+    <g fill="#7da563" opacity=".8">
+      <ellipse cx="160" cy="900" rx="90" ry="26"/><ellipse cx="1500" cy="980" rx="110" ry="30"/></g>
+  </svg>`;
+  const PLACED=[["Hydrantica",44,58,26,0],["Grumblewick",22,66,19,0],["Kerbcoo",68,70,17,1],["Verglow",84,60,14,0]];
+  view("scene",`${HDRBAR(CAPBTN,"7")}
+  <div class="pad">
+    <div class="ttl" style="margin-bottom:9px">Habitat group</div>
+    <div class="stagebox" id="stageBox">${BD}
+      ${PLACED.map(([n,x,y,w,flip],i)=>`<div class="sp" data-sp="${i}"
+        style="left:${x}%;top:${y}%;width:${w}%;aspect-ratio:1;transform:translate(-50%,-100%) scaleX(${flip?-1:1})">${SP[n]}</div>`).join("")}
+      <div class="selring" id="selRing" style="left:31%;top:23.3%;width:26%;height:34.7%">
+        <i style="left:-5px;top:-5px"></i><i style="right:-5px;top:-5px"></i>
+        <i style="left:-5px;bottom:-5px"></i><i style="right:-5px;bottom:-5px"></i></div>
+    </div>
+    <div class="picker" id="bdPicker">${[0,1,2,3,4].map(i=>
+      `<div class="${i===1?"on":""}">${BD}</div>`).join("")}</div>
+    <div class="strip" id="spStrip">${["Cuppary","Stanchling","Lumenspill","Verglow","Kerbcoo"].map(n=>
+      `<div>${SP[n]}</div>`).join("")}</div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <div class="btn btn-red" style="flex:1;height:36px">Send the picture</div>
+      <div class="btn btn-ghost" style="height:36px;padding:0 12px">Save scene</div>
+    </div>
+  </div>`);
+}
+
+/* --- 10. the drawer, searched and filtered --- */
+{
+  const TRAYS=["Hydrantica","Grumblewick","Stanchling","Cuppary"];
+  const nos={Hydrantica:"#007",Grumblewick:"#001",Stanchling:"#002",Cuppary:"#003"};
+  const rar={Hydrantica:"uncommon",Grumblewick:"uncommon",Stanchling:"common",Cuppary:"common"};
+  const alg={Hydrantica:"LN",Grumblewick:"CN",Stanchling:"LN",Cuppary:"NG"};
+  view("drawer",`${HDRBAR(CAPBTN,"7")}
+  <div class="pad">
+    <div class="srch">${ico("search")}Search the drawer…</div>
+    <div class="frow" id="fRarity"><span class="lab">Rarity</span><div class="chips">
+      ${["common","uncommon","rare","epic"].map((r,i)=>
+        `<span class="chip lab" style="${i===1?"background:var(--ink);color:var(--foam);border-color:var(--ink)":`color:${RARITY_INK[r]}`}">${r}</span>`).join("")}
+    </div></div>
+    <div class="frow" id="fType"><span class="lab">Type</span><div class="chips">
+      ${["Ferrous","Hydro","Textile","Domestic","Whimsy"].map(x=>
+        `<span class="chip lab" style="color:${inkFor(x)}">${x}</span>`).join("")}
+    </div></div>
+    <div class="frow" id="fPlace"><span class="lab">Place</span><div class="chips">
+      ${["Neubau","Leopoldstadt"].map(x=>`<span class="chip lab" style="color:var(--ink-soft)">${ico("pin")}${x}</span>`).join("")}
+    </div></div>
+  </div>
+  <div class="pgrid" id="pGrid">
+    ${TRAYS.map(n=>`<div class="pcell"><div class="no fig">${nos[n]}</div>
+      <div class="w pin">${SP[n]}</div>
+      <div class="s slip"><div class="n">${n}</div><div class="b">
+        <span class="lab" style="color:${RARITY_INK[rar[n]]}">${rar[n]}</span>
+        <span class="lab" style="color:var(--ink-soft)">${alg[n]}</span></div></div></div>`).join("")}
+    <div class="pcell" style="background:var(--tray)"></div><div class="pcell" style="background:var(--tray)"></div>
+  </div>`);
+}
+
+/* ===================== the full-bleed drawer ===================== */
+{
+  const ORDER=["Hydrantica","Grumblewick","Stanchling","Cuppary","Verglow","Lumenspill","Kerbcoo"];
+  const meta={Hydrantica:["#007","uncommon","LN"],Grumblewick:["#001","uncommon","CN"],
+    Stanchling:["#002","common","LN"],Cuppary:["#003","common","NG"],Verglow:["#004","rare","CG"],
+    Lumenspill:["#005","epic","TN"],Kerbcoo:["#006","common","CN"]};
+  ORDER.forEach((n,i)=>{
+    const [no,r,a]=meta[n];
+    const c=el("div","cell");c.dataset.i=i;
+    c.innerHTML=`<div class="no fig">${no}</div><div class="well pin">${SP[n]}</div>
+      <div class="cslip slip"><div class="n">${n}</div><div class="b">
+        <span class="lab" style="color:${RARITY_INK[r]}">${r}</span>
+        <span class="lab" style="color:var(--ink-soft)">${a}</span></div></div>`;
+    drawer.appendChild(c);});
+  /* the lattice never ends flush: an open row past the last specimen,
+     closing on one double-width compartment */
+  drawer.appendChild(el("div","cell vacant"));
+  for(let i=0;i<6;i++) drawer.appendChild(el("div","cell vacant"));
+  drawer.appendChild(el("div","cell vacant wide"));
+}
+
+latBand(views.login,{h:150,rows:1});
+latBand(views.confirm,{h:88});
+latBand(views.progress,{h:100,rows:1});
+latBand(views.scene,{h:88});
+
+/* ===================== the copy column ===================== */
+const SHOTS=[
+ {a:0.0, b:2.4,  view:null,       l1:"", l2:"", step:""},
+ {a:2.4, b:5.0,  view:"login",    l1:"No passwords.<br>Ever.",
+  l2:"A link in your inbox, and the drawer opens.", step:"01 — Sign in"},
+ {a:5.0, b:7.6,  view:"empty",    l1:"Your drawer<br>starts empty.",
+  l2:"Which is the whole argument for filling it.", step:"02 — Open"},
+ {a:7.6, b:10.6, view:"camera",   l1:"Photograph<br>anything.",
+  l2:"Four ways to frame it — a point, a box, a circle, or the whole photo.", step:"03 — Frame"},
+ {a:10.6,b:13.4, view:"camera",   l1:"You mark<br>the subject.",
+  l2:"Not the model. It catalogues what you pointed at, not whatever filled the frame.", step:"04 — Mark"},
+ {a:13.4,b:16.4, view:"confirm",  l1:"Nothing is spent<br>until you say yes.",
+  l2:"The cut-out is held up first, and a draft keeps if you walk away.", step:"05 — Confirm"},
+ {a:16.4,b:20.0, view:"progress", l1:"Then it gets<br>determined.",
+  l2:"Half a minute, with the work shown rather than a spinner.", step:"06 — Determine"},
+ {a:20.0,b:27.0, view:"entry",    l1:"Name. Typing.<br>Stats. Moves.",
+  l2:"All argued from the real material, shape and wear of the thing you photographed.", step:"07 — Catalogue"},
+ {a:27.0,b:30.5, view:"chart",    l1:"It grows a type<br>chart of its own.",
+  l2:"Types are coined per specimen, then read back against every type named before them.", step:"08 — The chart"},
+ {a:30.5,b:34.0, view:"scene",    l1:"Stand them out<br>of the drawer.",
+  l2:"Arrange a habitat group on a painted backdrop, and send the picture.", step:"09 — Habitat"},
+ {a:34.0,b:39.0, view:"drawer",   l1:"Filed under<br>a number.",
+  l2:"Searchable, sortable, filterable — and never quite finished.", step:"10 — Collect"},
+ {a:39.0,b:43.0, view:null,       l1:"", l2:"", step:""},
+];
+const shot=SHOTS.find(s=>t>=s.a&&t<s.b) ?? SHOTS[SHOTS.length-1];
+l1.innerHTML=shot.l1; l2.textContent=shot.l2; step.textContent=shot.step;
+
+/* ===========================================================================
+ * The master timeline.
+ * ======================================================================== */
+const tl=gsap.timeline({paused:true});
+const V=n=>views[n];
+
+/* --- cold open --- */
+gsap.set("#cold .inner",{y:22,opacity:0});
+gsap.set("#coldLat",{opacity:0,scale:1.06});
+tl.to("#cold .inner",{y:0,opacity:1,duration:.9,ease:"expo.out"},.15)
+  .to("#coldLat",{opacity:.16,scale:1,duration:2.1,ease:"power2.out"},.15)
+  .to("#cold",{opacity:0,duration:.5,ease:"power2.inOut"},2.05)
+  .set("#cold",{pointerEvents:"none"},2.55);
+
+/* --- the copy column: one in, one out, per shot --- */
+gsap.set("#copy",{opacity:0});
+gsap.set("#wordmark",{opacity:0,y:8});
+tl.to("#wordmark",{opacity:1,y:0,duration:.7,ease:"expo.out"},2.2);
+SHOTS.forEach((s,i)=>{
+  if(!s.view) return;
+  const dur=Math.min(.55,(s.b-s.a)*.22);
+  /* the words only re-animate when they actually change */
+  const fresh = i===0 || SHOTS[i-1].l1!==s.l1;
+  if(fresh){
+    tl.fromTo("#lines",{y:20,opacity:0},{y:0,opacity:1,duration:dur+.2,ease:"expo.out"},s.a)
+      .fromTo("#rule",{scaleX:.05},{scaleX:1,duration:1.0,ease:"power3.out"},s.a+.12);
+  }
+  tl.to("#copy",{opacity:1,duration:.35,ease:"power2.out"},s.a)
+  if(i===SHOTS.length-2) tl.to("#copy",{opacity:0,duration:.45,ease:"power2.in"},s.b-.5);
+});
+
+/* --- the device, and the crossfades between screens --- */
+gsap.set("#device",{opacity:0,y:16,scale:.985});
+tl.to("#device",{opacity:1,y:0,scale:1,duration:.8,ease:"expo.out"},2.15);
+Object.values(views).forEach(v=>gsap.set(v,{opacity:0}));
+let prev=null;
+SHOTS.forEach(s=>{
+  if(!s.view || s.view===prev) return;
+  if(prev) tl.to(V(prev),{opacity:0,duration:.34,ease:"power2.inOut"},s.a-.10);
+  tl.fromTo(V(s.view),{opacity:0},{opacity:1,duration:.38,ease:"power2.out"},s.a-.02);
+  prev=s.view;
+});
+
+/* --- 01 sign in: the address typed, then the link sent --- */
+gsap.set("#loginEmail",{width:0,overflow:"hidden",display:"inline-block",whiteSpace:"nowrap"});
+document.getElementById("loginEmail").textContent="you@example.com";
+gsap.set("#loginSent",{opacity:0,y:6});
+tl.to("#loginEmail",{width:118,duration:.95,ease:"none"},2.75)
+  .fromTo("#loginCaret",{opacity:1},{opacity:0,duration:.36,repeat:5,yoyo:true,ease:"none"},2.75)
+  .to("#loginSent",{opacity:1,y:0,duration:.5,ease:"expo.out"},4.05);
+
+/* --- 02 the empty drawer: the vacant trays settle in --- */
+tl.fromTo("#emptyVacant span",{opacity:0,y:10},
+   {opacity:1,y:0,duration:.5,ease:"power3.out",stagger:.07},5.35);
+
+/* --- 03/04 the viewfinder: framing row, shutter, tap, cut-out lifting --- */
+gsap.set(".modes div",{opacity:0,y:-8});
+gsap.set("#camHint",{opacity:0});
+gsap.set(".toggles div",{opacity:0,y:8});
+gsap.set("#crosshair",{opacity:0,scale:.55});
+gsap.set("#ripple",{opacity:0,scale:1});
+gsap.set("#flash",{opacity:0});
+tl.to(".modes div",{opacity:1,y:0,duration:.45,ease:"power3.out",stagger:.06},7.85)
+  .to("#camHint",{opacity:1,duration:.45,ease:"power2.out"},8.25)
+  .to(".toggles div",{opacity:1,y:0,duration:.45,ease:"power3.out",stagger:.08},8.55)
+  /* the shutter is pressed */
+  .to("#shutterRing",{scale:.88,duration:.10,ease:"power2.in"},9.7)
+  .to("#shutterRing",{scale:1,duration:.30,ease:"back.out(3)"},9.8)
+  .to("#flash",{opacity:.85,duration:.06,ease:"none"},9.74)
+  .to("#flash",{opacity:0,duration:.34,ease:"power2.out"},9.80)
+  /* then the mark lands on the subject */
+  .fromTo("#ripple",{opacity:.9,scale:1},{opacity:0,scale:13,duration:.75,ease:"power2.out"},10.92)
+  .to("#crosshair",{opacity:1,scale:1,duration:.55,ease:"back.out(2.2)"},10.95)
+  .to("#camHint",{opacity:0,duration:.3},11.1);
+
+/* --- 05 the cut-out rises off the plate --- */
+gsap.set("#cutWrap",{y:30,scale:.84,opacity:0});
+tl.to("#cutWrap",{y:0,scale:1,opacity:1,duration:1.15,ease:"expo.out"},13.5);
+
+/* --- 06 the three stages, and an honest bar --- */
+/* Bands from lib/stages.ts: segment 0-18%, identify 18-48%, render 48-100%,
+   crept through by elapsed time and never reaching the end of its own band. */
+gsap.set("#pfill",{scaleX:0});
+gsap.set(".stage-row",{opacity:.34});
+gsap.set(".stage-row .tick b",{scale:0});
+const pnum=document.getElementById("pnum");
+tl.to("#pfill",{scaleX:.17,duration:1.0,ease:"power2.out"},16.6)
+  .to("#pfill",{scaleX:.46,duration:1.25,ease:"none"},17.35)
+  .to("#pfill",{scaleX:.97,duration:1.35,ease:"power1.in"},18.45)
+  .to(".stage-row[data-i='0']",{opacity:1,duration:.3},16.65)
+  .to(".stage-row[data-i='0'] .tick b",{scale:1,duration:.34,ease:"back.out(3)"},17.3)
+  .to(".stage-row[data-i='1']",{opacity:1,duration:.3},17.35)
+  .to(".stage-row[data-i='1'] .tick b",{scale:1,duration:.34,ease:"back.out(3)"},18.4)
+  .to(".stage-row[data-i='2']",{opacity:1,duration:.3},18.45)
+  .to(".stage-row[data-i='2'] .tick b",{scale:1,duration:.34,ease:"back.out(3)"},19.5);
+/* the read-out is text, so it is computed rather than tweened */
+{
+  const el0=16.6, span=3.4, elapsed=Math.min(50,Math.max(0,(t-el0)/span*48+2));
+  const band=elapsed<14?[0,.18]:elapsed<27?[.18,.48]:[.48,1];
+  const frac=Math.min(Math.max(Math.min(.97,elapsed/50),band[0]),band[0]+(band[1]-band[0])*.94);
+  if(t>=el0-.4 && t<20.3)
+    pnum.textContent=`${Math.round(frac*100)}%  ·  ${Math.round(elapsed)}s elapsed  ·  ~50s typical`;
+}
+
+/* --- 07 the entry assembles, then is read down the page --- */
+const ENTRY=[["#ePlate",0],["#eName",.34],["#eSpec",.46],["#eSlips",.58],["#eTypes",.78],
+             ["#eDl",.94],["#eProse",1.14],["#eStats",1.34],["#eMoves",1.5],["#eMatch",1.6],["#eAlign",1.7]];
+ENTRY.forEach(([sel,at])=>{
+  gsap.set(sel,{opacity:0,y:12});
+  tl.to(sel,{opacity:1,y:0,duration:.6,ease:"expo.out"},20.05+at);
+});
+/* the name is revealed rather than typed: a mask is a tweened property, and
+   a per-character callback would not survive a seek */
+gsap.set("#eName",{clipPath:"inset(0 100% 0 0)"});
+tl.to("#eName",{clipPath:"inset(0 0% 0 0)",duration:.8,ease:"power3.inOut"},20.42);
+/* the slips drop onto the pin, one under the other */
+tl.fromTo("#eSlips span",{y:-9,opacity:0},{y:0,opacity:1,duration:.42,ease:"back.out(2.4)",stagger:.36},20.7);
+/* stats rule out to their measurement */
+document.querySelectorAll("#eStats .m i").forEach((b,i)=>{
+  gsap.set(b,{scaleX:0,opacity:+b.dataset.v===94?1:.55});
+  tl.to(b,{scaleX:1,duration:.7,ease:"power3.out"},21.5+i*.09);
+});
+/* and the page is read, slowly, all the way to the alignment grid */
+gsap.set("#entryRoll",{y:0});
+tl.to("#entryRoll",{y:-1108,duration:4.1,ease:"power1.inOut"},22.4);
+
+/* --- 08 the chart fills in, row by row --- */
+gsap.set("#mxBox tbody tr",{opacity:0,x:-10});
+gsap.set(".mx td.e span,.mx td.r span",{scale:0});
+gsap.set(".legend span.k",{opacity:0,y:6});
+tl.to(".legend span.k",{opacity:1,y:0,duration:.4,ease:"power3.out",stagger:.07},27.2)
+  .to("#mxBox tbody tr",{opacity:1,x:0,duration:.4,ease:"power3.out",stagger:.085},27.35)
+  .to(".mx td.e span,.mx td.r span",{scale:1,duration:.35,ease:"back.out(3)",stagger:{amount:1.1,from:"start"}},27.8);
+gsap.set("#mxWords .wline",{opacity:0,x:-8});
+tl.to("#mxWords .wline",{opacity:1,x:0,duration:.4,ease:"power3.out",stagger:.1},28.9);
+
+/* --- 09 the habitat group is arranged --- */
+gsap.set("#stageBox .sp",{opacity:0,y:16,scale:.9});
+gsap.set("#selRing",{opacity:0});
+gsap.set("#bdPicker div",{opacity:0,y:8});
+gsap.set("#spStrip div",{opacity:0,y:8});
+tl.to("#stageBox .sp",{opacity:1,y:0,scale:1,duration:.65,ease:"back.out(1.8)",stagger:.17},30.7)
+  .to("#bdPicker div",{opacity:1,y:0,duration:.4,ease:"power3.out",stagger:.06},31.0)
+  .to("#spStrip div",{opacity:1,y:0,duration:.4,ease:"power3.out",stagger:.06},31.3)
+  /* one specimen picked up, turned, and set down a little larger */
+  .to("#selRing",{opacity:1,duration:.3},31.9)
+  .to("#stageBox .sp[data-sp='1']",{scale:1.18,rotation:-5,duration:.8,ease:"power2.inOut"},32.1)
+  .to("#stageBox .sp[data-sp='1']",{rotation:0,duration:.6,ease:"power2.inOut"},32.9)
+  .to("#selRing",{left:"12.5%",top:"40.7%",width:"19%",height:"25.3%",duration:.8,ease:"power2.inOut"},32.1);
+
+/* --- 10 the drawer, filtered, then handed to the full-bleed lattice --- */
+gsap.set("#fRarity .chip,#fType .chip,#fPlace .chip",{opacity:0,y:6});
+gsap.set("#pGrid .pcell",{opacity:0,y:12});
+tl.to("#fRarity .chip",{opacity:1,y:0,duration:.34,ease:"power3.out",stagger:.05},34.2)
+  .to("#fType .chip",{opacity:1,y:0,duration:.34,ease:"power3.out",stagger:.05},34.4)
+  .to("#fPlace .chip",{opacity:1,y:0,duration:.34,ease:"power3.out",stagger:.05},34.6)
+  .to("#pGrid .pcell",{opacity:1,y:0,duration:.5,ease:"power3.out",stagger:.08},34.7);
+
+/* the pull-back: the phone hands the composition to the drawer itself */
+gsap.set("#drawer",{opacity:0});
+gsap.set(".cell[data-i] .well",{opacity:0,y:10});
+gsap.set(".cell[data-i] .cslip",{opacity:0});
+gsap.set(".cell[data-i] .no",{opacity:0});
+tl.to("#device",{opacity:0,scale:1.08,duration:.85,ease:"power2.inOut"},36.0)
+  .to("#drawer",{opacity:1,duration:.85,ease:"power2.inOut"},36.0)
+  .to(".cell[data-i] .well",{opacity:1,y:0,duration:.55,ease:"power3.out",stagger:.13},36.45)
+  .to(".cell[data-i] .cslip",{opacity:1,duration:.45,ease:"power2.out",stagger:.13},36.6)
+  .to(".cell[data-i] .no",{opacity:1,duration:.35,stagger:.13},36.5);
+/* the copy moves onto the drawer as a typed slip rather than open foam */
+if(t>=36.2){
+  Object.assign(copy.style,{background:"var(--slip)",border:"1px solid var(--slip-edge)",
+    padding:"28px 30px 30px",left:"58px",top:"596px",width:"452px",
+    boxShadow:"0 2px 3px rgb(21 24 26/.06),0 18px 30px -14px rgb(21 24 26/.30)"});
+}
+
+/* --- the close --- */
+gsap.set("#outro",{opacity:0});
+gsap.set("#outro .box",{y:18,scale:.985});
+tl.to("#outro",{opacity:1,duration:.7,ease:"power2.inOut"},39.0)
+  .to("#outro .box",{y:0,scale:1,duration:.9,ease:"expo.out"},39.05)
+  .to("#outro .url",{scale:1.02,duration:.5,ease:"power2.inOut",yoyo:true,repeat:2},40.4);
+
+/* one seek, one frame */
+tl.time(t);
+document.documentElement.setAttribute("data-seekreel-ready","1");
+</script>
