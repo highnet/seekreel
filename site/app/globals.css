@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+/*
+ * seekreel — brand tokens.
+ *
+ * Scene: an animation studio at 3am. A dope sheet under a desk lamp, magenta
+ * printer ink still tacky on the frame numbers, the room otherwise unlit.
+ * Strategy: Committed — magenta carries the first fold and every live control;
+ * the rest of the page is pure white so the frames themselves are the color.
+ */
+@theme {
+  --color-bg: oklch(1 0 0);
+  --color-surface: oklch(0.971 0.006 340);
+  --color-ink: oklch(0.2 0.03 340);
+  --color-muted: oklch(0.52 0.02 340);
+  --color-primary: oklch(0.55 0.21 340);
+  --color-primary-deep: oklch(0.44 0.18 340);
+  --color-primary-lit: oklch(0.74 0.17 340);
+  --color-accent: oklch(0.34 0.13 264);
+  --color-accent-lit: oklch(0.74 0.13 264);
+  --color-stage: oklch(0.16 0.02 340);
+  --color-rule: oklch(0.88 0.01 340);
+
+  --font-display: var(--font-anybody), "Arial Narrow", system-ui, sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, "SF Mono", monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-variation-settings: "wdth" 100;
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+    letter-spacing: -0.03em;
+    font-variation-settings: "wdth" 112;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+}
+
+@layer utilities {
+  /* Frame numbers, timecodes, flags and commands: everything the tool counts. */
+  .data {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wide {
+    font-variation-settings: "wdth" 125;
+  }
+
+  .narrow {
+    font-variation-settings: "wdth" 85;
+  }
+
+  /* The dope-sheet ruling: a hairline grid that only shows where it helps. */
+  .sheet {
+    background-image: linear-gradient(to right, var(--color-rule) 1px, transparent 1px);
+    background-size: 5.5rem 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

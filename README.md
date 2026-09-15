@@ -7,12 +7,15 @@ time. seekreel walks through every moment in the video, screenshots the page at
 each one, and stitches the screenshots into an MP4 with ffmpeg.
 
 ```sh
-npm i -g seekreel          # or use npx seekreel
+npm i -g github:highnet/seekreel     # not on npm yet — installs from this repo
 seekreel init my-film
 cd my-film
 seekreel build
 # → deliver/reel.mp4, deliver/reel-4x5.mp4, deliver/reel-silent.mp4
 ```
+
+There is a homepage too, with a viewer you can scrub:
+**[seekreel.vercel.app](https://seekreel.vercel.app)**
 
 **Contents**
 

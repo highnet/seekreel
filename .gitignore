@@ -9,3 +9,10 @@ gsap.min.js
 grain.png
 __pycache__/
 *.pyc
+
+# site
+site/node_modules
+site/.next
+site/.vercel
+site/next-env.d.ts
+site/*.tsbuildinfo
