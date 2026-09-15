@@ -82,7 +82,7 @@ export async function encode(config, { onVariant } = {}) {
 
   const frames = (await readdir(config.outDir)).filter((f) => f.endsWith(".png")).sort();
   if (frames.length === 0) {
-    throw Object.assign(new Error(`No frames in ${config.outDir}. Render first.`), {
+    throw Object.assign(new Error(`There are no frames in ${config.outDir} yet — run \`seekreel render\` first.`), {
       expected: true,
     });
   }

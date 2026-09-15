@@ -35,8 +35,8 @@ async function launch() {
     });
   } catch (error) {
     const hint =
-      "No Chromium found. Either `npm i -D playwright && npx playwright install chromium`, " +
-      "or set CHROMIUM=/path/to/chrome.";
+      "No Chromium found. Either install one with `npm i -D playwright && npx playwright install chromium`, " +
+      "or point CHROMIUM at a Chrome or Chromium binary you already have.";
     const wrapped = new Error(`${hint}\n\n${error.message}`);
     wrapped.expected = true;
     throw wrapped;

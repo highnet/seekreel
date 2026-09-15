@@ -1,58 +1,76 @@
 # seekreel
 
-Render an animated HTML page to video by seeking it, one frame at a time.
+**Turn an animated web page into a video file — one frame at a time.**
 
-You write a page that draws the frame for a given timestamp. seekreel asks it
-for every timestamp in turn, screenshots each one, and hands the stack to
-ffmpeg. A 43-second film comes out as an MP4 you can upload.
+You write a normal HTML page that knows how to draw itself at any moment in
+time. seekreel walks through every moment in the video, screenshots the page at
+each one, and stitches the screenshots into an MP4 with ffmpeg.
 
 ```sh
-npm i -g seekreel          # or npx seekreel
+npm i -g seekreel          # or use npx seekreel
 seekreel init my-film
 cd my-film
 seekreel build
-# deliver/reel.mp4, deliver/reel-4x5.mp4, deliver/reel-silent.mp4
+# → deliver/reel.mp4, deliver/reel-4x5.mp4, deliver/reel-silent.mp4
 ```
 
-## Why do it this way
+**Contents**
 
-Screen-recording an animation gives you whatever the machine managed to draw
-that time: dropped frames on a busy laptop, a font that arrived late, a
-scroll that landed two pixels off. Re-cutting one shot means recording the
-whole thing again, and the recording is not the source — the page is, and the
-two drift.
+- [Why not just screen-record it?](#why-not-just-screen-record-it)
+- [How a page talks to seekreel](#how-a-page-talks-to-seekreel)
+- [Animating with GSAP](#animating-with-gsap)
+- [Commands](#commands)
+- [Configuration](#configuration)
+- [Sound](#sound)
+- [What you need installed](#what-you-need-installed)
+- [A full example](#a-full-example)
+- [Things to know before you start](#things-to-know-before-you-start)
 
-seekreel makes the film **a pure function of time**. Frame 512 is whatever the
-page draws at `t=21.333`, every time, on any machine. Which buys three things
-that are hard to get any other way:
+---
 
-- **One frame is examinable on its own.** `seekreel probe 21.3` gives you that
-  frame as a PNG, in a second, without rendering the other thousand.
-- **One shot is re-renderable on its own.** Change the middle of the film and
+## Why not just screen-record it?
+
+A screen recording captures whatever your computer managed to draw at that
+moment. If the machine was busy, frames drop. If a font loaded late, the first
+second looks wrong. Fix one shot in the middle and you have to record the whole
+thing over — and the recording slowly drifts away from the page it came from.
+
+seekreel renders each frame from a timestamp instead. Frame 512 is always
+"whatever the page looks like at `t = 21.333`", on any machine, every time. That
+gives you three things:
+
+- **Inspect a single frame.** `seekreel probe 21.3` renders just that moment to
+  a PNG in about a second. No need to render the other thousand frames.
+- **Re-render a single shot.** Changed the middle of the film?
   `seekreel render 480 620` redraws only those frames, in place.
-- **The film is a file in your repo.** It diffs, it reviews, and it rebuilds
-  in CI. Nobody has to remember how it was made.
+- **Keep the film in your repo.** The page is the source. It diffs, it gets
+  reviewed, and it rebuilds in CI — nobody has to remember how the video was
+  made.
 
-The cost is honest: rendering is a screenshot per frame, so budget about a
-second each. A 43-second film at 24fps takes roughly twenty minutes. That is
-fine for something you cut once and re-cut in pieces, and wrong for anything
-interactive.
+The trade-off: rendering means one screenshot per frame, so budget roughly a
+second per frame. A 43-second film at 24fps takes about twenty minutes. That is
+fine for a video you cut once and then tweak in pieces. It is the wrong tool for
+anything interactive.
 
-## The contract
+---
 
-A stage is any HTML file that does three things:
+## How a page talks to seekreel
 
-1. reads `t` (in seconds) from the query string,
-2. draws the frame for that timestamp, synchronously,
-3. stamps `data-seekreel-ready` on `<html>` when the frame is final.
+A **stage** is any HTML file that does three things:
 
-That is the whole interface. There is no seekreel runtime on the page and
-nothing to import.
+1. Reads `t` (the timestamp, in seconds) from the query string.
+2. Draws the frame for that timestamp, synchronously.
+3. Sets `data-seekreel-ready` on `<html>` once the frame is finished.
+
+That is the entire interface. There is no seekreel library to install on the
+page and nothing to import.
 
 ```html
 <div id="box"></div>
 <script>
   const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+
+  // progress from 0 to 1 between two timestamps
   const span = (a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
 
   box.style.opacity = span(0, 1);
@@ -62,13 +80,16 @@ nothing to import.
 </script>
 ```
 
-`data-ready` is accepted as an alias, so a page written against an earlier
-version still renders.
+`data-ready` also works, so pages written against an earlier version still
+render.
 
-### Using an animation library
+---
 
-Hand-rolling easing gets old fast. Anything that can be **seeked** works, and
-GSAP is the comfortable choice: build a paused timeline, then seek it once.
+## Animating with GSAP
+
+Writing easing curves by hand gets tedious quickly. Any animation library that
+can be **seeked** to a point in time will work, and GSAP is the comfortable
+choice: build a paused timeline, then jump it to `t`.
 
 ```js
 const tl = gsap.timeline({ paused: true });
@@ -76,39 +97,47 @@ tl.from("#card", { y: 24, opacity: 0, duration: 0.9, ease: "expo.out" }, 0.1)
   .to("#bar i", { scaleX: 1, duration: 3.4, ease: "power1.inOut" }, 1.2)
   .to(".tray", { opacity: 1, duration: 0.5, stagger: 0.13 }, 6.0);
 
-tl.time(t);                     // the only line that touches the clock
+tl.time(t); // the only line that touches the clock
 ```
 
-Two rules come with that, and both are load-bearing:
+Two rules matter here, and ignoring either one produces broken frames:
 
-- **Do not use callbacks for anything you need to see.** GSAP suppresses
-  `onStart` / `onComplete` on a seek, so a callback-driven typewriter renders
-  blank. Animate properties instead — reveal text with a `clip-path` mask
-  rather than writing it a character at a time.
-- **Do not animate with CSS transitions or keyframes.** They have a clock of
-  their own and will render whichever frame they happened to be on.
+- **Do not rely on callbacks for anything visible.** GSAP skips `onStart` and
+  `onComplete` when you seek, so a callback-driven typewriter effect renders
+  blank. Animate properties instead — for example, reveal text with a
+  `clip-path` mask rather than typing it one character at a time.
+- **Do not animate with CSS transitions or `@keyframes`.** They run on their own
+  clock, which seekreel cannot control, so you will capture whichever frame they
+  happened to be showing.
 
-Text content is not a tweened property, so compute it from `t` in plain
-JavaScript rather than trying to tween it.
+Text content is not an animatable property, so calculate it from `t` in plain
+JavaScript instead of trying to tween it.
+
+---
 
 ## Commands
 
-```
-seekreel init [dir]          scaffold a project
-seekreel doctor              check Chromium, ffmpeg and python
-seekreel probe <t,t,...>     render just those timestamps, into probe/
-seekreel render [a] [b]      render every frame, or frames a..b in place
-seekreel audio               render the cue sheet to a WAV
-seekreel encode              frames (+ WAV) -> deliver/*.mp4
-seekreel build               audio, then render, then encode
+| Command | What it does |
+| --- | --- |
+| `seekreel init [dir]` | Scaffold a new project |
+| `seekreel doctor` | Check that Chromium, ffmpeg and python are available |
+| `seekreel probe <t,t,...>` | Render only those timestamps, into `probe/` |
+| `seekreel render [a] [b]` | Render every frame, or just frames `a` to `b`, in place |
+| `seekreel audio` | Render the cue sheet to a WAV file |
+| `seekreel encode` | Turn the frames (plus the WAV) into `deliver/*.mp4` |
+| `seekreel build` | Audio, then render, then encode |
+
+Use `-c, --config <path>` to point at a config other than
+`./seekreel.config.json`. Paths inside a config are resolved relative to the
+config file, so this works from anywhere in the tree:
+
+```sh
+seekreel build -c examples/collection-dex/seekreel.config.json
 ```
 
-`-c, --config <path>` points at a config other than `./seekreel.config.json`.
-Every path inside a config is resolved against the config file, so
-`seekreel build -c examples/collection-dex/seekreel.config.json` works from
-anywhere in the tree.
+---
 
-## Config
+## Configuration
 
 ```json
 {
@@ -128,22 +157,26 @@ anywhere in the tree.
 }
 ```
 
-| key | what it does |
+| Key | What it does |
 | --- | --- |
-| `name` | basename of the output files. Defaults to the directory's name. |
-| `duration`, `fps` | how many frames, and what timestamps they sit at. |
-| `width`, `height` | viewport, in CSS pixels at scale 1. Both must be even — H.264 cannot encode an odd dimension. |
-| `poster` | a timestamp to also write as a PNG. Omit for none. |
-| `audio` | omit entirely for a silent film. |
-| `variants` | one MP4 each. `scale` and `pad` are passed to ffmpeg's filters; `audio: false` drops the track. |
-| `readySelector` | override if your stage signals readiness some other way. |
-| `encode` | `crf`, `preset`, `audioBitrate`, `keyint`. |
+| `name` | Base filename for the output. Defaults to the directory name. |
+| `stage` | The HTML file to render. |
+| `duration`, `fps` | Together these decide how many frames there are, and what timestamp each one sits at. |
+| `width`, `height` | Viewport size, in CSS pixels at scale 1. Both must be even numbers — H.264 cannot encode an odd dimension. |
+| `poster` | A timestamp to also save as a PNG. Leave it out if you do not want one. |
+| `audio` | Leave this out entirely for a silent film. |
+| `variants` | One MP4 per entry. `scale` and `pad` are passed straight to ffmpeg's filters; `audio: false` drops the soundtrack. |
+| `readySelector` | Override this if your stage signals readiness some other way. |
+| `encode` | Encoder settings: `crf`, `preset`, `audioBitrate`, `keyint`. |
+
+---
 
 ## Sound
 
-Soundtracks are synthesized from a JSON cue sheet — no sample library, no
-licences to track, and a shot moving by half a second is one number to change.
-`seekreel audio` renders it; `seekreel build` does that first.
+Soundtracks are synthesized from a JSON cue sheet. There is no sample library to
+ship and no licences to keep track of, and moving a shot half a second later is
+a one-number edit. `seekreel audio` renders the cue sheet; `seekreel build` does
+it for you first.
 
 ```json
 {
@@ -163,36 +196,44 @@ licences to track, and a shot moving by half a second is one number to change.
 }
 ```
 
-`bed` is an optional looping music bed: a marimba figure over a chord
-progression, a sine bass, and a shaker, thinned outside the `dense` window so
-it can sit under a quiet opening. `cues` are one-off sounds placed by time.
+`bed` is an optional looping music bed — a marimba figure over a chord
+progression, a sine bass and a shaker. It thins out outside the `dense` window
+so it can sit quietly under an opening. `cues` are one-off sounds placed at a
+given time.
 
-Available sounds: `marimba` `bass` `pad` `swell` `chime` `pip` `tick`
-`shutter` `pop` `whoosh` `stamp` `tray` `shaker`. Every cue takes `gain` and
-`pan` (−1 to +1); the rest of its keys go to the sound, so `note`, `dur`,
-`freq` and `seed` work wherever that sound takes them. The whole kit is about
-three hundred lines of `src/audio/synth.py` — read it, and add to it.
+The available sounds are: `marimba`, `bass`, `pad`, `swell`, `chime`, `pip`,
+`tick`, `shutter`, `pop`, `whoosh`, `stamp`, `tray` and `shaker`. Every cue
+accepts `gain` and `pan` (−1 to +1); any other keys are passed to the sound
+itself, so `note`, `dur`, `freq` and `seed` work wherever that sound supports
+them. The whole synth is about three hundred lines in `src/audio/synth.py` —
+it is worth reading, and easy to add to.
 
-Needs `python3` (standard library only). Nothing else here does.
+Audio needs `python3` (standard library only). Nothing else in seekreel does.
 
-## Requirements
+---
 
-- **Node 20+**
-- **Chromium.** Not bundled — a browser is 150MB and most machines have one.
-  `npm i -D playwright && npx playwright install chromium`, or point
-  `CHROMIUM` at any Chromium or Chrome binary.
-- **ffmpeg with libx264.** `ffmpeg-static` is an optional dependency and is
-  used if present; otherwise `ffmpeg` from your `PATH`, or set `FFMPEG`.
-- **python3**, for audio only.
+## What you need installed
 
-`seekreel doctor` tells you which of those it can find.
+- **Node 20 or newer.**
+- **Chromium.** Not bundled, because a browser is 150MB and most machines
+  already have one. Either run
+  `npm i -D playwright && npx playwright install chromium`, or point the
+  `CHROMIUM` environment variable at any Chromium or Chrome binary.
+- **ffmpeg with libx264.** `ffmpeg-static` is an optional dependency and gets
+  used if it is installed; otherwise seekreel uses `ffmpeg` from your `PATH`, or
+  whatever `FFMPEG` points at.
+- **python3**, but only if you want sound.
 
-## The worked example
+Run `seekreel doctor` to see which of these it can find.
+
+---
+
+## A full example
 
 `examples/collection-dex` is a real 43-second film: twelve shots, a GSAP
-timeline, a synthesized soundtrack, and a cue sheet pinned to the shot table.
-It is the best documentation of how to write a stage that is longer than a
-paragraph.
+timeline, a synthesized soundtrack, and a cue sheet lined up with the shot
+table. If you are writing anything longer than a few seconds, it is the best
+reference in the repo.
 
 ```sh
 sh examples/collection-dex/setup.sh        # fonts, gsap, the noise plate
@@ -200,23 +241,28 @@ seekreel build -c examples/collection-dex/seekreel.config.json
 ```
 
 It renders a marketing film for [Collection Dex](https://collectiondex.com),
-which is where this tool came from.
+the project seekreel was originally built for.
 
-## Known edges
+---
 
-- **Rendering is slow**, about a second a frame. That is inherent: it is a
-  navigation and a screenshot per frame. Use `probe` and `render a b` while you
-  iterate and only do a full pass when you mean it.
-- **A stage is `file://`**, so it cannot fetch anything over the network.
-  Vendor your fonts, scripts and images next to it; the example's `setup.sh`
-  shows the shape.
-- **Fonts must be loaded before the shot.** seekreel waits on
-  `document.fonts.ready`, which handles `@font-face`, but a font arriving by
-  some other route is yours to wait for before you stamp ready.
-- **No transparency.** Output is yuv420p H.264, because that is what feeds
-  accept. If you need alpha, encode the frames yourself.
+## Things to know before you start
+
+- **Rendering is slow** — roughly a second per frame. That is inherent to the
+  approach: each frame is a page load and a screenshot. Use `probe` and
+  `render a b` while you are iterating, and only do a full pass when you mean
+  it.
+- **A stage is loaded from `file://`**, so it cannot fetch anything over the
+  network. Keep your fonts, scripts and images next to the page;
+  `examples/collection-dex/setup.sh` shows how.
+- **Fonts have to be loaded before the frame is captured.** seekreel waits for
+  `document.fonts.ready`, which covers `@font-face`. If a font arrives some
+  other way, wait for it yourself before marking the frame ready.
+- **No transparency.** Output is yuv420p H.264, because that is what social
+  platforms accept. If you need an alpha channel, encode the frames yourself.
+
+---
 
 ## Licence
 
-MIT. GSAP, if you use it, has [its own licence](https://gsap.com/licensing/)
-and is not distributed here.
+MIT. GSAP, if you use it, has [its own licence](https://gsap.com/licensing/) and
+is not distributed here.

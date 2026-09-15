@@ -17,18 +17,22 @@ const encoder = () => import("../src/encode.js");
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE = path.resolve(here, "..");
 
-const USAGE = `seekreel — render an animated HTML page to video, one frame per seek
+const USAGE = `seekreel — turn an animated web page into a video, one frame at a time
 
-  seekreel init [dir]            scaffold a project
+Commands
+  seekreel init [dir]            create a new project from the starter template
   seekreel probe <t,t,...>       render just those timestamps, into probe/
-  seekreel render [a] [b]        render all frames, or the range a..b in place
-  seekreel audio                 render the cue sheet to a WAV
-  seekreel encode                frames + WAV -> deliver/*.mp4
+  seekreel render [a] [b]        render every frame, or only frames a..b, in place
+  seekreel audio                 render the cue sheet to a WAV file
+  seekreel encode                turn frames (plus the WAV) into deliver/*.mp4
   seekreel build                 audio, then render, then encode
-  seekreel doctor                check Chromium and ffmpeg
+  seekreel doctor                check that Chromium and ffmpeg are available
 
 Options
-  -c, --config <path>            default: ./seekreel.config.json
+  -c, --config <path>            which config to use (default: ./seekreel.config.json)
+
+Example
+  seekreel init my-film && cd my-film && seekreel build
 `;
 
 function arg(argv, ...names) {
@@ -46,7 +50,7 @@ function python(script, args) {
     child.on("error", (error) =>
       reject(
         Object.assign(
-          new Error(`Could not run ${bin}: ${error.message}. Set PYTHON to a python3.`),
+          new Error(`Could not run ${bin}: ${error.message}. Point PYTHON at a python3 binary.`),
           { expected: true },
         ),
       ),
@@ -59,7 +63,7 @@ function python(script, args) {
 
 async function doAudio(config) {
   if (!config.audio) {
-    console.log("No audio configured; nothing to render.");
+    console.log("No audio is configured in this project, so there is nothing to render.");
     return;
   }
   await python(path.join(PACKAGE, "src/audio/render.py"), [
@@ -93,19 +97,19 @@ async function main() {
   if (command === "doctor") {
     const browser = await renderer()
       .then(() => "playwright-core installed")
-      .catch(() => "playwright-core MISSING — run npm install");
-    let ffmpeg = "ffmpeg-static MISSING and no system ffmpeg";
+      .catch(() => "playwright-core is missing — run npm install");
+    let ffmpeg = "no ffmpeg found — neither ffmpeg-static nor one on your PATH";
     try {
       const { checkEncoder, ffmpegPath } = await encoder();
       const found = await checkEncoder();
-      ffmpeg = `${ffmpegPath()} — ${found.ok ? "ok, has libx264" : `NOT USABLE: ${found.reason}`}`;
+      ffmpeg = `${ffmpegPath()} — ${found.ok ? "ok, has libx264" : `found, but not usable: ${found.reason}`}`;
       if (!found.ok) process.exitCode = 1;
     } catch {
       process.exitCode = 1;
     }
     console.log(`chromium   ${process.env.CHROMIUM ?? "(auto-detected)"} — ${browser}`);
     console.log(`ffmpeg     ${ffmpeg}`);
-    console.log(`python     ${process.env.PYTHON ?? "python3"} — only needed for audio`);
+    console.log(`python     ${process.env.PYTHON ?? "python3"} — only needed if you want sound`);
     return;
   }
 
@@ -115,7 +119,7 @@ async function main() {
 
   if (command === "probe") {
     const list = (argv[1] ?? "").split(",").map(Number).filter((n) => !Number.isNaN(n));
-    if (list.length === 0) throw Object.assign(new Error("Give me timestamps: seekreel probe 1.2,4.5"), { expected: true });
+    if (list.length === 0) throw Object.assign(new Error("This command needs timestamps, for example: seekreel probe 1.2,4.5"), { expected: true });
     const result = await (await renderer()).renderFrames(config, { times: list });
     console.log(`${result.written} frame(s) -> ${path.relative(process.cwd(), result.dir)}`);
     if (result.errors.length) console.warn(`page errors:\n  ${result.errors.join("\n  ")}`);

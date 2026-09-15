@@ -1,7 +1,7 @@
 {
   "name": "seekreel",
   "version": "0.1.0",
-  "description": "Render an animated HTML page to video by seeking it one frame at a time.",
+  "description": "Turn an animated web page into a video file, rendering it one frame at a time.",
   "license": "MIT",
   "author": "highnet",
   "repository": { "type": "git", "url": "git+https://github.com/highnet/seekreel.git" },
