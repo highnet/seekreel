@@ -8,10 +8,13 @@
   "out": "out",
   "deliver": "deliver",
   "poster": 3.0,
+  "background": "#111315",
   "audio": { "cues": "cues.json", "wav": "soundtrack.wav" },
   "variants": [
     { "name": "" },
-    { "name": "4x5", "scale": "1080:1080", "pad": "1080:1350:0:135:color=0x111315" },
+    { "name": "4x5", "ratio": "4:5" },
+    { "name": "story", "ratio": "9:16" },
+    { "name": "loop", "format": "gif", "fps": 12 },
     { "name": "silent", "audio": false }
   ]
 }

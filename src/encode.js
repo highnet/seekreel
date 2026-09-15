@@ -3,6 +3,7 @@ import { mkdir, readdir } from "node:fs/promises";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { variantFile } from "./config.js";
+import { FORMATS, videoFilters } from "./formats.js";
 
 const require = createRequire(import.meta.url);
 
@@ -50,6 +51,13 @@ function run(bin, args) {
   });
 }
 
+/**
+ * Which formats this ffmpeg can actually write.
+ *
+ * libx264 is the one that matters — it is what `mp4` needs and what some
+ * distro builds leave out — but a config asking for webm on a build without
+ * VP9 deserves the same warning before the render, not after it.
+ */
 export async function checkEncoder() {
   const bin = ffmpegPath();
   return new Promise((resolve) => {
@@ -58,23 +66,29 @@ export async function checkEncoder() {
     child.stdout.on("data", (chunk) => {
       out += chunk;
     });
-    child.on("error", () => resolve({ ok: false, bin, reason: "not found" }));
-    child.on("close", () =>
+    child.on("error", () => resolve({ ok: false, bin, reason: "not found", formats: {} }));
+    child.on("close", () => {
+      const formats = Object.fromEntries(
+        Object.entries(FORMATS).map(([name, format]) => [
+          name,
+          new RegExp(`\\b${format.encoder}\\b`).test(out),
+        ]),
+      );
       resolve(
-        /\blibx264\b/.test(out)
-          ? { ok: true, bin }
-          : { ok: false, bin, reason: "this build has no libx264" },
-      ),
-    );
+        formats.mp4
+          ? { ok: true, bin, formats }
+          : { ok: false, bin, reason: "this build has no libx264", formats },
+      );
+    });
   });
 }
 
 /**
- * Frames (plus a soundtrack, if there is one) into one MP4 per variant.
+ * Frames (plus a soundtrack, if there is one) into one file per variant.
  *
- * yuv420p and High profile because that is what every player and every feed
- * accepts; `+faststart` so the moov atom is at the front and a browser can
- * begin playing before the file has finished arriving.
+ * Each variant carries its own container, aspect ratio, size and frame rate;
+ * the arguments for those live in formats.js so this stays the loop that runs
+ * them rather than a switch over every codec.
  */
 export async function encode(config, { onVariant } = {}) {
   const bin = ffmpegPath();
@@ -91,31 +105,35 @@ export async function encode(config, { onVariant } = {}) {
   const written = [];
   for (const variant of config.variants) {
     const file = variantFile(config, variant);
-    const wantsAudio = variant.audio !== false && Boolean(config.audio);
-
-    const filters = [];
-    if (variant.scale) filters.push(`scale=${variant.scale}`);
-    if (variant.pad) filters.push(`pad=${variant.pad}`);
+    const format = FORMATS[variant.format];
+    const wantsAudio = variant.audio && Boolean(config.audio);
+    const filters = videoFilters(config, variant);
 
     const args = ["-y", "-hide_banner", "-loglevel", "error"];
     args.push("-framerate", String(config.fps), "-i", pattern);
     if (wantsAudio) args.push("-i", config.audio.wav, "-shortest");
-    if (filters.length) args.push("-vf", filters.join(","));
-    args.push(
-      "-c:v", "libx264",
-      "-preset", config.encode.preset,
-      "-crf", String(config.encode.crf),
-      "-pix_fmt", "yuv420p",
-      "-profile:v", "high",
-      "-level", "4.0",
-      "-x264-params", `keyint=${config.encode.keyint}:min-keyint=${config.fps}:scenecut=0`,
-    );
-    if (wantsAudio) {
-      args.push("-c:a", "aac", "-b:a", config.encode.audioBitrate, "-ar", "48000", "-ac", "2");
+
+    if (variant.format === "gif") {
+      /*
+       * Two passes in one graph: build a palette from the whole clip, then map
+       * the frames onto it. A single pass falls back to the 216-colour web
+       * palette, which turns any gradient into bands.
+       */
+      const chain = filters.length ? `${filters.join(",")},` : "";
+      args.push(
+        "-filter_complex",
+        `${chain}split[a][b];[a]palettegen=max_colors=${config.encode.gifColors}:stats_mode=diff[p];` +
+          `[b][p]paletteuse=dither=bayer:bayer_scale=3`,
+        "-loop", "0",
+      );
     } else {
-      args.push("-an");
+      if (filters.length) args.push("-vf", filters.join(","));
+      args.push(...format.video(config));
+      if (wantsAudio) args.push(...format.audioArgs(config));
+      else args.push("-an");
     }
-    args.push("-movflags", "+faststart", file);
+
+    args.push(file);
 
     await run(bin, args);
     written.push(file);

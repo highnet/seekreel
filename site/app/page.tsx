@@ -4,6 +4,7 @@ import Commands from '@/components/commands';
 import Code from '@/components/code';
 import CopyCommand from '@/components/copy-command';
 import Timing from '@/components/timing';
+import Shapes from '@/components/shapes';
 
 const REPO = 'https://github.com/highnet/seekreel';
 
@@ -27,6 +28,18 @@ tl.from("#card", { y: 24, opacity: 0, duration: 0.9, ease: "expo.out" }, 0.1)
   .to(".tray", { opacity: 1, duration: 0.5, stagger: 0.13 }, 6.0);
 
 tl.time(t); // the only line that touches the clock
+`;
+
+const VARIANTS_SAMPLE = `
+"variants": [
+  { "name": "" },
+  { "name": "4x5",    "ratio": "4:5" },
+  { "name": "story",  "ratio": "9:16" },
+  { "name": "og",     "size": "1200x628", "fit": "cover" },
+  { "name": "web",    "format": "webm" },
+  { "name": "loop",   "format": "gif", "fps": 12 },
+  { "name": "silent", "audio": false }
+]
 `;
 
 const CUES_SAMPLE = `
@@ -64,6 +77,9 @@ export default function Home() {
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#contract">
               How it works
             </a>
+            <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#formats">
+              Formats
+            </a>
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#commands">
               Commands
             </a>
@@ -83,9 +99,9 @@ export default function Home() {
                 Ship the film, not the screen recording.
               </h1>
               <p className="mt-7 max-w-[46ch] text-lg leading-relaxed text-white/90 sm:text-xl">
-                seekreel turns the animation you already built in the browser into a finished MP4 —
-                square, 4:5 and silent cuts in the same pass — with every frame drawn exactly as you
-                designed it. One command, same result on your laptop and in CI.
+                seekreel turns the animation you already built in the browser into finished video —
+                every ratio, format and frame rate your feed asks for, cut from one render, with
+                every frame drawn exactly as you designed it. Same result on your laptop and in CI.
               </p>
               <ul className="mt-6 flex list-none flex-wrap gap-x-2 gap-y-2 p-0">
                 {['Launch films', 'Feature reels', 'Store listings'].map((use) => (
@@ -98,7 +114,7 @@ export default function Home() {
                 <CopyCommand command="npx github:highnet/seekreel init my-film" />
               </div>
               <p className="data mt-4 text-white/90">
-                MIT · Node 20+ · not on npm yet, so it installs straight from the repository
+                MIT · Node 20+ · installs straight from the repository
               </p>
             </div>
 
@@ -201,6 +217,46 @@ export default function Home() {
                 </p>
               </div>
               <Timing />
+            </div>
+          </div>
+        </section>
+
+
+        {/* Fold: the deliverables, which is what anyone is actually here for. */}
+        <section id="formats" className="scroll-mt-8 border-t border-rule py-20 sm:py-28">
+          <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
+            <div className="grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
+              <div>
+                <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
+                  One render. Every cut the feed asks for.
+                </h2>
+                <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
+                  Ask for <span className="data text-ink">9:16</span> and the canvas changes shape
+                  while the picture stays exactly where you put it — padded in your own background
+                  colour, or cropped if you say <span className="data text-ink">cover</span>. Name a
+                  size instead when a platform wants pixels. Drop the frame rate for a gif. Rendering
+                  is the slow part, so it happens once and every deliverable is cut from the same
+                  frames.
+                </p>
+                <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+                  {[
+                    ['mp4', 'H.264 + AAC. The one every feed accepts.'],
+                    ['webm', 'VP9 + Opus, for autoplay on your own site.'],
+                    ['gif', 'Palette-mapped, for a README or a changelog.'],
+                    ['mov', 'ProRes 422 HQ, for an edit timeline.'],
+                  ].map(([format, use]) => (
+                    <div key={format} className="flex gap-3">
+                      <dt className="data w-12 shrink-0 text-primary">{format}</dt>
+                      <dd className="text-sm leading-relaxed text-muted">{use}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              <div className="grid min-w-0 grid-cols-1 content-start gap-8">
+                <Shapes />
+                <Code code={VARIANTS_SAMPLE} lang="json" file="seekreel.config.json" />
+              </div>
             </div>
           </div>
         </section>

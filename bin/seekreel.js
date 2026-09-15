@@ -99,10 +99,12 @@ async function main() {
       .then(() => "playwright-core installed")
       .catch(() => "playwright-core is missing — run npm install");
     let ffmpeg = "no ffmpeg found — neither ffmpeg-static nor one on your PATH";
+    let formats = null;
     try {
       const { checkEncoder, ffmpegPath } = await encoder();
       const found = await checkEncoder();
       ffmpeg = `${ffmpegPath()} — ${found.ok ? "ok, has libx264" : `found, but not usable: ${found.reason}`}`;
+      formats = found.formats;
       if (!found.ok) process.exitCode = 1;
     } catch {
       process.exitCode = 1;
@@ -110,6 +112,12 @@ async function main() {
     console.log(`chromium   ${process.env.CHROMIUM ?? "(auto-detected)"} — ${browser}`);
     console.log(`ffmpeg     ${ffmpeg}`);
     console.log(`python     ${process.env.PYTHON ?? "python3"} — only needed if you want sound`);
+    if (formats) {
+      const list = Object.entries(formats)
+        .map(([name, ok]) => `${name} ${ok ? "yes" : "NO"}`)
+        .join("   ");
+      console.log(`formats    ${list}`);
+    }
     return;
   }
 

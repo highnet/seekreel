@@ -7,11 +7,11 @@ time. seekreel walks through every moment in the video, screenshots the page at
 each one, and stitches the screenshots into an MP4 with ffmpeg.
 
 ```sh
-npm i -g github:highnet/seekreel     # not on npm yet — installs from this repo
+npm i -g github:highnet/seekreel     # installs straight from this repository
 seekreel init my-film
 cd my-film
 seekreel build
-# → deliver/reel.mp4, deliver/reel-4x5.mp4, deliver/reel-silent.mp4
+# → deliver/reel.mp4, reel-4x5.mp4, reel-story.mp4, reel-loop.gif, reel-silent.mp4
 ```
 
 There is a homepage too, with a viewer you can scrub:
@@ -127,7 +127,7 @@ JavaScript instead of trying to tween it.
 | `seekreel probe <t,t,...>` | Render only those timestamps, into `probe/` |
 | `seekreel render [a] [b]` | Render every frame, or just frames `a` to `b`, in place |
 | `seekreel audio` | Render the cue sheet to a WAV file |
-| `seekreel encode` | Turn the frames (plus the WAV) into `deliver/*.mp4` |
+| `seekreel encode` | Turn the frames (plus the WAV) into every variant in `deliver/` |
 | `seekreel build` | Audio, then render, then encode |
 
 Use `-c, --config <path>` to point at a config other than
@@ -151,10 +151,15 @@ seekreel build -c examples/collection-dex/seekreel.config.json
   "width": 1080,
   "height": 1080,
   "poster": 22.1,
+  "background": "#111315",
   "audio": { "cues": "cues.json", "wav": "soundtrack.wav" },
   "variants": [
     { "name": "" },
-    { "name": "4x5", "scale": "1080:1080", "pad": "1080:1350:0:135:color=0xedefec" },
+    { "name": "4x5", "ratio": "4:5" },
+    { "name": "story", "ratio": "9:16" },
+    { "name": "og", "size": "1200x628", "fit": "cover" },
+    { "name": "web", "format": "webm" },
+    { "name": "loop", "format": "gif", "fps": 12 },
     { "name": "silent", "audio": false }
   ]
 }
@@ -165,12 +170,34 @@ seekreel build -c examples/collection-dex/seekreel.config.json
 | `name` | Base filename for the output. Defaults to the directory name. |
 | `stage` | The HTML file to render. |
 | `duration`, `fps` | Together these decide how many frames there are, and what timestamp each one sits at. |
-| `width`, `height` | Viewport size, in CSS pixels at scale 1. Both must be even numbers — H.264 cannot encode an odd dimension. |
+| `width`, `height` | The size you render at, in CSS pixels. Both must be even numbers — H.264 cannot encode an odd dimension. |
 | `poster` | A timestamp to also save as a PNG. Leave it out if you do not want one. |
+| `background` | Padding colour when a variant's shape does not match the render. Any ffmpeg colour: `black`, `#edefec`, `0xedefec`. |
 | `audio` | Leave this out entirely for a silent film. |
-| `variants` | One MP4 per entry. `scale` and `pad` are passed straight to ffmpeg's filters; `audio: false` drops the soundtrack. |
+| `variants` | One output file per entry — see below. |
 | `readySelector` | Override this if your stage signals readiness some other way. |
-| `encode` | Encoder settings: `crf`, `preset`, `audioBitrate`, `keyint`. |
+| `encode` | Encoder settings: `crf`, `preset`, `audioBitrate`, `keyint`, `gifColors`. |
+
+### Variants: one render, many deliverables
+
+Rendering is the slow part, so it happens once and every variant is cut from
+the same frames.
+
+| Key | What it does |
+| --- | --- |
+| `name` | Filename suffix. `""` is the plain `<name>.<ext>`. |
+| `format` | `mp4` (H.264 + AAC, the default), `webm` (VP9 + Opus), `gif`, or `mov` (ProRes 422 HQ + PCM, for an edit timeline). |
+| `ratio` | `"9:16"`, `"4:5"`, `"16:9"`, `"1:1"` — the shape you want. The canvas changes, the picture does not shrink: a 1080×1080 render at `9:16` becomes 1080×1920 with the frame centred. |
+| `size` | An exact `"1200x628"` instead of a ratio, for the places that ask for pixels. |
+| `fit` | `contain` (default) pads to the new shape with `background` and never crops. `cover` fills it and crops the overhang. |
+| `fps` | Output frame rate, when it should differ from the render — a 24fps film as a 12fps gif. It can go down, not up: frames that were never drawn cannot be invented. |
+| `audio` | `false` drops the soundtrack from this one. A `gif` is silent either way. |
+| `scale`, `pad` | Raw ffmpeg filter strings, if you need something the keys above cannot say. They win over `ratio`/`size`/`fit`. |
+
+So the common set — a square post, a 4:5 feed cut, a 9:16 story, a silent
+autoplay loop and an OG image — is five lines of config and one render.
+
+`seekreel doctor` lists which formats your ffmpeg can actually write.
 
 ---
 
@@ -224,7 +251,8 @@ Audio needs `python3` (standard library only). Nothing else in seekreel does.
   `CHROMIUM` environment variable at any Chromium or Chrome binary.
 - **ffmpeg with libx264.** `ffmpeg-static` is an optional dependency and gets
   used if it is installed; otherwise seekreel uses `ffmpeg` from your `PATH`, or
-  whatever `FFMPEG` points at.
+  whatever `FFMPEG` points at. The `webm` and `mov` formats also want
+  `libvpx-vp9` and `prores_ks` — `seekreel doctor` says which ones you have.
 - **python3**, but only if you want sound.
 
 Run `seekreel doctor` to see which of these it can find.
