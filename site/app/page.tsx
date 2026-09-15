@@ -79,15 +79,21 @@ export default function Home() {
         <section className="bg-primary pb-16 text-white sm:pb-20">
           <div className="mx-auto grid max-w-[76rem] gap-12 px-5 sm:px-8 grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-16 lg:pb-8">
             <div>
-              <h1 className="max-w-[13ch] text-[clamp(2.9rem,7.4vw,5.4rem)] leading-[0.92] font-extrabold">
-                Render the page, one frame at a time.
+              <h1 className="max-w-[16ch] text-[clamp(2.5rem,6vw,4.6rem)] leading-[0.94] font-extrabold">
+                Ship the film, not the screen recording.
               </h1>
               <p className="mt-7 max-w-[46ch] text-lg leading-relaxed text-white/90 sm:text-xl">
-                seekreel asks your page to draw itself at every timestamp in the film, screenshots
-                each one, and hands the stack to ffmpeg. Frame 512 is whatever the page draws at{' '}
-                <span className="data whitespace-nowrap rounded-sm bg-white px-1.5 py-0.5 text-[0.95em] text-primary-deep">t = 21.333</span>{' '}
-                — on any machine, every time.
+                seekreel turns the animation you already built in the browser into a finished MP4 —
+                square, 4:5 and silent cuts in the same pass — with every frame drawn exactly as you
+                designed it. One command, same result on your laptop and in CI.
               </p>
+              <ul className="mt-6 flex list-none flex-wrap gap-x-2 gap-y-2 p-0">
+                {['Launch films', 'Feature reels', 'Store listings'].map((use) => (
+                  <li key={use} className="data rounded-sm bg-primary-deep px-2.5 py-1 text-white">
+                    {use}
+                  </li>
+                ))}
+              </ul>
               <div className="mt-8 max-w-[34rem]">
                 <CopyCommand command="npx github:highnet/seekreel init my-film" />
               </div>
@@ -99,8 +105,8 @@ export default function Home() {
             <div className="lg:pt-6">
               <Instrument />
               <p className="mt-5 max-w-[40ch] text-white/90">
-                This viewer has no animation in it. Every pixel above is drawn from the timestamp —
-                drag the scrubber and you are doing by hand what the renderer does 288 times.
+                Drag the scrubber: every moment you land on is exactly the frame the render would
+                write to disk.
               </p>
             </div>
           </div>
@@ -111,13 +117,13 @@ export default function Home() {
           <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
             <div className="grid gap-8 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-end">
               <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-                A frame is a thing you can hold.
+                Re-cut one shot. Leave the other 287 alone.
               </h2>
               <p className="max-w-[58ch] text-lg leading-relaxed text-muted">
-                Because the picture depends on the timestamp and nothing else, any single moment can
-                be rendered on its own. <span className="data text-ink">seekreel probe 3.25</span> gives
-                you that PNG in about a second, without touching the other thousand frames. The twelve
-                below are that command, twelve times.
+                Changed your mind about second eight? Render second eight. Check any single moment as
+                a PNG in about a second — <span className="data text-ink">seekreel probe 3.25</span> —
+                before committing to a full pass. Your film stops being a take you have to get right
+                and starts being a file you edit.
               </p>
             </div>
             <div className="mt-12">
@@ -132,13 +138,17 @@ export default function Home() {
             <div className="grid gap-12 grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
               <div>
                 <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-                  Three rules, and no library on the page.
+                  If it runs in a browser, it ships as video.
                 </h2>
+                <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
+                  No timeline app to learn, no export plugin, no runtime to install. Your page takes a
+                  timestamp and draws that moment. Three rules, and seekreel does the rest.
+                </p>
                 <ol className="mt-8 grid list-none grid-cols-1 gap-6 p-0">
                   {[
                     ['Read the timestamp.', 'It arrives as ?t= on the query string, in seconds.'],
-                    ['Draw that moment, synchronously.', 'No waiting on a clock of its own — transitions and keyframes render whichever frame they happened to be on.'],
-                    ['Say when the frame is final.', 'Stamp data-seekreel-ready on the document and the screenshot is taken.'],
+                    ['Draw that moment, synchronously.', 'Set properties from t rather than leaving CSS transitions to their own clock.'],
+                    ['Say when the frame is final.', 'Stamp data-seekreel-ready on the document and the shutter goes.'],
                   ].map(([rule, detail], i) => (
                     <li key={rule} className="grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 border-t border-rule pt-4">
                       <span className="data text-primary">{String(i + 1).padStart(2, '0')}</span>
@@ -154,10 +164,11 @@ export default function Home() {
               <div className="grid min-w-0 grid-cols-1 content-start gap-8">
                 <Code code={STAGE_SAMPLE} lang="html" file="stage.html" />
                 <div>
-                  <h3 className="text-xl font-bold">Anything seekable works</h3>
+                  <h3 className="text-xl font-bold">Bring your own GSAP timeline</h3>
                   <p className="mt-2 max-w-[52ch] leading-relaxed text-muted">
-                    Hand-rolling easing gets old fast. Build a paused GSAP timeline and seek it once;
-                    just don&rsquo;t reach for callbacks, which a seek skips.
+                    Keep the easing, the staggers and the choreography you already wrote. Build the
+                    timeline paused, seek it once, and it renders — just skip callbacks, which a seek
+                    passes over.
                   </p>
                   <div className="mt-4 min-w-0">
                     <Code code={GSAP_SAMPLE} lang="js" file="stage.js" />
@@ -174,20 +185,19 @@ export default function Home() {
             <div className="grid gap-12 grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-20">
               <div>
                 <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-                  Why not just screen-record it?
+                  Never re-record because a font loaded late.
                 </h2>
                 <p className="mt-6 max-w-[54ch] text-lg leading-relaxed text-muted">
-                  A recording captures whatever your machine managed to draw at the time. Frames drop
-                  when it is busy. A font that loads late is in the file forever. Fix one shot in the
-                  middle and you record the whole thing again — and the recording slowly drifts away
-                  from the page it came from.
+                  A recording keeps whatever your machine managed to draw that afternoon: dropped
+                  frames, a late font, a scroll two pixels off. Render instead and the file is the
+                  same every time — which also means it can rebuild itself in CI whenever the page
+                  changes.
                 </p>
                 <p className="mt-5 max-w-[54ch] text-lg leading-relaxed text-muted">
-                  The trade is real and it is speed:{' '}
-                  <span className="text-ink">rendering is a page load and a screenshot per frame</span>, so
-                  budget about a second each. A 43-second film at 24fps takes roughly twenty minutes.
-                  That is the right deal for a film you cut once and re-cut in pieces, and the wrong
-                  one for anything interactive.
+                  The trade is speed, and we would rather say it up front:{' '}
+                  <span className="text-ink">a page load and a screenshot per frame</span>, so budget
+                  about a second each. A 43-second film takes roughly twenty minutes. Worth it for
+                  something you cut once and re-cut in pieces; wrong for anything interactive.
                 </p>
               </div>
               <Timing />
@@ -199,7 +209,7 @@ export default function Home() {
         <section id="commands" className="scroll-mt-8 py-20 sm:py-28">
           <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
             <h2 className="max-w-[18ch] text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-              Four commands, in the order you reach for them.
+              From empty folder to finished cut.
             </h2>
             <div className="mt-10">
               <Commands />
@@ -213,13 +223,13 @@ export default function Home() {
             <div className="grid min-w-0 gap-12 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
               <div>
                 <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-                  The soundtrack is a JSON file.
+                  Sound you can move by half a second.
                 </h2>
                 <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
-                  Cues are synthesized, not sampled: nothing to licence, and a shot that moves half a
-                  second later is one number to change. A looping bed sits under one-off sounds placed
-                  by time. It needs <span className="data text-ink">python3</span> and its standard
-                  library; nothing else here does.
+                  Cues are synthesized, not sampled — no library to licence, no clearance to chase,
+                  and no re-editing audio when a shot shifts. Change the number, rebuild, done. A
+                  looping bed sits under one-off hits placed by time, and all it needs is{' '}
+                  <span className="data text-ink">python3</span> and its standard library.
                 </p>
                 <ul className="mt-7 flex list-none flex-wrap gap-2 p-0">
                   {SOUNDS.map((s) => (
@@ -240,14 +250,15 @@ export default function Home() {
           <div className="grid gap-10 grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-end">
             <div>
               <h2 className="max-w-[16ch] text-[clamp(2.2rem,5vw,3.8rem)] leading-[0.95] font-extrabold">
-                Point it at a page and go.
+                Your next launch film is a page away.
               </h2>
               <p className="mt-5 max-w-[46ch] leading-relaxed text-white/80">
-                seekreel was written to render a 43-second film for{' '}
+                It was built to cut a 43-second film for{' '}
                 <a className="text-primary-lit underline underline-offset-4" href="https://collectiondex.com">
                   Collection Dex
                 </a>
-                , and that film ships in the repository as the worked example.
+                — twelve shots, a synthesized score — and that whole film ships in the repository,
+                ready to take apart.
               </p>
             </div>
             <div className="lg:justify-self-end lg:w-[26rem]">

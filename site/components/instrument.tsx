@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Slider } from '@base-ui/react/slider';
 import { Toggle } from '@base-ui/react/toggle';
 import Stage, { DURATION, FPS, FRAME_COUNT, frameAt, timecode } from './stage';
@@ -14,16 +14,35 @@ import Stage, { DURATION, FPS, FRAME_COUNT, frameAt, timecode } from './stage';
 /** The frame the viewer opens on — mid-render, where the film says the most. */
 const POSTER = Math.round(5.2 * FPS);
 
+/*
+ * Read the reduced-motion preference as an external store rather than setting
+ * state from an effect: the server has no media query, so the first paint
+ * matches the server snapshot and the preference is applied on hydration
+ * without a second render pass.
+ */
+const MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+function subscribeToMotion(onChange: () => void) {
+  const query = window.matchMedia(MOTION_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+
+function useReducedMotion() {
+  return useSyncExternalStore(
+    subscribeToMotion,
+    () => window.matchMedia(MOTION_QUERY).matches,
+    () => false,
+  );
+}
+
 export default function Instrument() {
   const [frame, setFrame] = useState(POSTER);
-  const [playing, setPlaying] = useState(true);
+  const [wantsPlayback, setWantsPlayback] = useState(true);
+  const reducedMotion = useReducedMotion();
+  const playing = wantsPlayback && !reducedMotion;
   const raf = useRef<number | null>(null);
   const started = useRef<number>(0);
-
-  useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (reduced.matches) setPlaying(false);
-  }, []);
 
   useEffect(() => {
     if (!playing) return;
@@ -42,7 +61,7 @@ export default function Instrument() {
   }, [playing]);
 
   const scrub = useCallback((value: number | number[]) => {
-    setPlaying(false);
+    setWantsPlayback(false);
     setFrame(Math.round(Array.isArray(value) ? value[0] : value));
   }, []);
 
@@ -57,7 +76,7 @@ export default function Instrument() {
       <div className="mt-4 flex items-center gap-4">
         <Toggle
           pressed={playing}
-          onPressedChange={setPlaying}
+          onPressedChange={setWantsPlayback}
           aria-label={playing ? 'Pause the film' : 'Play the film'}
           className="grid size-11 shrink-0 place-items-center rounded-sm border border-white/70 bg-white/10 text-white transition-colors duration-150 hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
