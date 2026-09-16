@@ -1,0 +1,15 @@
+{
+  "name": "three-orbit",
+  "stage": "stage.html",
+  "duration": 8,
+  "fps": 24,
+  "width": 1080,
+  "height": 1080,
+  "webgl": true,
+  "background": "#0b0d10",
+  "poster": 5.5,
+  "variants": [
+    { "name": "" },
+    { "name": "loop", "format": "gif", "fps": 12 }
+  ]
+}

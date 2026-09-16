@@ -1,24 +1,57 @@
 {
   "name": "seekreel",
   "version": "0.1.0",
-  "description": "Turn an animated web page into a video file, rendering it one frame at a time.",
+  "description": "Turn an animated web page into a video file, rendering it one frame at a time. TypeScript, no build step.",
   "license": "MIT",
   "author": "highnet",
-  "repository": { "type": "git", "url": "git+https://github.com/highnet/seekreel.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/highnet/seekreel.git"
+  },
   "homepage": "https://github.com/highnet/seekreel#readme",
   "bugs": "https://github.com/highnet/seekreel/issues",
-  "keywords": ["video", "animation", "gsap", "playwright", "ffmpeg", "mp4", "frame", "deterministic", "marketing"],
+  "keywords": [
+    "video",
+    "animation",
+    "three.js",
+    "webgl",
+    "strudel",
+    "gsap",
+    "playwright",
+    "ffmpeg",
+    "mp4",
+    "frame",
+    "deterministic",
+    "typescript"
+  ],
   "type": "module",
-  "bin": { "seekreel": "bin/seekreel.js" },
-  "files": ["bin", "src", "templates", "scripts", "README.md", "LICENSE"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "seekreel": "bin/seekreel.ts"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "install.sh",
+    "SKILLS.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
-    "example": "node bin/seekreel.js build --config examples/collection-dex/seekreel.config.json"
+    "typecheck": "tsc --noEmit",
+    "example": "node bin/seekreel.ts build --config examples/linkedin-promo/seekreel.config.json"
   },
   "dependencies": {
     "playwright-core": "^1.63.0"
   },
   "optionalDependencies": {
     "ffmpeg-static": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "typescript": "^5.9.3"
   }
 }

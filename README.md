@@ -7,11 +7,23 @@ time. seekreel walks through every moment in the video, screenshots the page at
 each one, and stitches the screenshots into an MP4 with ffmpeg.
 
 ```sh
-npm i -g github:highnet/seekreel     # installs straight from this repository
+curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh
 seekreel init my-film
 cd my-film
+seekreel strudel                     # the audio engine's bundle, once
 seekreel build
 # → deliver/reel.mp4, reel-4x5.mp4, reel-story.mp4, reel-loop.gif, reel-silent.mp4
+```
+
+There is no npm package. seekreel is distributed by git: the installer clones
+the repository to `~/.seekreel` and links the CLI onto your `PATH`. Clone it
+yourself if you would rather see what you are running first — the tool is
+TypeScript that Node executes as it is, so there is nothing to build:
+
+```sh
+git clone https://github.com/highnet/seekreel && cd seekreel
+npm install --omit=dev               # playwright-core, the one runtime dependency
+node bin/seekreel.ts doctor
 ```
 
 There is a homepage too, with a viewer you can scrub:
@@ -22,10 +34,12 @@ There is a homepage too, with a viewer you can scrub:
 - [Why not just screen-record it?](#why-not-just-screen-record-it)
 - [How a page talks to seekreel](#how-a-page-talks-to-seekreel)
 - [Animating with GSAP](#animating-with-gsap)
+- [3D with three.js](#3d-with-threejs)
 - [Commands](#commands)
 - [Configuration](#configuration)
 - [Sound](#sound)
 - [What you need installed](#what-you-need-installed)
+- [Written in TypeScript](#written-in-typescript)
 - [A full example](#a-full-example)
 - [Things to know before you start](#things-to-know-before-you-start)
 - [For agents](#for-agents)
@@ -119,6 +133,57 @@ JavaScript instead of trying to tween it.
 
 ---
 
+## 3D with three.js
+
+The contract does not change: read `t`, draw that moment, say when the frame is
+final. What changes is that a renderer normally driven by `requestAnimationFrame`
+is asked for exactly one frame instead.
+
+```html
+<script type="module">
+import * as THREE from "./three.module.js";
+
+const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+
+/* The camera's angle is a function of t. There is no `rotation.y += 0.01`
+   anywhere, because frame 300 has to be the same picture whether it was
+   rendered after frame 299 or on its own. */
+const angle = (t / DURATION) * Math.PI * 2;
+camera.position.set(Math.sin(angle) * 11.5, 4.4, Math.cos(angle) * 11.5);
+camera.lookAt(0, 1.1, 0);
+
+renderer.render(scene, camera);
+document.documentElement.setAttribute("data-seekreel-ready", "1");
+</script>
+```
+
+Two things make this work, and both are seekreel's side of the bargain:
+
+**`"webgl": true` in the config.** Chromium is launched with ANGLE on
+SwiftShader, a software rasteriser. Left to itself a headless browser will
+either refuse a WebGL context or hand back one backed by whatever driver the
+machine has, and the same scene shades differently on the next machine.
+Software rendering is slower and identical everywhere — rendering one timestamp
+twice, in two processes, gives the same PNG byte for byte.
+
+**Stages are served, not opened from disk.** three.js ships as an ES module, and
+a `file://` document may not import one. seekreel serves the project directory
+on a loopback port for the length of the render, so `import` works, and so does
+`fetch` of a data file beside the stage.
+
+Cost: WebGL through SwiftShader runs about two seconds a frame rather than one,
+and a scene with real shading costs more. `seekreel probe` before committing to
+a pass.
+
+`examples/three-orbit` is a working eight-second scene. For an `AnimationMixer`,
+use `mixer.setTime(t)` rather than `mixer.update(delta)` — the same move as
+GSAP's `tl.time(t)`.
+
+---
+
 ## Commands
 
 | Command | What it does |
@@ -155,6 +220,7 @@ seekreel build -c examples/collection-dex/seekreel.config.json
   "poster": 22.1,
   "background": "#111315",
   "audio": { "engine": "strudel", "pattern": "music.strudel.js", "cps": 0.5 },
+  "webgl": false,
   "variants": [
     { "name": "" },
     { "name": "4x5", "ratio": "4:5" },
@@ -176,6 +242,7 @@ seekreel build -c examples/collection-dex/seekreel.config.json
 | `poster` | A timestamp to also save as a PNG. Leave it out if you do not want one. |
 | `background` | Padding colour when a variant's shape does not match the render. Any ffmpeg colour: `black`, `#edefec`, `0xedefec`. |
 | `audio` | Leave this out entirely for a silent film. |
+| `webgl` | Turn this on for a three.js or raw-WebGL stage: it launches Chromium with software GL, so the scene renders the same on every machine. |
 | `variants` | One output file per entry — see below. |
 | `readySelector` | Override this if your stage signals readiness some other way. |
 | `encode` | Encoder settings: `crf`, `preset`, `audioBitrate`, `keyint`, `gifColors`. |
@@ -307,7 +374,8 @@ not: it renders in the browser seekreel already drives.
 
 ## What you need installed
 
-- **Node 20 or newer.**
+- **Node 22.18 or newer.** seekreel is TypeScript and Node runs it directly;
+  22.18 is the version where that stopped needing a flag.
 - **Chromium.** Not bundled, because a browser is 150MB and most machines
   already have one. Either run
   `npm i -D playwright && npx playwright install chromium`, or point the
@@ -345,8 +413,17 @@ a LinkedIn post needs from a single render. Its
 that go with the video.
 
 ```sh
-sh examples/linkedin-promo/setup.sh        # two typefaces, nothing else
+sh examples/linkedin-promo/setup.sh        # two typefaces and the strudel bundle
 seekreel build -c examples/linkedin-promo/seekreel.config.json
+```
+
+`examples/three-orbit` is the 3D one: eight seconds of three.js, a camera whose
+angle is a function of `t`, and software-rendered WebGL that comes out the same
+on every machine.
+
+```sh
+sh examples/three-orbit/setup.sh           # three.js, fetched
+seekreel build -c examples/three-orbit/seekreel.config.json
 ```
 
 ---
@@ -363,8 +440,34 @@ seekreel build -c examples/linkedin-promo/seekreel.config.json
 - **Fonts have to be loaded before the frame is captured.** seekreel waits for
   `document.fonts.ready`, which covers `@font-face`. If a font arrives some
   other way, wait for it yourself before marking the frame ready.
+- **The picture is deterministic; the noise in the soundtrack is not.** Frames
+  are identical run to run, and so is a Strudel pattern made of oscillators.
+  Noise voices and reverb tails are built inside an AudioWorklet, which is its
+  own JavaScript realm with its own `Math.random` that seekreel cannot seed — so
+  those come out as the same music with a different texture each render. Render
+  the WAV once and keep it if you need the bytes to match.
 - **No transparency.** Output is yuv420p H.264, because that is what social
   platforms accept. If you need an alpha channel, encode the frames yourself.
+
+---
+
+## Written in TypeScript
+
+The tool is TypeScript, and there is no build step. Node 22.18 and newer strip
+the types at load time and run the files as they are, so what you clone is what
+executes — no `dist/`, no watch process, and a stack trace points at the line
+you edited.
+
+That constrains the source to erasable syntax: no enums, no parameter
+properties, no decorators. `tsconfig.json` sets `erasableSyntaxOnly`, so the
+type checker rejects anything that would need compiling:
+
+```sh
+npm run typecheck     # tsc --noEmit, the only thing tsc does here
+```
+
+Stages stay HTML and JavaScript. A stage is loaded by a browser, and the browser
+is the one thing in this pipeline that cannot strip types.
 
 ---
 

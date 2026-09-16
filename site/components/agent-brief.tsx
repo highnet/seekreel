@@ -40,6 +40,7 @@ const CONFIG = `{
   "height": 1080,
   "background": "#ffffff",
   "poster": 14.8,
+  "webgl": false,
   "audio": {
     "engine": "strudel",
     "pattern": "music.strudel.js",
@@ -64,12 +65,23 @@ stack(
   note("<[c3,eb3,g3] [ab2,c3,eb3]>").s("triangle").attack(.8).room(.7).gain(.34)
 )`;
 
+const THREE_STAGE = `import * as THREE from "./three.module.js";   // stages are served, so this works
+
+const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+const angle = (t / DURATION) * Math.PI * 2;      // never \`+= 0.01\`
+camera.position.set(Math.sin(angle) * 11.5, 4.4, Math.cos(angle) * 11.5);
+camera.lookAt(0, 1.1, 0);
+
+renderer.render(scene, camera);
+document.documentElement.setAttribute("data-seekreel-ready", "1");`;
+
 const COMMANDS: [string, string][] = [
   ['seekreel init <dir>', 'scaffold a project from the starter template'],
   ['seekreel doctor', 'check Chromium, ffmpeg and the formats before rendering'],
   ['seekreel probe 3.2,9.6', 'render only those timestamps to probe/ — about a second each'],
   ['seekreel render [a] [b]', 'render every frame, or only frames a..b, in place'],
   ['seekreel audio', 'render the soundtrack to a WAV'],
+  ['seekreel strudel', 'fetch the Strudel bundle the audio engine needs, once'],
   ['seekreel encode', 'cut every variant from the frames already on disk'],
   ['seekreel build', 'audio, then render, then encode'],
   ['-c, --config <path>', 'any command, against a config somewhere else'],
@@ -97,6 +109,14 @@ const TRAPS: [string, string][] = [
     'A ratio keeps the picture and changes the canvas, padding with background. Pass "fit": "cover" when you do want it cropped.',
   ],
   [
+    'Reaching for npm i -g seekreel',
+    'There is no registry package. Install with the curl line above, or clone the repo — the tool is TypeScript that Node runs without a build step, so a checkout is already runnable.',
+  ],
+  [
+    'Driving a 3D scene with a delta',
+    'mixer.update(delta) and rotation.y += 0.01 both accumulate, and a renderer that loads one page per frame has nothing to accumulate from. Use mixer.setTime(t) and compute every transform from t. Set "webgl": true so Chromium renders with software GL and the scene shades the same everywhere.',
+  ],
+  [
     'Strudel sounds that need samples',
     's("bd") and friends load sample packs over the network. Synth voices — sine, sawtooth, triangle, square, white, pink, brown — render offline and are the safe default.',
   ],
@@ -115,7 +135,11 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
       '',
       'Renders an animated web page to video by seeking it: the page draws the frame for a',
       'timestamp, seekreel screenshots every frame and ffmpeg stitches them. Deterministic —',
-      'frame N is the same on any machine. Cost: about one second per frame.',
+      'frame N is the same on any machine. Cost: about one second per frame, two for WebGL.',
+      '',
+      'Install (git, not npm):',
+      '  curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh',
+      'Needs Node 22.18+ (the tool is TypeScript run without a build step), a Chromium, ffmpeg.',
       '',
       `Full skill file: ${SKILLS_RAW}`,
       '',
@@ -132,6 +156,12 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
       '## Config',
       '```json',
       CONFIG,
+      '```',
+      '',
+      '## 3D',
+      'Set "webgl": true for three.js or raw WebGL — software GL, identical output per machine.',
+      '```js',
+      THREE_STAGE,
       '```',
       '',
       '## Commands',
@@ -194,9 +224,20 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
       </div>
 
       <Section title="Install">
-        <Pre>{`npm i -g github:highnet/seekreel   # not on npm yet; installs from the repo
+        <p className="max-w-[68ch] leading-relaxed text-muted">
+          Distributed by git, not by a package registry. The installer clones to{' '}
+          <code className="data text-ink">~/.seekreel</code> and links the CLI into{' '}
+          <code className="data text-ink">~/.local/bin</code>.
+        </p>
+        <Pre className="mt-5">{`curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh
 seekreel doctor                    # verifies chromium, ffmpeg, formats
-# needs: node >= 20, a chromium, ffmpeg with libx264`}</Pre>
+
+# or work from a checkout — TypeScript, no build step:
+git clone https://github.com/highnet/seekreel && cd seekreel
+npm install --omit=dev             # playwright-core, the one runtime dependency
+node bin/seekreel.ts doctor
+
+# needs: node >= 22.18, a chromium, ffmpeg with libx264`}</Pre>
       </Section>
 
       <Section title="The contract a page has to keep">
@@ -216,6 +257,18 @@ seekreel doctor                    # verifies chromium, ffmpeg, formats
           ))}
         </ol>
         <Pre className="mt-6">{STAGE}</Pre>
+      </Section>
+
+      <Section title="3D and WebGL">
+        <p className="max-w-[68ch] leading-relaxed text-muted">
+          Set <code className="data text-ink">&quot;webgl&quot;: true</code> and Chromium launches with
+          ANGLE on SwiftShader — software rendering, so a scene shades the same on every machine
+          instead of picking up whatever driver is present. Two renders of one timestamp, in two
+          processes, give the same PNG byte for byte. Stages are served over loopback rather than
+          opened from <code className="data text-ink">file://</code>, which is what makes an ES module
+          import (three.js ships as one) work at all. Budget about two seconds a frame.
+        </p>
+        <Pre className="mt-5">{THREE_STAGE}</Pre>
       </Section>
 
       <Section title="Config">
@@ -266,10 +319,24 @@ seekreel doctor                    # verifies chromium, ffmpeg, formats
         </dl>
       </Section>
 
+      <Section title="Source">
+        <p className="max-w-[68ch] leading-relaxed text-muted">
+          TypeScript, run by Node&apos;s own type stripping — there is no{' '}
+          <code className="data text-ink">dist/</code> and nothing to compile. That constrains the
+          source to erasable syntax (no enums, no parameter properties, no decorators), which{' '}
+          <code className="data text-ink">tsconfig.json</code> enforces with{' '}
+          <code className="data text-ink">erasableSyntaxOnly</code>.{' '}
+          <code className="data text-ink">npm run typecheck</code> is{' '}
+          <code className="data text-ink">tsc --noEmit</code> and emits nothing by design. Stages stay
+          HTML and JavaScript: a browser cannot strip types.
+        </p>
+      </Section>
+
       <Section title="Worked examples in the repository">
         <ul className="grid list-none grid-cols-1 gap-3 p-0">
           {[
             ['examples/linkedin-promo', 'sixteen seconds, plain JavaScript, a Strudel soundtrack, five deliverables from one render'],
+            ['examples/three-orbit', 'eight seconds of three.js: webgl on, camera angle computed from t, frames identical across processes'],
             ['examples/collection-dex', 'forty-three seconds, a paused GSAP timeline, a JSON cue sheet'],
             ['templates/starter', 'what seekreel init writes: the contract in ninety lines, no dependencies'],
           ].map(([where, what]) => (

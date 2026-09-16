@@ -2,8 +2,10 @@ import { spawn } from "node:child_process";
 import { mkdir, readdir } from "node:fs/promises";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { variantFile } from "./config.js";
-import { FORMATS, videoFilters } from "./formats.js";
+import { variantFile } from "./config.ts";
+import { FORMATS, videoFilters } from "./formats.ts";
+import { expected } from "./types.ts";
+import type { Config, FormatName } from "./types.ts";
 
 const require = createRequire(import.meta.url);
 
@@ -15,16 +17,16 @@ const require = createRequire(import.meta.url);
  * copy. Needs libx264, which the static build has and some distro builds do
  * not — hence the check below rather than a confusing failure at encode time.
  */
-export function ffmpegPath() {
+export function ffmpegPath(): string {
   if (process.env.FFMPEG) return process.env.FFMPEG;
   try {
-    return require("ffmpeg-static");
+    return require("ffmpeg-static") as string;
   } catch {
     return "ffmpeg";
   }
 }
 
-function run(bin, args) {
+function run(bin: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(bin, args, { stdio: ["ignore", "pipe", "pipe"] });
     let stderr = "";
@@ -32,14 +34,11 @@ function run(bin, args) {
     child.stderr.on("data", (chunk) => {
       stderr += chunk;
     });
-    child.on("error", (error) =>
+    child.on("error", (error: Error) =>
       reject(
-        Object.assign(
-          new Error(
-            `Could not run ffmpeg (${bin}): ${error.message}\n` +
-              `Install it, or set FFMPEG=/path/to/ffmpeg.`,
-          ),
-          { expected: true },
+        expected(
+          `Could not run ffmpeg (${bin}): ${error.message}\n` +
+            `Install it, or set FFMPEG=/path/to/ffmpeg.`,
         ),
       ),
     );
@@ -58,9 +57,16 @@ function run(bin, args) {
  * distro builds leave out — but a config asking for webm on a build without
  * VP9 deserves the same warning before the render, not after it.
  */
-export async function checkEncoder() {
+export interface EncoderCheck {
+  ok: boolean;
+  bin: string;
+  reason?: string;
+  formats: Partial<Record<FormatName, boolean>>;
+}
+
+export async function checkEncoder(): Promise<EncoderCheck> {
   const bin = ffmpegPath();
-  return new Promise((resolve) => {
+  return new Promise<EncoderCheck>((resolve) => {
     const child = spawn(bin, ["-hide_banner", "-encoders"]);
     let out = "";
     child.stdout.on("data", (chunk) => {
@@ -73,7 +79,7 @@ export async function checkEncoder() {
           name,
           new RegExp(`\\b${format.encoder}\\b`).test(out),
         ]),
-      );
+      ) as Record<FormatName, boolean>;
       resolve(
         formats.mp4
           ? { ok: true, bin, formats }
@@ -90,19 +96,21 @@ export async function checkEncoder() {
  * the arguments for those live in formats.js so this stays the loop that runs
  * them rather than a switch over every codec.
  */
-export async function encode(config, { onVariant } = {}) {
+export interface EncodeOptions {
+  onVariant?: (file: string) => void;
+}
+
+export async function encode(config: Config, { onVariant }: EncodeOptions = {}): Promise<string[]> {
   const bin = ffmpegPath();
   await mkdir(config.deliverDir, { recursive: true });
 
   const frames = (await readdir(config.outDir)).filter((f) => f.endsWith(".png")).sort();
   if (frames.length === 0) {
-    throw Object.assign(new Error(`There are no frames in ${config.outDir} yet — run \`seekreel render\` first.`), {
-      expected: true,
-    });
+    throw expected(`There are no frames in ${config.outDir} yet — run \`seekreel render\` first.`);
   }
   const pattern = path.join(config.outDir, `%0${frames[0].length - 4}d.png`);
 
-  const written = [];
+  const written: string[] = [];
   for (const variant of config.variants) {
     const file = variantFile(config, variant);
     const format = FORMATS[variant.format];
@@ -111,7 +119,7 @@ export async function encode(config, { onVariant } = {}) {
 
     const args = ["-y", "-hide_banner", "-loglevel", "error"];
     args.push("-framerate", String(config.fps), "-i", pattern);
-    if (wantsAudio) args.push("-i", config.audio.wav, "-shortest");
+    if (wantsAudio) args.push("-i", config.audio!.wav, "-shortest");
 
     if (variant.format === "gif") {
       /*

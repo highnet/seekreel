@@ -7,7 +7,19 @@ import { writeFile } from "node:fs/promises";
  * anything from more; the fade and the peak normalisation happen here, on
  * floats, before the quantisation that would make them audible.
  */
-export async function writeWav(file, interleaved, { sampleRate, fadeIn = 0, fadeOut = 0, peak = null }) {
+export interface WavOptions {
+  sampleRate: number;
+  fadeIn?: number;
+  fadeOut?: number;
+  /** Normalisation target, 0 to 1, or null to leave the level alone. */
+  peak?: number | null;
+}
+
+export async function writeWav(
+  file: string,
+  interleaved: Float32Array,
+  { sampleRate, fadeIn = 0, fadeOut = 0, peak = null }: WavOptions,
+): Promise<{ frames: number; seconds: number }> {
   const frames = Math.floor(interleaved.length / 2);
 
   if (peak != null) {

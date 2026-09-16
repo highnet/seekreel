@@ -1,4 +1,6 @@
 import { chromium } from "playwright-core";
+import type { Browser } from "playwright-core";
+import { expected } from "./types.ts";
 
 /**
  * Where Chromium is.
@@ -7,7 +9,7 @@ import { chromium } from "playwright-core";
  * have one, whether from a full `playwright` install or from the system. The
  * env var is checked first so CI can point at whatever it cached.
  */
-export function chromiumPath() {
+export function chromiumPath(): string | undefined {
   if (process.env.CHROMIUM) return process.env.CHROMIUM;
   try {
     // A full `playwright` install knows where it put its browsers.
@@ -24,7 +26,7 @@ export function chromiumPath() {
  * will not be, because it shifts with the glyph cache. They cost the audio
  * engine nothing.
  */
-export async function launch() {
+export async function launch({ webgl = false }: { webgl?: boolean } = {}): Promise<Browser> {
   const executablePath = chromiumPath();
   try {
     return await chromium.launch({
@@ -33,12 +35,24 @@ export async function launch() {
         "--font-render-hinting=none",
         "--disable-lcd-text",
         "--force-color-profile=srgb",
+        /*
+         * A headless Chromium on a machine with no GPU will either refuse WebGL
+         * or hand back a context backed by whatever driver it found, which is
+         * the one thing a deterministic renderer cannot have: the same scene
+         * would shade differently on the next machine. SwiftShader is a
+         * software rasteriser, so every frame is computed the same way
+         * everywhere — slower, and identical, which is the trade this whole
+         * tool makes.
+         */
+        ...(webgl
+          ? ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+          : []),
       ],
     });
   } catch (error) {
     const hint =
       "No Chromium found. Either install one with `npm i -D playwright && npx playwright install chromium`, " +
       "or point CHROMIUM at a Chrome or Chromium binary you already have.";
-    throw Object.assign(new Error(`${hint}\n\n${error.message}`), { expected: true });
+    throw expected(`${hint}\n\n${(error as Error).message}`);
   }
 }

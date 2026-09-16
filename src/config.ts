@@ -1,6 +1,15 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { FORMATS, FORMAT_NAMES, parseRatio, parseSize } from "./formats.js";
+import { FORMATS, FORMAT_NAMES, isFormatName, parseRatio, parseSize } from "./formats.ts";
+import { expected } from "./types.ts";
+import type {
+  AudioConfig,
+  Config,
+  ConfigInput,
+  EncodeSettings,
+  Variant,
+  VariantInput,
+} from "./types.ts";
 
 /**
  * A project's config, resolved against the directory the file lives in.
@@ -27,6 +36,13 @@ const DEFAULTS = {
   /** Seconds to allow one frame. A frame that needs longer is a bug worth seeing. */
   frameTimeoutMs: 30_000,
   audio: null,
+  /*
+   * Ask Chromium for a software-rendered WebGL context. Off by default because
+   * it costs a little start-up time and most stages are DOM; on, a three.js or
+   * raw-GL stage renders the same way on every machine instead of picking up
+   * whatever driver the machine happens to have.
+   */
+  webgl: false,
   /** Padding colour for a variant whose ratio does not match the render. */
   background: "black",
   variants: [{ name: "" }],
@@ -42,36 +58,34 @@ const DEFAULTS = {
   poster: null,
 };
 
-function fail(message) {
-  const error = new Error(message);
-  error.expected = true;
-  throw error;
+function fail(message: string): never {
+  throw expected(message);
 }
 
-export async function loadConfig(configPath) {
+export async function loadConfig(configPath: string): Promise<Config> {
   const file = path.resolve(configPath);
-  let raw;
+  let raw: string;
   try {
     raw = await readFile(file, "utf8");
   } catch {
     fail(`No config at ${file}. Run \`seekreel init\` to make one.`);
   }
 
-  let parsed;
+  let parsed: ConfigInput;
   try {
     parsed = JSON.parse(raw);
   } catch (error) {
-    fail(`${file} is not valid JSON: ${error.message}`);
+    fail(`${file} is not valid JSON: ${(error as Error).message}`);
   }
 
   const root = path.dirname(file);
   const config = {
     ...DEFAULTS,
     ...parsed,
-    encode: { ...DEFAULTS.encode, ...(parsed.encode ?? {}) },
+    encode: { ...DEFAULTS.encode, ...(parsed.encode ?? {}) } as EncodeSettings,
     root,
     file,
-  };
+  } as Config;
 
   if (!(config.duration > 0)) fail(`duration must be a positive number of seconds`);
   if (!(config.fps > 0)) fail(`fps must be positive`);
@@ -85,12 +99,15 @@ export async function loadConfig(configPath) {
   config.probeDir = path.resolve(root, config.probe);
   config.deliverDir = path.resolve(root, config.deliver);
 
-  if (config.audio) config.audio = normalizeAudio(config, root, parsed.audio);
+  if (config.audio) config.audio = normalizeAudio(root, parsed.audio!);
 
-  if (!Array.isArray(config.variants) || config.variants.length === 0) {
+  /* The variants as written, before defaults: `config.variants` holds the
+     resolved shape from here on, and the two are not the same type. */
+  const written: VariantInput[] = parsed.variants ?? DEFAULTS.variants;
+  if (!Array.isArray(written) || written.length === 0) {
     fail(`variants must be a non-empty array`);
   }
-  config.variants = config.variants.map((variant, index) => normalizeVariant(config, variant, index));
+  config.variants = written.map((variant, index) => normalizeVariant(config, variant, index));
 
   config.name = parsed.name ?? path.basename(root);
   return config;
@@ -100,21 +117,21 @@ export async function loadConfig(configPath) {
  * Fill in a variant's defaults and reject the mistakes worth catching before a
  * twenty-minute render rather than after it.
  */
-function normalizeVariant(config, variant, index) {
+function normalizeVariant(config: Config, variant: VariantInput, index: number): Variant {
   const where = variant.name ? `variant "${variant.name}"` : `variant ${index}`;
 
   const format = variant.format ?? "mp4";
-  if (!FORMATS[format]) {
+  if (!isFormatName(format)) {
     fail(`${where}: unknown format "${format}". Known formats: ${FORMAT_NAMES.join(", ")}.`);
   }
 
-  let ratio = null;
+  let ratio: number | null = null;
   if (variant.ratio != null) {
     ratio = parseRatio(variant.ratio);
     if (ratio == null) fail(`${where}: ratio must look like "9:16", got ${JSON.stringify(variant.ratio)}`);
   }
 
-  let size = null;
+  let size: ReturnType<typeof parseSize> = null;
   if (variant.size != null) {
     size = parseSize(variant.size);
     if (size == null) fail(`${where}: size must look like "1080x1920", got ${JSON.stringify(variant.size)}`);
@@ -164,20 +181,16 @@ function normalizeVariant(config, variant, index) {
  */
 const AUDIO_ENGINES = ["cues", "strudel"];
 
-function normalizeAudio(config, root, audio) {
+function normalizeAudio(root: string, audio: NonNullable<ConfigInput["audio"]>): AudioConfig {
   const engine = audio.engine ?? "cues";
   if (!AUDIO_ENGINES.includes(engine)) {
     fail(`audio.engine must be one of ${AUDIO_ENGINES.join(", ")}, got ${JSON.stringify(audio.engine)}`);
   }
 
-  const resolved = {
-    engine,
-    wav: path.resolve(root, audio.wav ?? "soundtrack.wav"),
-  };
+  const wav = path.resolve(root, audio.wav ?? "soundtrack.wav");
 
   if (engine === "cues") {
-    resolved.cues = path.resolve(root, audio.cues ?? "cues.json");
-    return resolved;
+    return { engine, wav, cues: path.resolve(root, audio.cues ?? "cues.json") };
   }
 
   /*
@@ -196,7 +209,8 @@ function normalizeAudio(config, root, audio) {
   if (!(peak > 0) || peak > 1) fail(`audio.peak must be between 0 and 1, got ${JSON.stringify(audio.peak)}`);
 
   return {
-    ...resolved,
+    engine: "strudel",
+    wav,
     pattern: path.resolve(root, audio.pattern ?? "music.strudel.js"),
     /* Fetched into the project, not vendored here: it is 850KB, and a project
        that pins its own copy should keep pinning it. */
@@ -206,12 +220,14 @@ function normalizeAudio(config, root, audio) {
     peak,
     fadeIn: audio.fadeIn ?? 0.05,
     fadeOut: audio.fadeOut ?? 1.0,
+    /* Any integer will do; the point is that it is the same one next time. */
+    seed: audio.seed ?? 1,
   };
 }
 
 /** What a variant's file is called: `<name>.<ext>`, or `<name>-<variant>.<ext>`. */
-export function variantFile(config, variant) {
+export function variantFile(config: Config, variant: Variant): string {
   const suffix = variant.name ? `-${variant.name}` : "";
-  const ext = FORMATS[variant.format ?? "mp4"].ext;
+  const ext = FORMATS[variant.format].ext;
   return path.join(config.deliverDir, `${config.name}${suffix}.${ext}`);
 }

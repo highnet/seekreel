@@ -20,9 +20,31 @@ feature reel, a social post, a loop for a store page. Do not use it for anything
 interactive, and do not reach for it when a screen recording of a real product
 session is what was actually asked for.
 
+## Install
+
+There is no npm registry package. seekreel is distributed by git:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh
+```
+
+That clones to `~/.seekreel`, installs `playwright-core`, and links the CLI into
+`~/.local/bin`. `SEEKREEL_HOME`, `SEEKREEL_BIN` and `SEEKREEL_REF` override
+where and what. To work from a checkout instead, with no install at all:
+
+```sh
+git clone https://github.com/highnet/seekreel && cd seekreel
+npm install --omit=dev
+node bin/seekreel.ts doctor
+```
+
+`bin/seekreel.ts` is TypeScript and Node runs it as it is — there is no build
+step, no `dist/`, and nothing to compile before using the repository.
+
 ## Requirements
 
-- Node 20+
+- Node 22.18+. The tool is TypeScript run through Node's own type stripping,
+  which stopped needing a flag in 22.18.
 - A Chromium. seekreel finds one from a `playwright` install, or takes
   `CHROMIUM=/path/to/chrome`.
 - ffmpeg with libx264. `ffmpeg-static` is an optional dependency and is used if
@@ -58,6 +80,39 @@ There is no library to import and no seekreel API on the page. A canvas draw, a
 charting library or a paused GSAP timeline seeked with `tl.time(t)` all satisfy
 the contract equally.
 
+## 3D and WebGL
+
+Set `"webgl": true` in the config for a three.js or raw-WebGL stage. It launches
+Chromium with ANGLE on SwiftShader — software rendering, so the scene shades the
+same on every machine rather than picking up whatever driver is present. Two
+renders of one timestamp in two processes give the same PNG byte for byte.
+
+The contract is unchanged; what changes is that the renderer is asked for one
+frame instead of being driven by `requestAnimationFrame`:
+
+```js
+import * as THREE from "./three.module.js";     // stages are served, so this works
+
+const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+const angle = (t / DURATION) * Math.PI * 2;      // never `+= 0.01`
+camera.position.set(Math.sin(angle) * 11.5, 4.4, Math.cos(angle) * 11.5);
+camera.lookAt(0, 1.1, 0);
+
+renderer.render(scene, camera);
+document.documentElement.setAttribute("data-seekreel-ready", "1");
+```
+
+- three.js ships as an ES module. That works because seekreel serves the project
+  directory on a loopback port for the length of the render rather than opening
+  the stage from `file://`, where a module import is a cross-origin request.
+  `fetch` of a file beside the stage works for the same reason.
+- Fetch three.js into the project (`examples/three-orbit/fetch-three.sh` does);
+  the module build needs **both** `three.module.js` and `three.core.js`, and
+  missing the second shows up only as a 404 at render time.
+- An `AnimationMixer` is driven with `mixer.setTime(t)`, never
+  `mixer.update(delta)`.
+- Budget about two seconds a frame rather than one, more with real shading.
+
 ## Commands
 
 | Command | What it does |
@@ -91,6 +146,7 @@ one number changed costs twenty minutes for no reason.
   "background": "#ffffff",
   "poster": 14.8,
   "audio": { "engine": "strudel", "pattern": "music.strudel.js", "cps": 0.625 },
+  "webgl": false,
   "variants": [
     { "name": "" },
     { "name": "4x5",      "ratio": "4:5" },
@@ -150,6 +206,11 @@ Rules that bite:
   network. Synth voices — `sine`, `sawtooth`, `triangle`, `square`, `white`,
   `pink`, `brown` — render offline. Prefer them unless the project has already
   vendored samples.
+- **Noise is not reproducible.** Oscillator voices render byte-identical run to
+  run, and `audio.seed` pins everything the main thread decides. Noise voices and
+  reverb tails are built inside an AudioWorklet — its own JS realm, its own
+  `Math.random`, unreachable from outside — so those are the same music with a
+  different texture each render. Render the WAV once and keep it if bytes matter.
 - `cps` is the only number tying the pattern's grid to the film's seconds. Pick
   one where a cycle divides the duration, then put the picture's cuts on the
   same boundaries: that is what makes a cut land on a downbeat instead of near
@@ -172,6 +233,11 @@ than an error.
   yourself before stamping ready.
 - **Assuming a ratio crops.** It pads. Say `"fit": "cover"` if you meant crop.
 - **Re-rendering to fix an encode.** `encode` re-cuts from frames on disk.
+- **Reaching for `npm i -g seekreel`.** There is no registry package. Install
+  with the curl line or a clone; both are above.
+- **Adding a build step.** The source is TypeScript in erasable syntax only —
+  no enums, no parameter properties, no decorators — so Node can run it
+  untouched. `npm run typecheck` is `tsc --noEmit` and emits nothing by design.
 - **Claiming things about the tool that are not true.** It is not on npm; it has
   no adoption numbers; rendering really does cost about a second per frame. If
   you are writing marketing copy with it, say that.
@@ -181,6 +247,8 @@ than an error.
 - `examples/linkedin-promo` — sixteen seconds, plain JavaScript, a Strudel
   soundtrack, five deliverables from one render. Its `POST.md` is the post copy
   that ships with the video.
+- `examples/three-orbit` — eight seconds of three.js: `"webgl": true`, a camera
+  angle computed from `t`, and frames that match byte for byte across processes.
 - `examples/collection-dex` — forty-three seconds, a paused GSAP timeline, a
   JSON cue sheet lined up with a shot table.
 - `templates/starter` — what `seekreel init` writes: the contract in ninety

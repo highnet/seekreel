@@ -1,9 +1,11 @@
-import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { launch } from "../browser.js";
-import { writeWav } from "./wav.js";
+import { launch } from "../browser.ts";
+import { serveDirectory } from "../serve.ts";
+import { writeWav } from "./wav.ts";
+import { expected } from "../types.ts";
+import type { Config, StrudelAudio } from "../types.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,47 +23,31 @@ const here = path.dirname(fileURLToPath(import.meta.url));
  * way the GSAP example fetches GSAP.
  */
 
-/*
- * A pattern file is ES module source, and a module cannot be imported from
- * file:// — the browser refuses it as a cross-origin request. Serving the
- * project directory over a loopback port for the length of the render is the
- * whole of the workaround, and it keeps the page's imports ordinary.
- */
-const TYPES = { ".mjs": "text/javascript", ".js": "text/javascript", ".html": "text/html" };
-
-async function serve(files) {
-  const server = createServer(async (request, response) => {
-    const name = (request.url ?? "/").split("?")[0];
-    /* Chromium asks for this unprompted, and a 404 would land in the page's
-       console next to the errors that matter. */
-    if (name === "/favicon.ico") {
-      response.writeHead(204).end();
-      return;
-    }
-    const file = files[name];
-    if (!file) {
-      response.writeHead(404).end();
-      return;
-    }
-    try {
-      response.writeHead(200, {
-        "content-type": TYPES[path.extname(file)] ?? "application/octet-stream",
-        /* The page and the bundle must not be cached between runs: a pattern
-           edited and re-rendered in the same second has to be the one that
-           renders. */
-        "cache-control": "no-store",
-      });
-      response.end(await readFile(file));
-    } catch (error) {
-      response.writeHead(500).end(String(error));
-    }
-  });
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  return { server, port: server.address().port };
+export interface StrudelResult {
+  frames: number;
+  seconds: number;
+  /** Events actually handed to the synth. */
+  events: number;
+  queried: number;
+  peak: number;
+  failures: string[];
 }
 
-export async function renderStrudel(config, { onProgress } = {}) {
-  const { pattern, bundle, wav, cps, sampleRate, peak, fadeIn, fadeOut } = config.audio;
+interface PageResult {
+  pcm: string;
+  frames: number;
+  haps: number;
+  played: number;
+  voices: string[];
+  peak: number;
+}
+
+export async function renderStrudel(
+  config: Config,
+  { onProgress }: { onProgress?: (stage: string) => void } = {},
+): Promise<StrudelResult> {
+  const { pattern, bundle, wav, cps, sampleRate, peak, fadeIn, fadeOut, seed } =
+    config.audio as StrudelAudio;
 
   for (const [what, file] of [["pattern", pattern], ["Strudel bundle", bundle]]) {
     try {
@@ -73,12 +59,17 @@ export async function renderStrudel(config, { onProgress } = {}) {
           : `No Strudel bundle at ${file}. Fetch one:\n\n` +
             `  curl -fsSL -o ${path.basename(file)} https://cdn.jsdelivr.net/npm/@strudel/web@1.3.0/dist/index.mjs\n\n` +
             `or point audio.bundle at a copy you already have.`;
-      throw Object.assign(new Error(hint), { expected: true });
+      throw expected(hint);
     }
   }
 
   const code = await readFile(pattern, "utf8");
-  const { server, port } = await serve({
+  /*
+   * A pattern file is ES module source, and a module cannot be imported from
+   * file:// — the browser refuses it as a cross-origin request. The engine's
+   * own page and the Strudel bundle are served beside the project instead.
+   */
+  const server = await serveDirectory(path.dirname(pattern), {
     "/": path.join(here, "strudel-page.html"),
     "/strudel-page.html": path.join(here, "strudel-page.html"),
     "/strudel.mjs": bundle,
@@ -87,42 +78,43 @@ export async function renderStrudel(config, { onProgress } = {}) {
   const browser = await launch();
   try {
     const page = await browser.newPage();
-    const failures = [];
+    const failures: string[] = [];
     page.on("pageerror", (error) => failures.push(String(error)));
     page.on("console", (message) => {
       /* Strudel narrates its own loading; only its complaints are interesting. */
       if (message.type() === "error") failures.push(`console: ${message.text()}`);
     });
 
-    await page.goto(`http://127.0.0.1:${port}/strudel-page.html`, { waitUntil: "load" });
+    await page.goto(`${server.origin}/strudel-page.html?seed=${seed}`, { waitUntil: "load" });
     await page.waitForSelector("html[data-seekreel-ready]", { state: "attached", timeout: 30_000 });
 
     onProgress?.("rendering");
-    let result;
+    let result: PageResult;
     try {
-      result = await page.evaluate(
-        ([source, options]) => window.seekreelRender(source, options),
-        [code, { duration: config.duration, cps, sampleRate }],
-      );
+      result = (await page.evaluate(
+        ([source, options]) =>
+          (window as unknown as {
+            seekreelRender: (code: string, options: unknown) => Promise<PageResult>;
+          }).seekreelRender(source as string, options),
+        [code, { duration: config.duration, cps, sampleRate, seed }] as [string, unknown],
+      )) as PageResult;
     } catch (error) {
       /* A pattern that will not evaluate is the user's file to fix, not this
          tool's bug, so it gets a message rather than a stack — with whatever
          the page complained about on the way down. */
-      const message = String(error?.message ?? error).split("\n")[0].replace(/^page\.evaluate: /, "");
-      throw Object.assign(
-        new Error(`${path.relative(process.cwd(), pattern)}: ${message}` +
-          (failures.length ? `\n\n  ${failures.join("\n  ")}` : "")),
-        { expected: true },
+      const message = String((error as Error)?.message ?? error)
+        .split("\n")[0]
+        .replace(/^page\.evaluate: /, "");
+      throw expected(
+        `${path.relative(process.cwd(), pattern)}: ${message}` +
+          (failures.length ? `\n\n  ${failures.join("\n  ")}` : ""),
       );
     }
 
     if (result.played === 0) {
-      throw Object.assign(
-        new Error(
-          `The pattern produced no sound over ${config.duration}s at ${cps} cycles per second.` +
-            (failures.length ? `\n\n  ${failures.join("\n  ")}` : ""),
-        ),
-        { expected: true },
+      throw expected(
+        `The pattern produced no sound over ${config.duration}s at ${cps} cycles per second.` +
+          (failures.length ? `\n\n  ${failures.join("\n  ")}` : ""),
       );
     }
 

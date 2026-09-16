@@ -3,7 +3,9 @@ import { spawn } from "node:child_process";
 import { cp, mkdir, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadConfig } from "../src/config.js";
+import { loadConfig } from "../src/config.ts";
+import type { Config } from "../src/types.ts";
+import { expected } from "../src/types.ts";
 
 /*
  * The renderer and the encoder are imported when they are needed, not at
@@ -11,8 +13,8 @@ import { loadConfig } from "../src/config.js";
  * nothing installed — which is exactly the state somebody is in when they need
  * those three.
  */
-const renderer = () => import("../src/render.js");
-const encoder = () => import("../src/encode.js");
+const renderer = () => import("../src/render.ts");
+const encoder = () => import("../src/encode.ts");
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE = path.resolve(here, "..");
@@ -36,7 +38,7 @@ Example
   seekreel init my-film && cd my-film && seekreel build
 `;
 
-function arg(argv, ...names) {
+function arg(argv: string[], ...names: string[]): string | null {
   for (const name of names) {
     const at = argv.indexOf(name);
     if (at !== -1 && argv[at + 1]) return argv[at + 1];
@@ -44,17 +46,12 @@ function arg(argv, ...names) {
   return null;
 }
 
-function python(script, args) {
+function python(script: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const bin = process.env.PYTHON ?? "python3";
     const child = spawn(bin, [script, ...args], { stdio: "inherit" });
-    child.on("error", (error) =>
-      reject(
-        Object.assign(
-          new Error(`Could not run ${bin}: ${error.message}. Point PYTHON at a python3 binary.`),
-          { expected: true },
-        ),
-      ),
+    child.on("error", (error: Error) =>
+      reject(expected(`Could not run ${bin}: ${error.message}. Point PYTHON at a python3 binary.`)),
     );
     child.on("close", (code) =>
       code === 0 ? resolve() : reject(new Error(`${path.basename(script)} exited ${code}`)),
@@ -62,7 +59,7 @@ function python(script, args) {
   });
 }
 
-const strudelEngine = () => import("../src/audio/strudel.js");
+const strudelEngine = () => import("../src/audio/strudel.ts");
 
 /*
  * Strudel, pinned. It is an 850KB bundle and it is not a dependency of this
@@ -73,24 +70,21 @@ const strudelEngine = () => import("../src/audio/strudel.js");
 const STRUDEL_VERSION = "1.3.0";
 const STRUDEL_URL = `https://cdn.jsdelivr.net/npm/@strudel/web@${STRUDEL_VERSION}/dist/index.mjs`;
 
-async function doStrudelFetch(config) {
+async function doStrudelFetch(config: Config): Promise<void> {
   const target =
     config.audio?.engine === "strudel"
       ? config.audio.bundle
       : path.resolve(config.root, "strudel.mjs");
 
-  let body;
+  let body: Buffer;
   try {
     const response = await fetch(STRUDEL_URL);
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
     body = Buffer.from(await response.arrayBuffer());
   } catch (error) {
-    throw Object.assign(
-      new Error(
-        `Could not fetch Strudel from ${STRUDEL_URL}: ${error.message}\n` +
-          `Download it by hand and put it at ${target}.`,
-      ),
-      { expected: true },
+    throw expected(
+      `Could not fetch Strudel from ${STRUDEL_URL}: ${(error as Error).message}\n` +
+        `Download it by hand and put it at ${target}.`,
     );
   }
 
@@ -101,7 +95,7 @@ async function doStrudelFetch(config) {
   );
 }
 
-async function doAudio(config) {
+async function doAudio(config: Config): Promise<void> {
   if (!config.audio) {
     console.log("No audio is configured in this project, so there is nothing to render.");
     return;
@@ -124,7 +118,7 @@ async function doAudio(config) {
   ]);
 }
 
-async function main() {
+async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   const command = argv[0];
   if (!command || command === "-h" || command === "--help") {
@@ -184,7 +178,9 @@ async function main() {
 
   if (command === "probe") {
     const list = (argv[1] ?? "").split(",").map(Number).filter((n) => !Number.isNaN(n));
-    if (list.length === 0) throw Object.assign(new Error("This command needs timestamps, for example: seekreel probe 1.2,4.5"), { expected: true });
+    if (list.length === 0) {
+      throw expected("This command needs timestamps, for example: seekreel probe 1.2,4.5");
+    }
     const result = await (await renderer()).renderFrames(config, { times: list });
     console.log(`${result.written} frame(s) -> ${path.relative(process.cwd(), result.dir)}`);
     if (result.errors.length) console.warn(`page errors:\n  ${result.errors.join("\n  ")}`);
@@ -198,7 +194,7 @@ async function main() {
   if (command === "render" || command === "build") {
     if (command === "build") await doAudio(config);
     const numbers = argv.slice(1).filter((a) => /^\d+$/.test(a)).map(Number);
-    const [from = null, to = null] = numbers;
+    const [from = null, to = null]: (number | null)[] = numbers;
     const started = Date.now();
     const result = await (await renderer()).renderFrames(config, {
       from, to,
@@ -227,12 +223,13 @@ async function main() {
     return;
   }
 
-  throw Object.assign(new Error(`Unknown command "${command}"\n\n${USAGE}`), { expected: true });
+  throw expected(`Unknown command "${command}"\n\n${USAGE}`);
 }
 
-main().catch((error) => {
+main().catch((error: unknown) => {
   // An expected failure is the user's problem to fix and does not need a stack;
   // anything else is this tool's problem and does.
-  console.error(error.expected ? `\n${error.message}\n` : error);
+  const isExpected = Boolean(error && typeof error === "object" && "expected" in error);
+  console.error(isExpected ? `\n${(error as Error).message}\n` : error);
   process.exitCode = 1;
 });

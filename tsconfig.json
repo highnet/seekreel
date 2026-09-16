@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    /*
+     * seekreel is not compiled. Node 22.18+ strips the types at load time and
+     * runs the .ts files as they are, which is why `erasableSyntaxOnly` is on:
+     * an enum or a parameter property would need a build step, and a tool
+     * distributed by `git clone` should not have one.
+     */
+    "target": "es2023",
+    "lib": ["es2023", "dom"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["bin/**/*.ts", "src/**/*.ts"],
+  "exclude": ["node_modules", "site", "examples", "templates"]
+}

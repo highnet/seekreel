@@ -6,6 +6,7 @@ import CopyCommand from '@/components/copy-command';
 import Timing from '@/components/timing';
 import Shapes from '@/components/shapes';
 import AudienceFork from '@/components/audience';
+import ThreeWidget from '@/components/three-widget';
 
 const REPO = 'https://github.com/highnet/seekreel';
 
@@ -92,6 +93,9 @@ export default function Home() {
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#contract">
               How it works
             </a>
+            <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#three">
+              3D
+            </a>
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#formats">
               Formats
             </a>
@@ -119,17 +123,17 @@ export default function Home() {
                 every frame drawn exactly as you designed it. Same result on your laptop and in CI.
               </p>
               <ul className="mt-6 flex list-none flex-wrap gap-x-2 gap-y-2 p-0">
-                {['Launch films', 'Feature reels', 'Store listings'].map((use) => (
+                {['Launch films', 'Feature reels', '3D scenes'].map((use) => (
                   <li key={use} className="data rounded-sm bg-primary-deep px-2.5 py-1 text-white">
                     {use}
                   </li>
                 ))}
               </ul>
               <div className="mt-8 max-w-[34rem]">
-                <CopyCommand command="npx github:highnet/seekreel init my-film" />
+                <CopyCommand command="curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh" />
               </div>
               <p className="data mt-4 text-white/90">
-                MIT · Node 20+ · installs straight from the repository
+                MIT · Node 22.18+ · no npm package — it clones the repo and links the CLI
               </p>
             </div>
 
@@ -207,6 +211,34 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Fold: 3D, demonstrated rather than claimed. */}
+        <section id="three" className="scroll-mt-8 border-t border-rule bg-surface py-20 sm:py-28">
+          <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+              <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
+                Your three.js scene is a film too.
+              </h2>
+              <p className="max-w-[58ch] text-lg leading-relaxed text-muted">
+                Same three rules, one canvas instead of a page. Set{' '}
+                <span className="data text-ink">&quot;webgl&quot;: true</span> and seekreel renders
+                with software GL, so the scene shades identically on your laptop, your colleague&apos;s
+                and the CI runner — the same timestamp gives the same PNG, byte for byte.
+              </p>
+            </div>
+
+            <div className="mt-12">
+              <ThreeWidget />
+            </div>
+
+            <p className="mt-8 max-w-[70ch] leading-relaxed text-muted">
+              Drag it, change the frame rate, watch the frame count change: that is the whole model.
+              Nothing in the scene accumulates — there is no{' '}
+              <span className="data text-ink">rotation.y += 0.01</span> — so every moment is computed,
+              never played into. Budget about two seconds a frame for WebGL rather than one.
+            </p>
           </div>
         </section>
 
@@ -342,7 +374,7 @@ export default function Home() {
               </p>
             </div>
             <div className="lg:justify-self-end lg:w-[26rem]">
-              <CopyCommand command="npm i -g github:highnet/seekreel" tone="dark" />
+              <CopyCommand command="git clone https://github.com/highnet/seekreel" tone="dark" />
               <div className="data mt-4 flex flex-wrap gap-x-6 gap-y-2 text-white/60">
                 <a className="underline underline-offset-4 transition-colors hover:text-white" href={REPO}>
                   GitHub ↗
@@ -357,7 +389,8 @@ export default function Home() {
             </div>
           </div>
           <p className="data mt-16 border-t border-white/15 pt-6 text-white/60">
-            MIT licensed. GSAP, if you use it, has its own licence and is not distributed here.
+            MIT licensed. TypeScript, run by Node without a build step. GSAP and three.js, if you use
+            them, have their own licences and are not distributed here.
           </p>
         </div>
       </footer>

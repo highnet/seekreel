@@ -1,5 +1,39 @@
 <meta charset="utf-8">
 <title>seekreel — strudel engine</title>
+<script>
+/*
+ * Determinism, which is the whole point of the tool and not a detail here.
+ *
+ * Noise voices — white, pink, brown, and the percussion built from them — fill
+ * their buffers from Math.random, and they do it when the voice is registered
+ * rather than when it sounds. Two renders of one pattern would then differ,
+ * quietly, in a tool whose entire claim is that they do not.
+ *
+ * So Math.random is replaced before anything else loads: this is a classic
+ * script, which runs ahead of the deferred module below, and the seed rides in
+ * on the query string because that is the only channel available this early.
+ *
+ * This pins everything the main thread decides — oscillator voices come out
+ * byte-identical run after run. It does not reach the noise and reverb
+ * superdough builds inside an AudioWorklet: a worklet is its own JavaScript
+ * realm with its own Math.random, and there is no way in from here. Those
+ * voices are the same music with a different noise texture each render. If you
+ * need the WAV itself to be stable, render it once and keep the file.
+ *
+ * mulberry32 — thirty-two bits of state, good enough for noise and small enough
+ * to read.
+ */
+window.seekreelSeed = (seed) => {
+  let state = seed >>> 0;
+  Math.random = () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let x = Math.imul(state ^ (state >>> 15), 1 | state);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+};
+window.seekreelSeed(Number(new URLSearchParams(location.search).get("seed") ?? 1));
+</script>
 <script type="module">
 /*
  * The Strudel engine's browser half.
@@ -27,7 +61,9 @@ const ready = (async () => {
   strudel.initStrudel();
 })();
 
-async function render(code, { duration, cps, sampleRate }) {
+async function render(code, { duration, cps, sampleRate, seed }) {
+  /* Re-seeded per pass, so a second render in this page matches the first. */
+  window.seekreelSeed(seed);
   const context = new OfflineAudioContext(2, Math.ceil(duration * sampleRate), sampleRate);
   strudel.setAudioContext(context);
 
@@ -80,6 +116,14 @@ async function render(code, { duration, cps, sampleRate }) {
   }
   await new Promise((resolve) => setTimeout(resolve, 100));
 
+  /*
+   * Seeded again here, not only at load. The warm-up above draws from the same
+   * generator, and how many draws it takes depends on which voices were already
+   * loaded — so the pass that counts starts from a known state instead of
+   * wherever the warm-up happened to leave it.
+   */
+  window.seekreelSeed(seed);
+
   let played = 0;
   for (const hap of haps) {
     const begin = hap.whole.begin.valueOf() / cps;
@@ -97,6 +141,7 @@ async function render(code, { duration, cps, sampleRate }) {
 
 window.seekreelRender = async (code, options) => {
   await ready;
+
   const { buffer, haps, played, voices } = await render(code, options);
   const left = buffer.getChannelData(0);
   const right = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : left;

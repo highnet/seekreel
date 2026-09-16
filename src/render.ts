@@ -1,7 +1,9 @@
 import { mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { launch } from "./browser.js";
+import { launch } from "./browser.ts";
+import { serveDirectory } from "./serve.ts";
+import type { Config } from "./types.ts";
 
 /**
  * Shoot frames.
@@ -15,21 +17,50 @@ import { launch } from "./browser.js";
  * everything else is the same, so a probe is not a different code path from
  * the real thing.
  */
-export async function renderFrames(config, { times = null, from = null, to = null, onProgress } = {}) {
-  const browser = await launch();
+export interface RenderOptions {
+  /** Render exactly these timestamps into probe/ instead of the film. */
+  times?: number[] | null;
+  from?: number | null;
+  to?: number | null;
+  onProgress?: (index: number, last: number) => void;
+}
+
+export interface RenderResult {
+  written: number;
+  dir: string;
+  errors: string[];
+}
+
+export async function renderFrames(
+  config: Config,
+  { times = null, from = null, to = null, onProgress }: RenderOptions = {},
+): Promise<RenderResult> {
+  const browser = await launch({ webgl: config.webgl });
   const page = await browser.newPage({
     viewport: { width: config.width, height: config.height },
     deviceScaleFactor: 1,
   });
 
-  const errors = new Set();
+  const errors = new Set<string>();
   page.on("pageerror", (error) => errors.add(String(error)));
   page.on("console", (message) => {
     if (message.type() === "error") errors.add(`console: ${message.text()}`);
   });
 
-  const url = pathToFileURL(config.stagePath).href;
-  const shoot = async (seconds, file) => {
+  /*
+   * The stage is served rather than opened from disk, so it can import modules
+   * and fetch files beside it. A stage outside the project root has nothing to
+   * serve it from and falls back to file://, where those two things do not
+   * work — which is a reason to keep the stage in the project, not a reason to
+   * special-case it here.
+   */
+  const inside =
+    config.stagePath === config.root || config.stagePath.startsWith(config.root + path.sep);
+  const server = inside ? await serveDirectory(config.root) : null;
+  const url = server
+    ? `${server.origin}/${path.relative(config.root, config.stagePath).split(path.sep).join("/")}`
+    : pathToFileURL(config.stagePath).href;
+  const shoot = async (seconds: number, file: string): Promise<void> => {
     await page.goto(`${url}?t=${seconds.toFixed(4)}`, { waitUntil: "load" });
     await page.waitForSelector(config.readySelector, {
       state: "attached",
@@ -70,5 +101,6 @@ export async function renderFrames(config, { times = null, from = null, to = nul
     return { written, dir: config.outDir, errors: [...errors] };
   } finally {
     await browser.close();
+    server?.close();
   }
 }
