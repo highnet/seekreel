@@ -53,5 +53,10 @@
   "devDependencies": {
     "@types/node": "^24.13.5",
     "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "ffmpeg-static"
+    ]
   }
 }
