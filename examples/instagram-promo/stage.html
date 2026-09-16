@@ -1,0 +1,305 @@
+<meta charset="utf-8">
+<title>seekreel — promo</title>
+<style>
+@font-face{font-family:Anybody;src:url("fonts/anybody.ttf")format("truetype");font-weight:100 900;font-stretch:50% 150%;font-display:block}
+@font-face{font-family:"Martian Mono";src:url("fonts/martianmono.ttf")format("truetype");font-weight:100 800;font-display:block}
+
+/* The tokens are site/DESIGN.md's, verbatim, so the film and the homepage are
+   demonstrably the same brand: white page, one committed magenta, indigo as
+   the machine's second voice. */
+:root{
+  --bg:oklch(1 0 0);
+  --surface:oklch(0.971 0.006 340);
+  --ink:oklch(0.2 0.03 340);
+  --muted:oklch(0.52 0.02 340);
+  --primary:oklch(0.55 0.21 340);
+  --primary-lit:oklch(0.74 0.17 340);
+  --accent:oklch(0.34 0.13 264);
+  --stage:oklch(0.16 0.02 340);
+  --rule:oklch(0.88 0.01 340);
+  color-scheme:light;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1080px;overflow:hidden}
+body{
+  background:var(--bg);color:var(--ink);
+  font:400 20px/1.4 Anybody,"Arial Narrow",system-ui,sans-serif;
+  font-variation-settings:"wdth" 100;
+  -webkit-font-smoothing:antialiased;
+}
+#stage{position:relative;width:1080px;height:1080px;overflow:hidden}
+
+/* ---- the dope sheet: a ruled margin of frame numbers, always moving ---- */
+#sheet{position:absolute;inset:0 auto 0 0;width:132px;border-right:1px solid var(--rule);overflow:hidden}
+#rows{position:absolute;inset:0;will-change:transform}
+.row{position:absolute;left:0;width:132px;height:54px;border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:flex-end;padding-right:22px;
+  font:400 17px/1 "Martian Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:-0.04em}
+.row.lit{color:var(--primary);font-weight:700}
+.row.lit::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--primary)}
+
+/* ---- the readout, top right: the film saying which moment it is ---- */
+#hud{position:absolute;top:56px;right:64px;text-align:right;
+  font:400 19px/1.7 "Martian Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:-0.04em}
+#hud b{color:var(--ink);font-weight:700}
+
+/* ---- shots ---- */
+.shot{position:absolute;left:132px;top:0;width:948px;height:1080px;
+  display:grid;align-content:center;gap:34px;padding:0 82px 0 78px;opacity:0}
+h1{font-size:112px;line-height:0.92;font-weight:750;letter-spacing:-0.045em;font-variation-settings:"wdth" 118}
+h2{font-size:64px;line-height:1.02;font-weight:700;letter-spacing:-0.035em;font-variation-settings:"wdth" 114}
+p{font-size:29px;line-height:1.35;color:var(--muted);max-width:26ch}
+.kicker{font:700 20px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:0.06em;color:var(--primary);text-transform:uppercase}
+
+/* Shot 0 — the wordmark, printed wide. */
+#mark{font-size:104px;font-weight:800;letter-spacing:-0.05em;font-variation-settings:"wdth" 118;color:var(--primary)}
+#mark i{font-style:normal;display:inline-block}
+
+/* Shot 1 — a film inside the film, and a scrubber under it. */
+#gate{position:relative;width:560px;height:360px;background:var(--stage);overflow:hidden;justify-self:start}
+#disc{position:absolute;width:104px;height:104px;border-radius:50%;background:var(--primary-lit)}
+#sweep{position:absolute;left:0;bottom:0;height:8px;background:var(--primary)}
+#gatenum{position:absolute;right:20px;bottom:18px;
+  font:400 20px/1 "Martian Mono",ui-monospace,monospace;color:oklch(0.78 0.02 340);letter-spacing:-0.04em}
+#track{position:relative;width:560px;height:34px;justify-self:start}
+#track u{position:absolute;left:0;right:0;top:16px;height:2px;background:var(--rule);display:block}
+#head{position:absolute;top:4px;width:6px;height:26px;background:var(--primary)}
+
+/* Shot 2 — the contract, three lines, numbered because it is a sequence. */
+.rule-item{display:grid;grid-template-columns:76px 1fr;align-items:baseline;gap:8px;
+  border-top:1px solid var(--rule);padding-top:20px}
+.rule-item span{font:700 26px/1 "Martian Mono",ui-monospace,monospace;color:var(--primary);letter-spacing:-0.04em}
+.rule-item div{font-size:42px;font-weight:650;letter-spacing:-0.03em;font-variation-settings:"wdth" 110}
+.rule-item em{display:block;font-style:normal;font-size:24px;color:var(--muted);font-weight:400;margin-top:6px;letter-spacing:0}
+
+/* Shot 3 — commands, typed. Mono, because they are commands. */
+.cmd{font:500 32px/1.5 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.05em;color:var(--accent);
+  background:var(--surface);padding:20px 24px;white-space:pre}
+.cmd b{color:var(--primary);font-weight:700}
+.cmd s{text-decoration:none;color:var(--muted)}
+.said{font-size:26px;color:var(--muted);margin:-18px 0 6px 4px}
+
+/* Shot 4 — the end card. */
+#install{font:500 30px/1.4 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.05em;
+  color:#fff;background:var(--primary);padding:22px 26px;justify-self:start}
+#site{font:400 30px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.04em;color:var(--muted)}
+#mark2{font-size:112px;font-weight:800;line-height:0.9;letter-spacing:-0.05em;color:var(--primary)}
+
+/* The film's own progress, hairline across the foot. */
+#progress{position:absolute;left:132px;right:0;bottom:0;height:6px;background:var(--rule)}
+#progress i{display:block;height:100%;background:var(--primary);transform-origin:left center}
+</style>
+
+<div id="stage">
+  <div id="sheet"><div id="rows"></div></div>
+
+  <div id="hud">t = <b id="hudT">0.000</b><br>frame <b id="hudF">0</b></div>
+
+  <section class="shot" id="s0">
+    <div class="kicker" id="s0k">a command-line tool</div>
+    <div id="mark"><i>seekreel</i></div>
+    <h2 id="s0h">Turn an animated web&nbsp;page into a video&nbsp;file.</h2>
+    <p id="s0p">One frame at a time, on the frame grid, the same on every machine.</p>
+  </section>
+
+  <section class="shot" id="s1">
+    <h2 id="s1h">The film is a function of&nbsp;time.</h2>
+    <div id="gate">
+      <div id="disc"></div>
+      <div id="sweep"></div>
+      <div id="gatenum">t = 0.000</div>
+    </div>
+    <div id="track"><u></u><div id="head"></div></div>
+    <p id="s1p">Ask for a timestamp, get exactly the frame that belongs to it.
+      Nothing is recorded; every pixel is computed.</p>
+  </section>
+
+  <section class="shot" id="s2">
+    <div class="kicker" id="s2k">the whole interface</div>
+    <h2 id="s2h">A page that draws itself at&nbsp;t.</h2>
+    <div class="rule-item" id="r0"><span>01</span><div>Read <code>t</code> from the URL<em>?t=21.333, in seconds</em></div></div>
+    <div class="rule-item" id="r1"><span>02</span><div>Draw that frame<em>synchronously, no clock of its own</em></div></div>
+    <div class="rule-item" id="r2"><span>03</span><div>Say it is ready<em>data-seekreel-ready on &lt;html&gt;</em></div></div>
+  </section>
+
+  <section class="shot" id="s3">
+    <h2 id="s3h">Re-cut one shot, not the whole film.</h2>
+    <div class="cmd" id="c0"></div>
+    <div class="said" id="d0">one moment, one PNG, about a second</div>
+    <div class="cmd" id="c1"></div>
+    <div class="said" id="d1">redraws those frames only, in place</div>
+    <div class="cmd" id="c2"></div>
+    <div class="said" id="d2">mp4 · 4:5 · story · gif · silent, from one render</div>
+  </section>
+
+  <section class="shot" id="s4">
+    <div id="mark2">seekreel</div>
+    <p id="s4p" style="max-width:24ch">Your launch film lives in the repo, diffs in review, and rebuilds in CI.</p>
+    <div id="install">npm i -g github:highnet/seekreel</div>
+    <div id="site">seekreel.vercel.app</div>
+  </section>
+
+  <div id="progress"><i id="progressFill"></i></div>
+</div>
+
+<script>
+/*
+ * The contract, and the whole of it: read `t`, draw that moment, stamp
+ * data-seekreel-ready. This film promotes the tool by obeying it — no
+ * animation library, no timers, nothing that could be mid-transition when the
+ * screenshot is taken. Every number below is arithmetic on one variable.
+ */
+const DURATION = 16;
+const FPS = 24;
+const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+/** Progress through [a, b], clamped — the only timing primitive needed. */
+const span = (a, b) => clamp01((t - a) / (b - a));
+const outExpo = (x) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const inOutSine = (x) => -(Math.cos(Math.PI * x) - 1) / 2;
+
+const el = (id) => document.getElementById(id);
+const set = (id, styles) => Object.assign(el(id).style, styles);
+const fix = (n, places) => n.toFixed(places);
+
+/* ---------------------------------------------------------------- readout */
+const frame = Math.round(t * FPS);
+el("hudT").textContent = fix(t, 3);
+el("hudF").textContent = String(frame);
+set("progressFill", { transform: `scaleX(${fix(t / DURATION, 4)})` });
+
+/* ------------------------------------------------------------- dope sheet */
+/*
+ * Two ruled rows a second, one row per six frames, scrolling the way a sheet
+ * does under an animator's hand. Rows are rebuilt from `t` rather than moved,
+ * because there is no previous frame to move them from.
+ */
+const ROW = 54, PER_ROW = FPS / 2, ROWS_PER_SEC = 2;
+const scrolled = t * ROWS_PER_SEC;
+const first = Math.floor(scrolled) - 2;
+const rows = [];
+for (let i = 0; i < 24; i++) {
+  const index = first + i;
+  const number = index * PER_ROW;
+  const lit = number <= frame && frame < number + PER_ROW;
+  /* The sheet runs out where the film does: past the last frame the rules
+     carry on and the numbers stop, the way an unshot page looks. */
+  const label = number < 0 || number > DURATION * FPS
+    ? ""
+    : String(number).padStart(4, "0");
+  rows.push(`<div class="row${lit ? " lit" : ""}" style="top:${i * ROW}px">${label}</div>`);
+}
+el("rows").innerHTML = rows.join("");
+set("rows", { transform: `translateY(${fix(-(scrolled - Math.floor(scrolled)) * ROW - 2 * ROW, 2)}px)` });
+
+/* ------------------------------------------------------------------ shots */
+/*
+ * A shot fades and lifts in, holds, and leaves. It returns its entrance
+ * progress so the things inside it can be staggered against the same clock.
+ */
+function shot(id, start, end, { last = false } = {}) {
+  const arrive = outExpo(span(start, start + 0.6));
+  const leave = last ? 0 : inOutSine(span(end - 0.45, end));
+  set(id, {
+    opacity: fix(arrive * (1 - leave), 4),
+    transform: `translateY(${fix(26 * (1 - arrive) - 22 * leave, 2)}px)`,
+  });
+  return arrive;
+}
+
+/** A child of a shot, entering `at` seconds with the same curve. */
+function stagger(id, at, { distance = 16 } = {}) {
+  const g = outExpo(span(at, at + 0.7));
+  set(id, { opacity: fix(g, 4), transform: `translateY(${fix(distance * (1 - g), 2)}px)` });
+}
+
+/* Shot 0 — the wordmark. ------------------------------------------------- */
+shot("s0", 0.1, 3.4);
+stagger("s0k", 0.25);
+stagger("s0h", 0.95);
+stagger("s0p", 1.25);
+/* The mark is printed rather than faded: it widens into place, which is the
+   one thing Anybody's wdth axis is here for. */
+{
+  const g = outExpo(span(0.45, 1.6));
+  set("mark", {
+    opacity: fix(clamp01(g * 1.6), 4),
+    fontVariationSettings: `"wdth" ${fix(74 + 44 * g, 1)}`,
+  });
+}
+
+/* Shot 1 — a film inside the film. --------------------------------------- */
+shot("s1", 3.5, 6.9);
+stagger("s1h", 3.65);
+stagger("s1p", 5.5);
+{
+  /*
+   * The scrubber drags back and forth, and the gate shows the moment it lands
+   * on. The disc's position is derived from `u`, never accumulated — which is
+   * the claim the shot is making, made in the only way that proves it.
+   */
+  const sweepIn = outExpo(span(3.9, 4.5));
+  set("gate", { opacity: fix(sweepIn, 4) });
+  set("track", { opacity: fix(sweepIn, 4) });
+
+  const drag = span(4.2, 6.6);
+  const u = clamp01(0.5 - 0.5 * Math.cos(Math.PI * (0.15 + 1.7 * drag)));
+  const inner = u * 26.2;
+  set("disc", {
+    left: `${fix(56 + u * 372, 1)}px`,
+    top: `${fix(120 - Math.sin(u * Math.PI * 2) * 72, 1)}px`,
+    transform: `scale(${fix(0.7 + 0.5 * u, 3)})`,
+  });
+  set("sweep", { width: `${fix(560 * u, 1)}px` });
+  set("head", { left: `${fix(u * 554, 1)}px` });
+  el("gatenum").textContent = `t = ${fix(inner, 3)}`;
+}
+
+/* Shot 2 — the three-rule contract. -------------------------------------- */
+shot("s2", 7.0, 10.2);
+stagger("s2k", 7.15);
+stagger("s2h", 7.3);
+["r0", "r1", "r2"].forEach((id, i) => stagger(id, 7.8 + i * 0.42, { distance: 22 }));
+
+/* Shot 3 — the commands, typed one character at a time. ------------------ */
+shot("s3", 10.3, 13.3);
+stagger("s3h", 10.45);
+{
+  /* Typing is a slice of a string by progress: deterministic, and the caret
+     blinks on the frame grid rather than on a CSS animation's own clock. */
+  /* The command text carries no markup, so a slice of it is safe to drop into
+     innerHTML once the two characters that would be are spelled out. */
+  const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const type = (id, text, at, over, until) => {
+    const cut = Math.round(text.length * clamp01(span(at, at + over)));
+    /* The caret belongs to whichever command is being typed now; a finished
+       one above it is output, and output does not blink. */
+    const blink = cut < text.length || (t < until && Math.floor((t - at) * 3) % 2 === 1);
+    el(id).innerHTML = `<b>$</b> ${escape(text.slice(0, cut))}${blink ? "<s>\u258c</s>" : ""}`;
+    set(id, { opacity: cut > 0 ? "1" : "0" });
+  };
+  const commands = [
+    ["c0", "d0", "seekreel probe 21.3", 10.7, 11.5],
+    ["c1", "d1", "seekreel render 480 620", 11.5, 12.3],
+    ["c2", "d2", "seekreel build", 12.3, 13.4],
+  ];
+  for (const [cmd, said, text, at, until] of commands) {
+    type(cmd, text, at, 0.5, until);
+    stagger(said, at + 0.55, { distance: 10 });
+  }
+}
+
+/* Shot 4 — the end card, which holds to the last frame. ------------------ */
+shot("s4", 13.4, DURATION, { last: true });
+stagger("s4p", 14.0);
+stagger("install", 14.3, { distance: 20 });
+stagger("site", 14.6);
+{
+  const g = outExpo(span(13.5, 14.6));
+  set("mark2", { fontVariationSettings: `"wdth" ${fix(92 + 33 * g, 1)}` });
+}
+
+/* Told you so. */
+document.documentElement.setAttribute("data-seekreel-ready", "1");
+</script>

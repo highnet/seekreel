@@ -1,0 +1,21 @@
+{
+  "name": "seekreel-promo",
+  "stage": "stage.html",
+  "duration": 16,
+  "fps": 24,
+  "width": 1080,
+  "height": 1080,
+  "poster": 14.8,
+  "background": "#ffffff",
+  "audio": {
+    "cues": "cues.json",
+    "wav": "soundtrack.wav"
+  },
+  "variants": [
+    { "name": "4x5", "ratio": "4:5" },
+    { "name": "" },
+    { "name": "story", "ratio": "9:16" },
+    { "name": "loop", "format": "gif", "fps": 12 },
+    { "name": "silent", "audio": false }
+  ]
+}

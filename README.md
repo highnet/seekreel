@@ -274,6 +274,17 @@ seekreel build -c examples/collection-dex/seekreel.config.json
 It renders a marketing film for [Collection Dex](https://collectiondex.com),
 the project seekreel was originally built for.
 
+`examples/instagram-promo` is the shorter one: a sixteen-second post promoting
+seekreel, in plain JavaScript with no animation library, cut to the five sizes
+an Instagram post needs from a single render. Its
+[POST.md](examples/instagram-promo/POST.md) carries the caption and alt text
+that go with the video.
+
+```sh
+sh examples/instagram-promo/setup.sh       # two typefaces, nothing else
+seekreel build -c examples/instagram-promo/seekreel.config.json
+```
+
 ---
 
 ## Things to know before you start

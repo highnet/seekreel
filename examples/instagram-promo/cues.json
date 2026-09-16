@@ -1,0 +1,36 @@
+{
+  "duration": 16,
+  "bed": {
+    "tempo": 104,
+    "barsPerChord": 2,
+    "progression": [
+      { "tones": ["F3", "A3", "C4", "E4"], "root": "F2" },
+      { "tones": ["D3", "F3", "A3", "C4"], "root": "D2" },
+      { "tones": ["A3", "C4", "E4", "G4"], "root": "A2" },
+      { "tones": ["C4", "E4", "G4", "B4"], "root": "C3" }
+    ],
+    "figure": [0, 2, 1, 3, 2, 0, 3, 1],
+    "dense": [3.4, 15.2],
+    "bassFrom": 3.4,
+    "shaker": true
+  },
+  "cues": [
+    { "at": 0.15, "sound": "swell", "note": "F2", "dur": 1.8, "gain": 0.75 },
+    { "at": 0.5, "sound": "stamp", "gain": 0.85 },
+    { "at": 3.5, "sound": "whoosh", "gain": 0.6 },
+    { "at": 4.3, "sound": "tick" },
+    { "at": 5.4, "sound": "tick", "gain": 0.8 },
+    { "at": 7.05, "sound": "whoosh", "gain": 0.55 },
+    { "at": 7.85, "sound": "pip", "freq": 660 },
+    { "at": 8.27, "sound": "pip", "freq": 784 },
+    { "at": 8.69, "sound": "pip", "freq": 988 },
+    { "at": 10.35, "sound": "whoosh", "gain": 0.55 },
+    { "at": 10.75, "sound": "tray" },
+    { "at": 11.55, "sound": "tray" },
+    { "at": 12.35, "sound": "tray" },
+    { "at": 13.45, "sound": "shutter", "gain": 0.9 },
+    { "at": 13.5, "sound": "pad", "note": "F3", "dur": 2.4, "gain": 0.5 },
+    { "at": 14.35, "sound": "chime", "note": "C5", "gain": 0.8 }
+  ],
+  "master": { "fadeIn": 0.12, "fadeOut": 1.0, "peak": 0.72 }
+}
