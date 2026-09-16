@@ -25,28 +25,35 @@ still.
 First person, plain words. The first two lines are all that shows before
 "…see more", so they have to say what this is on their own.
 
-The framing is the use case: showing your website off in a video for social,
-not "make an animation". Everything below stays true to how it actually works —
-you build the page that shows the product off, using the components and brand
-your site already has, and seekreel renders it. It does not screen-record an
-arbitrary site, and the copy never implies it does.
+Two things the framing has to carry: the use case is showing your website off
+in a video for social, and the tool is built to be driven by an agent as
+readily as by a person. Both stay true to what ships — you build the page that
+shows the product off, using the components your site already has, and an agent
+can do that work because the CLI, the skill file and the file-in, file-out
+shape were designed for one. It does not screen-record a live site, and the
+copy never implies it does.
 
-> I built a tool for turning your website into a video for social media.
+> I built a tool that turns your website into a video for social media —
+> whether you make it yourself or hand the job to an agent.
 >
-> It's called seekreel. You put your real components on a page — the same
-> React, the same CSS, the same fonts your site ships — say what should happen
-> over time, and it renders an MP4 you can post.
+> It's called seekreel. Your real components go on a page — the same React, the
+> same CSS, the same fonts your site ships — you say what should happen over
+> time, and it renders an MP4 you can post.
 >
 > Why I made it:
 >
 > → It looks like your product because it is your product. No mockups, no
 > re-drawing your UI in a video editor.
+> → Agents can run the whole job. It's a command line tool with a skill file, it
+> writes plain files, and the same input always gives the same frames — so an
+> agent can build it, look at one frame, fix that bit and rebuild, without
+> anyone watching over it.
 > → One build, every size. Square for the feed, 4:5, 9:16 for stories and
-> reels, plus a gif and a thumbnail. All from one render.
+> reels, plus a gif and a thumbnail.
 > → The site changed? Change the page and rebuild. You are not booking another
 > video shoot because a button moved.
-> → 3D works, if your site has it. Real WebGL, drawn properly.
-> → Music comes with it, so there's nothing to licence.
+> → 3D works, if your site has it. Music comes with it, so there's nothing to
+> licence.
 >
 > One catch, and it's a real one: it draws a frame at a time, about a second
 > each. Good for a video you cut once and keep tweaking. No good for anything
@@ -55,25 +62,27 @@ arbitrary site, and the copy never implies it does.
 > It's free and open source. One line to install:
 > `curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh`
 >
-> Site: https://seekreel.vercel.app/
+> Site: https://seekreel.vercel.app/ — there's an "I'm an agent" button on it
+> that swaps the page for the version an agent should read.
 > Code: https://github.com/highnet/seekreel
 >
 > I made the video above with it.
 >
-> #devtools #opensource #frontend #designengineering
+> #devtools #opensource #frontend #designengineering #aiagents
 
 Shorter version, if you would rather not run long:
 
-> I built seekreel: it turns your website into a video for social.
+> I built seekreel: it turns your website into a video for social — and it's
+> made to be driven by an agent as easily as by you.
 >
-> Your real components, your real brand, on a page that moves — and an MP4 out
-> the other end, in every size the feed asks for. 3D and music included.
+> Your real components, your real brand, on a page that moves. An MP4 out the
+> other end, in every size the feed asks for. 3D and music included.
 >
 > Free and open source: https://seekreel.vercel.app/
 >
 > I made the video above with it.
 >
-> #devtools #opensource #designengineering
+> #devtools #opensource #aiagents
 
 ## First comment
 
@@ -82,6 +91,11 @@ Shorter version, if you would rather not run long:
 > no npm package — `git clone https://github.com/highnet/seekreel` works just as
 > well, since it's TypeScript that Node runs as-is, with nothing to build. You
 > need Node 22.18 or newer, a Chromium and ffmpeg.
+>
+> If you're pointing an agent at it, give it SKILLS.md from the repo: the
+> contract, the config, the commands, and the mistakes that produce a video
+> that's technically fine and visibly wrong. The homepage has the same thing
+> behind the "I'm an agent" button.
 >
 > The video in this post is `examples/linkedin-promo` in the repo: one HTML
 > file, a short music file, no animation library. All five sizes came out of the
