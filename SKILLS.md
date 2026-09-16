@@ -111,7 +111,10 @@ document.documentElement.setAttribute("data-seekreel-ready", "1");
   missing the second shows up only as a 404 at render time.
 - An `AnimationMixer` is driven with `mixer.setTime(t)`, never
   `mixer.update(delta)`.
-- Budget about two seconds a frame rather than one, more with real shading.
+- `"webgl": true` applies to the browser, not to one shot: every frame gets
+  slower, DOM ones included. In this repo's promo it took frames from about a
+  fifth of a second to about seven tenths. Import three.js inside the window
+  that needs it if only part of the film is 3D.
 
 ## React
 
