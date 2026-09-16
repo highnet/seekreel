@@ -71,6 +71,14 @@
     font-size: 0.76rem;
     letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
+    /*
+     * A command, a config key or a DOM call has no spaces to break at, so on a
+     * phone one of them becomes a 385px word that pushes the whole page
+     * sideways. `anywhere` only breaks when the line would otherwise overflow,
+     * which is exactly when we want it to. Code blocks scroll instead — they
+     * set their own `white-space`, which wins over this.
+     */
+    overflow-wrap: anywhere;
   }
 
   .wide {

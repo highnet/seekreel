@@ -269,9 +269,9 @@ node bin/seekreel.ts doctor
             ['Draw that frame synchronously.', 'every value derived from t, nothing accumulated'],
             ['Say the frame is final.', 'document.documentElement.setAttribute("data-seekreel-ready", "1")'],
           ].map(([rule, detail], i) => (
-            <li key={rule} className="grid grid-cols-[2.2rem_1fr] items-baseline gap-x-3 border-t border-rule pt-3">
+            <li key={rule} className="grid grid-cols-[2.2rem_minmax(0,1fr)] items-baseline gap-x-3 border-t border-rule pt-3">
               <span className="data text-primary">{String(i + 1).padStart(2, '0')}</span>
-              <span>
+              <span className="min-w-0">
                 <strong className="font-bold">{rule}</strong>
                 <span className="data mt-1 block text-muted">{detail}</span>
               </span>
@@ -335,7 +335,7 @@ node bin/seekreel.ts doctor
       <Section title="Commands">
         <dl className="grid grid-cols-1 gap-x-8 gap-y-3">
           {COMMANDS.map(([command, what]) => (
-            <div key={command} className="grid grid-cols-1 gap-1 border-t border-rule pt-3 sm:grid-cols-[22rem_1fr] sm:gap-4">
+            <div key={command} className="grid grid-cols-1 gap-1 border-t border-rule pt-3 sm:grid-cols-[22rem_minmax(0,1fr)] sm:gap-4">
               <dt className="data text-primary">{command}</dt>
               <dd className="leading-relaxed text-muted">{what}</dd>
             </div>
@@ -376,7 +376,7 @@ node bin/seekreel.ts doctor
             ['examples/collection-dex', 'forty-three seconds, a paused GSAP timeline, a JSON cue sheet'],
             ['templates/starter', 'what seekreel init writes: the contract in ninety lines, no dependencies'],
           ].map(([where, what]) => (
-            <li key={where} className="grid grid-cols-1 gap-1 border-t border-rule pt-3 sm:grid-cols-[20rem_1fr] sm:gap-4">
+            <li key={where} className="grid grid-cols-1 gap-1 border-t border-rule pt-3 sm:grid-cols-[20rem_minmax(0,1fr)] sm:gap-4">
               <a className="data text-primary underline underline-offset-4" href={`${REPO}/tree/main/${where}`}>
                 {where} ↗
               </a>
