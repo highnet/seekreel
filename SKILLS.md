@@ -235,11 +235,11 @@ Rules that bite:
   network. Synth voices — `sine`, `sawtooth`, `triangle`, `square`, `white`,
   `pink`, `brown` — render offline. Prefer them unless the project has already
   vendored samples.
-- **Noise is not reproducible.** Oscillator voices render byte-identical run to
-  run, and `audio.seed` pins everything the main thread decides. Noise voices and
-  reverb tails are built inside an AudioWorklet — its own JS realm, its own
-  `Math.random`, unreachable from outside — so those are the same music with a
-  different texture each render. Render the WAV once and keep it if bytes matter.
+- **Each render is its own take.** Oscillator voices come out byte-identical;
+  noise and reverb do not, because they are generated in an AudioWorklet with
+  its own random. `audio.seed` pins the rest. Expected, and fine — the frames
+  are what has to match. `seekreel audio` writes the WAV once and every later
+  step reads that file, so keep it when you want a specific take.
 - `cps` is the only number tying the pattern's grid to the film's seconds. Pick
   one where a cycle divides the duration, then put the picture's cuts on the
   same boundaries: that is what makes a cut land on a downbeat instead of near

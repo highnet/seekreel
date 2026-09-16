@@ -359,6 +359,15 @@ to the film's seconds. Pick one where a cycle divides the duration and you can
 put the picture's cuts on the same boundaries — which is the difference between
 a cut that lands on a downbeat and one that lands near it.
 
+The WAV is rendered fresh each time, and noise voices come out slightly
+different on each render — the same music with a different texture in the hats
+and the reverb tail. `audio.seed` pins what the main thread decides; the rest
+lives in an AudioWorklet with its own random. This is how synthesis works rather
+than a problem to route around: the frames are the thing that has to be
+identical, and they are. If you want one specific take, `seekreel audio` writes
+the WAV and everything downstream reads it — keep that file and the film stops
+changing.
+
 Three things to know:
 
 - **The file's last statement has to be the pattern.** An assignment evaluates
@@ -496,12 +505,6 @@ seekreel build -c examples/react-stage/seekreel.config.json
 - **Fonts have to be loaded before the frame is captured.** seekreel waits for
   `document.fonts.ready`, which covers `@font-face`. If a font arrives some
   other way, wait for it yourself before marking the frame ready.
-- **The picture is deterministic; the noise in the soundtrack is not.** Frames
-  are identical run to run, and so is a Strudel pattern made of oscillators.
-  Noise voices and reverb tails are built inside an AudioWorklet, which is its
-  own JavaScript realm with its own `Math.random` that seekreel cannot seed — so
-  those come out as the same music with a different texture each render. Render
-  the WAV once and keep it if you need the bytes to match.
 - **No transparency.** Output is yuv420p H.264, because that is what social
   platforms accept. If you need an alpha channel, encode the frames yourself.
 

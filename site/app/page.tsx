@@ -6,7 +6,7 @@ import CopyCommand from '@/components/copy-command';
 import Timing from '@/components/timing';
 import Shapes from '@/components/shapes';
 import AudienceFork from '@/components/audience';
-import ThreeWidget from '@/components/three-widget';
+import Playground from '@/components/playground';
 
 const REPO = 'https://github.com/highnet/seekreel';
 
@@ -106,8 +106,8 @@ export default function Home() {
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#contract">
               How it works
             </a>
-            <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#three">
-              3D
+            <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#playground">
+              Playground
             </a>
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#formats">
               Formats
@@ -241,30 +241,34 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Fold: 3D, demonstrated rather than claimed. */}
-        <section id="three" className="scroll-mt-8 border-t border-rule bg-surface py-20 sm:py-28">
+        {/* Fold: the whole tool, running, with every control a config key. */}
+        <section id="playground" className="scroll-mt-8 border-t border-rule bg-surface py-20 sm:py-28">
           <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
             <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
               <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-                Your three.js scene is a film too.
+                The whole thing, running here.
               </h2>
               <p className="max-w-[58ch] text-lg leading-relaxed text-muted">
-                Same three rules, one canvas instead of a page. Set{' '}
-                <span className="data text-ink">&quot;webgl&quot;: true</span> and seekreel renders
-                with software GL, so the scene shades identically on your laptop, your colleague&apos;s
-                and the CI runner — the same timestamp gives the same PNG, byte for byte.
+                Pick a stage — plain DOM, a React tree or a three.js scene — then set the length,
+                the frame rate, the shape and the sound. Every control is a key in the config
+                printed beside it, and the file list underneath is what{' '}
+                <span className="data text-ink">seekreel build</span> would write. Drag the
+                scrubber: each moment you land on is exactly the frame the render puts on disk.
               </p>
             </div>
 
             <div className="mt-12">
-              <ThreeWidget />
+              <Playground />
             </div>
 
             <p className="mt-8 max-w-[70ch] leading-relaxed text-muted">
-              Drag it, change the frame rate, watch the frame count change: that is the whole model.
-              Nothing in the scene accumulates — there is no{' '}
-              <span className="data text-ink">rotation.y += 0.01</span> — so every moment is computed,
-              never played into. Budget about two seconds a frame for WebGL rather than one.
+              None of the three stages accumulates anything — no{' '}
+              <span className="data text-ink">rotation.y += 0.01</span>, no frame counter carried
+              forward — so every moment is computed rather than played into, which is what makes a
+              seek and a render agree. The three.js one turns{' '}
+              <span className="data text-ink">&quot;webgl&quot;: true</span> on for you: software GL,
+              identical shading on every machine, about a third of a second a frame instead of a
+              fifth.
             </p>
           </div>
         </section>

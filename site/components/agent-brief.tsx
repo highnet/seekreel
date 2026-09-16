@@ -130,7 +130,7 @@ const TRAPS: [string, string][] = [
   ],
   [
     'Strudel sounds that need samples',
-    's("bd") and friends load sample packs over the network. Synth voices — sine, sawtooth, triangle, square, white, pink, brown — render offline and are the safe default.',
+    's("bd") and friends load sample packs over the network. Synth voices — sine, sawtooth, triangle, square, white, pink, brown — render offline and are the safe default. Noise and reverb come out a little different on each render, which is expected: seekreel audio writes the WAV once and every later step reads that file.',
   ],
   [
     'Rendering everything to check one moment',
