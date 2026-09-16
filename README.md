@@ -463,9 +463,9 @@ seekreel build -c examples/collection-dex/seekreel.config.json
 It renders a marketing film for [Collection Dex](https://collectiondex.com),
 the project seekreel was originally built for.
 
-`examples/linkedin-promo` is the shorter one: a sixteen-second post promoting
-seekreel, in plain JavaScript with no animation library, cut to the five sizes
-a LinkedIn post needs from a single render. Its
+`examples/linkedin-promo` is the shorter one: a forty-second post promoting
+seekreel, in plain JavaScript with one three.js shot, cut to the five sizes a
+LinkedIn post needs from a single render. Its
 [POST.md](examples/linkedin-promo/POST.md) carries the post text and alt text
 that go with the video.
 

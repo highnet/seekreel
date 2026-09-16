@@ -4,15 +4,15 @@
 @font-face{font-family:Anybody;src:url("fonts/anybody.ttf")format("truetype");font-weight:100 900;font-stretch:50% 150%;font-display:block}
 @font-face{font-family:"Martian Mono";src:url("fonts/martianmono.ttf")format("truetype");font-weight:100 800;font-display:block}
 
-/* The tokens are site/DESIGN.md's, verbatim, so the film and the homepage are
-   demonstrably the same brand: white page, one committed magenta, indigo as
-   the machine's second voice. */
+/* site/DESIGN.md's tokens, verbatim: white page, one committed magenta, indigo
+   as the machine's second voice. */
 :root{
   --bg:oklch(1 0 0);
   --surface:oklch(0.971 0.006 340);
   --ink:oklch(0.2 0.03 340);
   --muted:oklch(0.52 0.02 340);
   --primary:oklch(0.55 0.21 340);
+  --primary-deep:oklch(0.44 0.18 340);
   --primary-lit:oklch(0.74 0.17 340);
   --accent:oklch(0.34 0.13 264);
   --stage:oklch(0.16 0.02 340);
@@ -29,209 +29,181 @@ body{
 }
 #stage{position:relative;width:1080px;height:1080px;overflow:hidden}
 
-/* ---- the dope sheet: a ruled margin of frame numbers, always moving ---- */
-#sheet{position:absolute;inset:0 auto 0 0;width:132px;border-right:1px solid var(--rule);overflow:hidden}
-#rows{position:absolute;inset:0;will-change:transform}
-.row{position:absolute;left:0;width:132px;height:54px;border-bottom:1px solid var(--rule);
-  display:flex;align-items:center;justify-content:flex-end;padding-right:22px;
-  font:400 17px/1 "Martian Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:-0.04em}
-.row.lit{color:var(--primary);font-weight:700}
-.row.lit::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--primary)}
+/* The dope sheet, kept as texture rather than telemetry: ruled columns under
+   everything, no numbers counting themselves. */
+#sheet{position:absolute;inset:0;
+  background-image:linear-gradient(to right,var(--rule) 1px,transparent 1px);
+  background-size:120px 100%;opacity:0.5}
 
-/* ---- the readout, top right: the film saying which moment it is ---- */
-#hud{position:absolute;top:52px;right:64px;text-align:right;
-  font:400 19px/1.7 "Martian Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:-0.04em}
-#hud b{color:var(--ink);font-weight:700}
+/* The magenta card the first and last shots sit on. */
+#wash{position:absolute;inset:0;background:var(--primary)}
 
-/* The feature counter: this film is a list, and a list has a length. */
-#counter{position:absolute;left:176px;top:56px;
-  font:700 18px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:0.06em;color:var(--primary)}
-#counter s{text-decoration:none;color:var(--muted);font-weight:400}
+.shot{position:absolute;inset:0;display:grid;align-content:center;gap:34px;padding:0 96px;opacity:0}
+h1{font-size:104px;line-height:0.94;font-weight:800;letter-spacing:-0.045em;font-variation-settings:"wdth" 116}
+h2{font-size:74px;line-height:1.0;font-weight:750;letter-spacing:-0.04em;font-variation-settings:"wdth" 114}
+p{font-size:31px;line-height:1.4;color:var(--muted);max-width:24ch}
+.on-wash h1,.on-wash h2{color:#fff}
+.on-wash p{color:rgba(255,255,255,0.92)}
+.mark{font:800 44px/1 Anybody,sans-serif;font-variation-settings:"wdth" 122;letter-spacing:-0.05em;color:#fff}
 
-/* ---- shots ---- */
-.shot{position:absolute;left:132px;top:0;width:948px;height:1080px;
-  display:grid;align-content:center;gap:30px;padding:0 74px 0 74px;opacity:0}
-h1{font-size:112px;line-height:0.92;font-weight:750;letter-spacing:-0.045em;font-variation-settings:"wdth" 118}
-h2{font-size:60px;line-height:1.04;font-weight:700;letter-spacing:-0.035em;font-variation-settings:"wdth" 114}
-p{font-size:28px;line-height:1.4;color:var(--muted);max-width:27ch}
-.kicker{font:700 20px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:0.06em;color:var(--primary);text-transform:uppercase}
-.mono{font:500 26px/1.7 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.05em;color:var(--accent);
-  background:var(--surface);padding:22px 26px;white-space:pre}
-.mono b{color:var(--primary);font-weight:700}
-.mono s{text-decoration:none;color:var(--muted)}
+/* Shot 1 — a page becoming frames. */
+#page{width:420px;height:260px;background:var(--surface);border:1px solid var(--rule);
+  position:relative;overflow:hidden;justify-self:start}
+#page i{position:absolute;display:block;background:var(--primary);border-radius:3px}
+.strip{display:flex;gap:12px;justify-self:start}
+.strip span{width:104px;height:104px;background:var(--stage);position:relative;overflow:hidden}
+.strip span i{position:absolute;width:34px;height:34px;border-radius:50%;background:var(--primary-lit)}
 
-/* Shot 0 — the wordmark, printed wide. */
-#mark{font-size:104px;font-weight:800;letter-spacing:-0.05em;font-variation-settings:"wdth" 118;color:var(--primary)}
-
-/* Shot 2 — a film inside the film, and a scrubber under it. */
-#gate{position:relative;width:600px;height:340px;background:var(--stage);overflow:hidden;justify-self:start}
-#disc{position:absolute;width:104px;height:104px;border-radius:50%;background:var(--primary-lit)}
-#sweep{position:absolute;left:0;bottom:0;height:8px;background:var(--primary)}
-#gatenum{position:absolute;right:20px;bottom:18px;
-  font:400 20px/1 "Martian Mono",ui-monospace,monospace;color:oklch(0.78 0.02 340);letter-spacing:-0.04em}
-#track{position:relative;width:600px;height:34px;justify-self:start}
-#track u{position:absolute;left:0;right:0;top:16px;height:2px;background:var(--rule);display:block}
-#head{position:absolute;top:4px;width:6px;height:26px;background:var(--primary)}
-
-/* Shot 1 — the contract, three lines, numbered because it is a sequence. */
-.rule-item{display:grid;grid-template-columns:72px 1fr;align-items:baseline;gap:8px;
-  border-top:1px solid var(--rule);padding-top:18px}
-.rule-item span{font:700 24px/1 "Martian Mono",ui-monospace,monospace;color:var(--primary);letter-spacing:-0.04em}
-.rule-item div{font-size:38px;font-weight:650;letter-spacing:-0.03em;font-variation-settings:"wdth" 110}
-.rule-item em{display:block;font-style:normal;font-size:23px;color:var(--muted);font-weight:400;margin-top:4px;letter-spacing:0}
-
-/* Shot 4 — the deliverables, as a grid of chips. */
-.chips{display:flex;flex-wrap:wrap;gap:12px;max-width:760px}
-.chip{font:500 23px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.04em;
-  border:1px solid var(--rule);padding:13px 16px;color:var(--muted)}
+/* Shot 2 — the shape changes, the picture does not. */
+#shapes{position:relative;height:380px;justify-self:start;width:800px}
+/* The canvas: the shape the platform asks for. */
+#shapes u{position:absolute;left:0;bottom:0;display:block;background:var(--surface);
+  border:2px solid var(--rule);border-radius:2px}
+/* The picture: always the same size, whatever shape it is sitting in. */
+#shapes b{position:absolute;display:block;background:var(--primary);border-radius:2px}
+#shapes em{position:absolute;bottom:6px;font-style:normal;
+  font:700 26px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.04em;color:var(--primary)}
+.chips{display:flex;flex-wrap:wrap;gap:12px;max-width:800px}
+.chip{font:500 24px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.04em;
+  border:1px solid var(--rule);padding:14px 18px;color:var(--muted)}
 .chip.on{border-color:var(--primary);background:var(--primary);color:#fff}
 
-/* Shot 5 — the 3D shot renders a real three.js scene into this canvas. */
-#three{width:600px;height:400px;background:var(--stage);justify-self:start;display:block}
+/* Shot 3 — the 3D scene, big. */
+#three{width:820px;height:440px;background:var(--stage);justify-self:start;display:block}
 
-/* Shot 6 — what a stage can be written in. */
-.langs{display:grid;gap:14px;max-width:780px}
-.lang{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:18px;
-  border-top:1px solid var(--rule);padding-top:14px}
-.lang b{font:700 24px/1 "Martian Mono",ui-monospace,monospace;color:var(--primary);letter-spacing:-0.04em}
-.lang span{font-size:25px;color:var(--muted)}
+/* Shot 4 — what it renders. */
+.words{display:flex;flex-wrap:wrap;gap:20px 34px;max-width:860px}
+.words span{font-size:62px;font-weight:750;letter-spacing:-0.035em;font-variation-settings:"wdth" 112;color:var(--primary)}
 
-/* Shot 11 — the end card. */
-#mark2{font-size:112px;font-weight:800;line-height:0.9;letter-spacing:-0.05em;color:var(--primary)}
-#install{font:500 25px/1.4 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.05em;
-  color:#fff;background:var(--primary);padding:20px 24px;justify-self:start}
-#site{font:400 26px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.045em;color:var(--muted)}
+/* Shot 5 — sound. */
+#levels{display:flex;align-items:flex-end;gap:10px;height:260px;justify-self:start}
+#levels i{width:26px;background:var(--primary);display:block;border-radius:2px}
 
-/* The film's own progress, hairline across the foot. */
-#progress{position:absolute;left:132px;right:0;bottom:0;height:6px;background:var(--rule)}
-#progress i{display:block;height:100%;background:var(--primary);transform-origin:left center}
+/* Shot 6 — one shot re-cut. */
+#film{display:flex;gap:10px;justify-self:start}
+#film span{width:96px;height:130px;background:var(--surface);border:1px solid var(--rule);position:relative}
+#film span.hot{background:var(--primary);border-color:var(--primary)}
+#film span.hot::after{content:"";position:absolute;inset:16px;border:2px solid rgba(255,255,255,0.7)}
+
+/* Shot 7 — in the repo. */
+.lines{display:grid;gap:16px;max-width:820px}
+.lines div{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:18px;
+  font-size:29px;color:var(--ink)}
+.lines b{font:700 22px/1 "Martian Mono",ui-monospace,monospace;color:var(--primary)}
+
+/* Shot 8 — the command. */
+.cmd{font:500 30px/1.5 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.05em;
+  color:#fff;background:var(--primary);padding:24px 28px;justify-self:start}
+.free{font:700 22px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:0.06em;
+  color:var(--primary);text-transform:uppercase}
+
+/* Shot 9 — the end card. */
+#site{font:400 30px/1 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.045em;color:rgba(255,255,255,0.9)}
+#endmark{font-size:150px;font-weight:800;line-height:0.9;letter-spacing:-0.05em;color:#fff}
 </style>
 
 <div id="stage">
-  <div id="sheet"><div id="rows"></div></div>
+  <div id="sheet"></div>
+  <div id="wash"></div>
 
-  <div id="hud">t = <b id="hudT">0.000</b><br>frame <b id="hudF">0</b></div>
-  <div id="counter"></div>
-
-  <section class="shot" id="s0">
-    <div class="kicker" id="s0k">a command-line tool</div>
-    <div id="mark">seekreel</div>
-    <h2 id="s0h">Turn an animated web&nbsp;page into a video&nbsp;file.</h2>
-    <p id="s0p">One frame at a time, on the frame grid, the same on every machine.</p>
+  <!-- 0 · the hook -->
+  <section class="shot on-wash" id="s0">
+    <div class="mark" id="s0m">seekreel</div>
+    <h1 id="s0h">Ship the film,<br>not the screen<br>recording.</h1>
+    <p id="s0p">Finished video, straight out of the browser you already build in.</p>
   </section>
 
+  <!-- 1 · the idea, in one line -->
   <section class="shot" id="s1">
-    <div class="kicker" id="s1k">the whole interface</div>
-    <h2 id="s1h">A page that draws itself at&nbsp;t.</h2>
-    <div class="rule-item" id="r0"><span>01</span><div>Read <code>t</code> from the URL<em>?t=21.333, in seconds</em></div></div>
-    <div class="rule-item" id="r1"><span>02</span><div>Draw that frame<em>synchronously, no clock of its own</em></div></div>
-    <div class="rule-item" id="r2"><span>03</span><div>Say it is ready<em>data-seekreel-ready on &lt;html&gt;</em></div></div>
+    <h2 id="s1h">Your next video is a web&nbsp;page.</h2>
+    <div id="page"><i></i><i></i><i></i></div>
+    <div class="strip" id="strip"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
+    <p id="s1p">Build it the way you build everything else. Get an MP4 back.</p>
   </section>
 
+  <!-- 2 · every shape the feed wants -->
   <section class="shot" id="s2">
-    <div class="kicker" id="s2k">deterministic</div>
-    <h2 id="s2h">Frame 512 is always t&nbsp;=&nbsp;21.333.</h2>
-    <div id="gate">
-      <div id="disc"></div>
-      <div id="sweep"></div>
-      <div id="gatenum">t = 0.000</div>
-    </div>
-    <div id="track"><u></u><div id="head"></div></div>
-    <p id="s2p">Nothing is recorded. Every pixel is computed, on your laptop and in CI alike.</p>
-  </section>
-
-  <section class="shot" id="s3">
-    <div class="kicker" id="s3k">four commands</div>
-    <h2 id="s3h">Re-cut one shot, not the whole film.</h2>
-    <div class="mono" id="c0"></div>
-    <div class="mono" id="c1"></div>
-    <div class="mono" id="c2"></div>
-    <p id="s3p">A full pass costs about a second a frame. A probe costs one second.</p>
-  </section>
-
-  <section class="shot" id="s4">
-    <div class="kicker" id="s4k">one render, every cut</div>
-    <h2 id="s4h">Every cut the feed asks&nbsp;for.</h2>
+    <h2 id="s2h">Every size the feed asks&nbsp;for.</h2>
+    <div id="shapes"><u></u><b></b><em></em></div>
     <div class="chips" id="chips"></div>
-    <p id="s4p">A ratio keeps the picture and changes the canvas. Say cover if you want it cropped.</p>
   </section>
 
+  <!-- 3 · 3D -->
+  <section class="shot" id="s3">
+    <h2 id="s3h">3D comes with it.</h2>
+    <canvas id="three" width="820" height="440"></canvas>
+    <p id="s3p">Real WebGL, rendered clean — no capture card, no dropped frames.</p>
+  </section>
+
+  <!-- 4 · anything that runs in a browser -->
+  <section class="shot" id="s4">
+    <h2 id="s4h">Use what you already know.</h2>
+    <div class="words" id="words">
+      <span>React</span><span>GSAP</span><span>three.js</span><span>CSS</span><span>Canvas</span><span>SVG</span>
+    </div>
+    <p id="s4p">If it runs in a browser, it ships as video.</p>
+  </section>
+
+  <!-- 5 · sound -->
   <section class="shot" id="s5">
-    <div class="kicker" id="s5k">3d, with three.js</div>
-    <h2 id="s5h">WebGL, and every machine agrees.</h2>
-    <canvas id="three" width="600" height="400"></canvas>
-    <p id="s5p">"webgl": true draws with software GL — one timestamp, one PNG, byte for byte.</p>
+    <h2 id="s5h">Music included, not licensed.</h2>
+    <div id="levels"></div>
+    <p id="s5p">A soundtrack that ships with the film and moves when the film moves.</p>
   </section>
 
+  <!-- 6 · re-cut one shot -->
   <section class="shot" id="s6">
-    <div class="kicker" id="s6k">bring your own everything</div>
-    <h2 id="s6h">If it runs in a browser, it ships as video.</h2>
-    <div class="langs">
-      <div class="lang" id="l0"><b>React</b><span>flushSync the tree, props from t</span></div>
-      <div class="lang" id="l1"><b>GSAP</b><span>a paused timeline, seeked with tl.time(t)</span></div>
-      <div class="lang" id="l2"><b>three.js</b><span>one render call per frame</span></div>
-      <div class="lang" id="l3"><b>plain JS</b><span>no library at all — this film</span></div>
+    <h2 id="s6h">Fix second eight. Keep the rest.</h2>
+    <div id="film"></div>
+    <p id="s6p">Re-render one shot in a minute instead of shooting the whole thing again.</p>
+  </section>
+
+  <!-- 7 · it lives in the repo -->
+  <section class="shot" id="s7">
+    <h2 id="s7h">It belongs in your repo.</h2>
+    <div class="lines" id="lines">
+      <div><b>01</b><span>Review it like code, because it is code</span></div>
+      <div><b>02</b><span>Rebuild it in CI whenever the brand changes</span></div>
+      <div><b>03</b><span>Ship the same file from every machine</span></div>
     </div>
   </section>
 
-  <section class="shot" id="s7">
-    <div class="kicker" id="s7k">sound, as source</div>
-    <h2 id="s7h">The soundtrack is a file you can diff.</h2>
-    <div class="mono" id="s7code"></div>
-    <p id="s7p">A Strudel pattern, rendered offline. Or a JSON cue sheet, if it just has to land on cuts.</p>
-  </section>
-
+  <!-- 8 · free -->
   <section class="shot" id="s8">
-    <div class="kicker" id="s8k">typescript, no build step</div>
-    <h2 id="s8h">What you clone is what runs.</h2>
-    <div class="mono" id="s8code"></div>
-    <p id="s8p">Node strips the types at load. No dist, no watch process, no compile before you start.</p>
+    <div class="free" id="s8k">free · open source · MIT</div>
+    <h2 id="s8h">One command to start.</h2>
+    <div class="cmd" id="s8c">git clone https://github.com/highnet/seekreel</div>
+    <p id="s8p">Node, a browser and ffmpeg. Nothing else to buy or sign up for.</p>
   </section>
 
-  <section class="shot" id="s9">
-    <div class="kicker" id="s9k">installed by git</div>
-    <h2 id="s9h">One line. No package registry.</h2>
-    <div class="mono" id="s9code"></div>
-    <p id="s9p">Node 22.18+, a Chromium and ffmpeg. seekreel doctor tells you which ones you have.</p>
-  </section>
-
-  <section class="shot" id="s10">
-    <div class="kicker" id="s10k">it lives in the repo</div>
-    <h2 id="s10h">A film that diffs and rebuilds.</h2>
-    <div class="mono" id="s10code"></div>
-    <p id="s10p">The page is the source. Nobody has to remember how the video was made.</p>
-  </section>
-
-  <section class="shot" id="s11">
-    <div id="mark2">seekreel</div>
-    <p id="s11p" style="max-width:24ch">Free and MIT. Your next launch film is a page away.</p>
-    <div id="install">git clone https://github.com/highnet/seekreel</div>
+  <!-- 9 · end card -->
+  <section class="shot on-wash" id="s9">
+    <div id="endmark">seekreel</div>
+    <p id="s9p" style="max-width:22ch">Turn the page you already built into the video you need.</p>
     <div id="site">https://seekreel.vercel.app/</div>
   </section>
-
-  <div id="progress"><i id="progressFill"></i></div>
 </div>
 
 <script type="module">
 /*
- * The contract, and the whole of it: read `t`, draw that moment, stamp
- * data-seekreel-ready. This film promotes the tool by obeying it — every number
- * below is arithmetic on one variable, and the one shot that uses a library
- * (three.js, in the 3D beat) obeys it too.
+ * The promo.
  *
- * Pacing: twelve shots of four seconds. Each one puts its words up inside the
- * first second and then holds, because a viewer reading a claim for the first
- * time needs the rest of the shot to finish reading it. The film is longer than
- * it was for exactly that reason.
+ * It obeys the contract like any other stage — read `t`, draw that moment,
+ * stamp data-seekreel-ready — but it no longer talks about doing so. The frame
+ * counter, the timestamp readout and the scrubber demonstrating its own seek
+ * were the tool admiring itself; what is left is what a viewer gets. The proof
+ * that it was rendered with seekreel belongs in the caption, not in ten shots
+ * of telemetry.
+ *
+ * Ten shots of four seconds: everything is on screen inside the first second,
+ * and the rest of the shot is reading time.
  */
-import { time, span as spanAt, frame as frameAt, markReady } from "/_seekreel/stage.js";
+import { time, span as spanAt, markReady } from "/_seekreel/stage.js";
 
-const DURATION = 48;
-const FPS = 24;
-const SHOT = 4;           // seconds per shot, and the soundtrack's section length
-const FEATURES = 9;       // how many of these shots are a feature being shown
-
+const DURATION = 40;
+const SHOT = 4;
 const t = time();
+
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const span = (a, b) => spanAt(a, b, t);
 const outExpo = (x) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x));
@@ -241,41 +213,12 @@ const el = (id) => document.getElementById(id);
 const set = (id, styles) => Object.assign(el(id).style, styles);
 const fix = (n, places) => n.toFixed(places);
 
-/* ---------------------------------------------------------------- readout */
-const frame = frameAt(FPS, t);
-el("hudT").textContent = fix(t, 3);
-el("hudF").textContent = String(frame);
-set("progressFill", { transform: `scaleX(${fix(t / DURATION, 4)})` });
+/* The magenta wash carries the first shot and the last; the middle is white so
+   the work is the only colourful thing on screen. */
+const washed = t < SHOT - 0.4 || t > DURATION - SHOT;
+set("wash", { opacity: washed ? "1" : "0" });
+set("sheet", { opacity: washed ? "0" : "0.5" });
 
-/* ------------------------------------------------------------- dope sheet */
-/*
- * Two ruled rows a second, one row per half second of film, scrolling the way
- * a sheet does under an animator's hand. Rows are rebuilt from `t` rather than
- * moved, because there is no previous frame to move them from.
- */
-const ROW = 54, PER_ROW = FPS / 2, ROWS_PER_SEC = 2;
-const scrolled = t * ROWS_PER_SEC;
-const first = Math.floor(scrolled) - 2;
-const rows = [];
-for (let i = 0; i < 24; i++) {
-  const index = first + i;
-  const number = index * PER_ROW;
-  const lit = number <= frame && frame < number + PER_ROW;
-  /* The sheet runs out where the film does: past the last frame the rules
-     carry on and the numbers stop, the way an unshot page looks. */
-  const label = number < 0 || number > DURATION * FPS ? "" : String(number).padStart(4, "0");
-  rows.push(`<div class="row${lit ? " lit" : ""}" style="top:${i * ROW}px">${label}</div>`);
-}
-el("rows").innerHTML = rows.join("");
-set("rows", { transform: `translateY(${fix(-(scrolled - Math.floor(scrolled)) * ROW - 2 * ROW, 2)}px)` });
-
-/* ------------------------------------------------------------------ shots */
-/*
- * A shot fades and lifts in, holds, and leaves as the next one arrives — the
- * cut lands on the downbeat the arrangement turns over on. It returns its
- * entrance progress so the things inside it can be staggered against the same
- * clock.
- */
 function shot(id, index, { last = false } = {}) {
   const start = index * SHOT;
   const end = start + SHOT;
@@ -283,236 +226,241 @@ function shot(id, index, { last = false } = {}) {
   const leave = last ? 0 : inOutSine(span(end - 0.4, end));
   set(id, {
     opacity: fix(arrive * (1 - leave), 4),
-    transform: `translateY(${fix(24 * (1 - arrive) - 20 * leave, 2)}px)`,
+    transform: `translateY(${fix(22 * (1 - arrive) - 18 * leave, 2)}px)`,
   });
   return start;
 }
 
-/*
- * A child of a shot, entering `at` seconds after it. The first child enters
- * within a frame or two of the shot itself: a child that waits leaves the cut
- * showing an empty page, and a fifth of a second of white is a hole, not a
- * beat. Everything is up inside the first second, so the remaining three are
- * reading time.
- */
 function stagger(id, at, { distance = 16 } = {}) {
   const g = outExpo(span(at, at + 0.6));
   set(id, { opacity: fix(g, 4), transform: `translateY(${fix(distance * (1 - g), 2)}px)` });
 }
 
-/** Typing, as a slice of a string — deterministic, unlike a CSS animation. */
-const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-function type(id, text, at, { over = 0.5, until = Infinity, prompt = true } = {}) {
-  const cut = Math.round(text.length * clamp01(span(at, at + over)));
-  const blink = cut < text.length || (t < until && Math.floor((t - at) * 3) % 2 === 1);
-  el(id).innerHTML =
-    (prompt ? `<b>$</b> ` : "") + escape(text.slice(0, cut)) + (blink ? "<s>▌</s>" : "");
-  set(id, { opacity: cut > 0 ? "1" : "0" });
-}
-
-/* The counter in the margin: which feature of how many is on screen. */
-/* Shots 2 to 10 are the features; the wordmark, the contract and the end card
-   are not being counted. */
-const featureIndex = Math.min(FEATURES, Math.max(0, Math.floor(t / SHOT) - 1));
-el("counter").innerHTML =
-  featureIndex > 0 && t < DURATION - SHOT
-    ? `${String(featureIndex).padStart(2, "0")}<s>/${FEATURES} features</s>`
-    : "";
-
-/* Shot 0 — the wordmark. ------------------------------------------------- */
+/* 0 — the hook. ---------------------------------------------------------- */
 {
   const start = shot("s0", 0);
-  stagger("s0k", start + 0.05);
-  stagger("s0h", start + 0.8);
-  stagger("s0p", start + 1.1);
-  /* The mark widens into place, which is the one thing Anybody's wdth axis is
-     here for. */
-  const g = outExpo(span(start + 0.35, start + 1.5));
-  set("mark", {
-    opacity: fix(clamp01(g * 1.6), 4),
-    fontVariationSettings: `"wdth" ${fix(74 + 44 * g, 1)}`,
-  });
+  stagger("s0m", start + 0.05);
+  stagger("s0h", start + 0.25, { distance: 26 });
+  stagger("s0p", start + 0.9);
 }
 
-/* Shot 1 — the three-rule contract. -------------------------------------- */
+/* 1 — a page, becoming frames. ------------------------------------------- */
 {
   const start = shot("s1", 1);
-  stagger("s1k", start + 0.05);
-  stagger("s1h", start + 0.15);
-  ["r0", "r1", "r2"].forEach((id, i) => stagger(id, start + 0.5 + i * 0.35, { distance: 20 }));
+  stagger("s1h", start + 0.05);
+  stagger("s1p", start + 2.4);
+
+  /* The "page" draws a little layout, and the strip beside it fills with the
+     frames that page turns into — the whole pitch, without a word of jargon. */
+  const appear = outExpo(span(start + 0.5, start + 1.1));
+  set("page", { opacity: fix(appear, 4) });
+  const bars = el("page").querySelectorAll("i");
+  [[40, 40, 180, 26], [40, 84, 300, 14], [40, 118, 240, 14]].forEach(([x, y, w, h], i) => {
+    const g = outExpo(span(start + 0.6 + i * 0.12, start + 1.3 + i * 0.12));
+    Object.assign(bars[i].style, {
+      left: `${x}px`, top: `${y}px`, height: `${h}px`,
+      width: `${fix(w * g, 1)}px`,
+      opacity: i === 0 ? "1" : "0.45",
+    });
+  });
+
+  el("strip").querySelectorAll("span").forEach((frame, i) => {
+    const g = outExpo(span(start + 1.0 + i * 0.16, start + 1.5 + i * 0.16));
+    Object.assign(frame.style, {
+      opacity: fix(g, 3),
+      transform: `translateY(${fix(18 * (1 - g), 1)}px)`,
+    });
+    /* Each thumbnail holds a later moment than the one before it, which is the
+       only thing that makes a row of squares read as a filmstrip. */
+    const moment = i / 4;
+    Object.assign(frame.querySelector("i").style, {
+      left: `${fix(12 + moment * 56, 1)}px`,
+      top: `${fix(58 - Math.sin(moment * Math.PI) * 40, 1)}px`,
+    });
+  });
 }
 
-/* Shot 2 — determinism, demonstrated. ------------------------------------ */
+/* 2 — the same picture, every shape. ------------------------------------- */
 {
   const start = shot("s2", 2);
-  stagger("s2k", start + 0.05);
-  stagger("s2h", start + 0.15);
-  stagger("s2p", start + 2.6);
-
-  const appear = outExpo(span(start + 0.6, start + 1.2));
-  set("gate", { opacity: fix(appear, 4) });
-  set("track", { opacity: fix(appear, 4) });
+  stagger("s2h", start + 0.05);
 
   /*
-   * The scrubber drags back and forth and the gate shows the moment it lands
-   * on. The disc's position is derived from `u`, never accumulated — which is
-   * the claim the shot is making, made in the only way that proves it.
+   * The canvas changes shape; the picture inside it does not change size. That
+   * is the whole of what a ratio does to a render, and it is the thing people
+   * expect to be a crop until they see it.
    */
-  const drag = span(start + 0.9, start + 3.4);
-  const u = clamp01(0.5 - 0.5 * Math.cos(Math.PI * (0.15 + 1.7 * drag)));
-  set("disc", {
-    left: `${fix(66 + u * 400, 1)}px`,
-    top: `${fix(110 - Math.sin(u * Math.PI * 2) * 68, 1)}px`,
-    transform: `scale(${fix(0.7 + 0.5 * u, 3)})`,
+  const PICTURE = 210;
+  const SHAPES = [
+    { id: "1:1", w: PICTURE, h: PICTURE },
+    { id: "4:5", w: PICTURE, h: PICTURE * 1.25 },
+    { id: "9:16", w: PICTURE, h: PICTURE * (16 / 9) },
+  ];
+  const leg = clamp01((t - (start + 0.7)) / 2.1) * (SHAPES.length - 1);
+  const index = Math.min(SHAPES.length - 1, Math.floor(leg));
+  const next = SHAPES[Math.min(SHAPES.length - 1, index + 1)];
+  const here = SHAPES[index];
+  const within = inOutSine(clamp01(leg - index));
+  const w = here.w + (next.w - here.w) * within;
+  const h = here.h + (next.h - here.h) * within;
+  const appear = outExpo(span(start + 0.35, start + 0.9));
+
+  Object.assign(el("shapes").querySelector("u").style, {
+    width: `${fix(w, 1)}px`,
+    height: `${fix(h, 1)}px`,
+    opacity: fix(appear, 3),
   });
-  set("sweep", { width: `${fix(600 * u, 1)}px` });
-  set("head", { left: `${fix(u * 594, 1)}px` });
-  el("gatenum").textContent = `t = ${fix(u * 26.2, 3)}`;
-}
+  Object.assign(el("shapes").querySelector("b").style, {
+    width: `${PICTURE}px`,
+    height: `${PICTURE}px`,
+    left: `${fix((w - PICTURE) / 2, 1)}px`,
+    bottom: `${fix((h - PICTURE) / 2, 1)}px`,
+    opacity: fix(appear, 3),
+  });
+  const label = el("shapes").querySelector("em");
+  label.textContent = within > 0.5 ? next.id : here.id;
+  Object.assign(label.style, { left: `${fix(w + 32, 1)}px`, opacity: fix(appear, 3) });
 
-/* Shot 3 — the commands. ------------------------------------------------- */
-{
-  const start = shot("s3", 3);
-  stagger("s3k", start + 0.05);
-  stagger("s3h", start + 0.15);
-  stagger("s3p", start + 2.9);
-  type("c0", "seekreel probe 21.3", start + 0.6, { until: start + 1.3 });
-  type("c1", "seekreel render 480 620", start + 1.3, { until: start + 2.0 });
-  type("c2", "seekreel build", start + 2.0, { until: start + SHOT });
-}
-
-/* Shot 4 — the deliverables. --------------------------------------------- */
-{
-  const start = shot("s4", 4);
-  stagger("s4k", start + 0.05);
-  stagger("s4h", start + 0.15);
-  stagger("s4p", start + 2.8);
-
-  /* Each chip lands on its own eighth-note, which is what makes the row read
-     as a list being counted rather than a block appearing. */
-  const CHIPS = ["1:1", "4:5", "9:16", "1200x628", "mp4", "webm", "mov", "gif", "silent", "poster.png"];
+  const CHIPS = ["1:1", "4:5", "9:16", "mp4", "webm", "gif", "poster"];
   el("chips").innerHTML = CHIPS.map((name, i) => {
-    const g = outExpo(span(start + 0.5 + i * 0.16, start + 0.9 + i * 0.16));
-    const lit = g > 0.98;
+    const g = outExpo(span(start + 1.5 + i * 0.16, start + 1.9 + i * 0.16));
     return (
-      `<span class="chip${lit ? " on" : ""}" style="opacity:${fix(g, 3)};` +
+      `<span class="chip${g > 0.98 ? " on" : ""}" style="opacity:${fix(g, 3)};` +
       `transform:translateY(${fix(12 * (1 - g), 2)}px)">${name}</span>`
     );
   }).join("");
 }
 
-/* Shot 5 — 3D, which is a real scene and not a picture of one. ------------ */
+/* 3 — 3D. ---------------------------------------------------------------- */
+{
+  const start = shot("s3", 3);
+  stagger("s3h", start + 0.05);
+  stagger("s3p", start + 2.5);
+  set("three", { opacity: fix(outExpo(span(start + 0.4, start + 1.0)), 4) });
+}
+
+/* 4 — the tools people already have. ------------------------------------- */
+{
+  const start = shot("s4", 4);
+  stagger("s4h", start + 0.05);
+  stagger("s4p", start + 2.6);
+  el("words").querySelectorAll("span").forEach((word, i) => {
+    const g = outExpo(span(start + 0.5 + i * 0.22, start + 1.0 + i * 0.22));
+    Object.assign(word.style, {
+      opacity: fix(g, 3),
+      transform: `translateY(${fix(20 * (1 - g), 2)}px)`,
+    });
+  });
+}
+
+/* 5 — sound. ------------------------------------------------------------- */
 {
   const start = shot("s5", 5);
-  stagger("s5k", start + 0.05);
-  stagger("s5h", start + 0.15);
-  stagger("s5p", start + 2.7);
-  set("three", { opacity: fix(outExpo(span(start + 0.5, start + 1.1)), 4) });
+  stagger("s5h", start + 0.05);
+  stagger("s5p", start + 2.6);
+
+  /* Levels that move with the music's own shape: a fixed figure, read at this
+     timestamp. Nothing is sampled — it is arithmetic, like everything else. */
+  const LEVELS = 18;
+  const local = t - start;
+  el("levels").innerHTML = Array.from({ length: LEVELS }, (_, i) => {
+    const appear = clamp01((local - (0.4 + i * 0.045)) * 3);
+    const wave =
+      0.35 +
+      0.4 * Math.abs(Math.sin(local * 2.4 + i * 0.55)) +
+      0.2 * Math.abs(Math.sin(local * 1.1 + i * 0.2));
+    const height = 26 + wave * 210 * appear;
+    return `<i style="height:${fix(height, 1)}px;opacity:${fix(0.35 + 0.65 * appear, 3)}"></i>`;
+  }).join("");
 }
 
-/* Shot 6 — what a stage can be written in. ------------------------------- */
+/* 6 — re-cut one shot. --------------------------------------------------- */
 {
   const start = shot("s6", 6);
-  stagger("s6k", start + 0.05);
-  stagger("s6h", start + 0.15);
-  ["l0", "l1", "l2", "l3"].forEach((id, i) => stagger(id, start + 0.55 + i * 0.3, { distance: 18 }));
+  stagger("s6h", start + 0.05);
+  stagger("s6p", start + 2.6);
+
+  /* Twelve frames; the fourth one changes while the others sit still. */
+  const HOT = 3;
+  el("film").innerHTML = Array.from({ length: 8 }, (_, i) => {
+    const g = outExpo(span(start + 0.45 + i * 0.07, start + 0.95 + i * 0.07));
+    const hot = i === HOT && t > start + 1.6;
+    return (
+      `<span class="${hot ? "hot" : ""}" style="opacity:${fix(g, 3)};` +
+      `transform:translateY(${fix(14 * (1 - g), 2)}px)"></span>`
+    );
+  }).join("");
 }
 
-/* Shot 7 — sound. -------------------------------------------------------- */
+/* 7 — in the repository. ------------------------------------------------- */
 {
   const start = shot("s7", 7);
-  stagger("s7k", start + 0.05);
-  stagger("s7h", start + 0.15);
-  stagger("s7p", start + 2.7);
-  type(
-    "s7code",
-    'note("<c2 ab1 eb2>").s("sawtooth")\n  .lpf(sine.range(420, 1500))',
-    start + 0.6,
-    { over: 1.2, until: start + SHOT, prompt: false },
-  );
+  stagger("s7h", start + 0.05);
+  el("lines").querySelectorAll("div").forEach((line, i) => {
+    const g = outExpo(span(start + 0.55 + i * 0.35, start + 1.15 + i * 0.35));
+    Object.assign(line.style, {
+      opacity: fix(g, 3),
+      transform: `translateY(${fix(18 * (1 - g), 2)}px)`,
+    });
+  });
 }
 
-/* Shot 8 — TypeScript. --------------------------------------------------- */
+/* 8 — free, and one command. --------------------------------------------- */
 {
   const start = shot("s8", 8);
   stagger("s8k", start + 0.05);
   stagger("s8h", start + 0.15);
-  stagger("s8p", start + 2.7);
-  type("s8code", "node bin/seekreel.ts build", start + 0.6, { until: start + SHOT });
+  stagger("s8c", start + 0.7, { distance: 20 });
+  stagger("s8p", start + 1.2);
 }
 
-/* Shot 9 — install. ------------------------------------------------------ */
+/* 9 — the end card. ------------------------------------------------------ */
 {
-  const start = shot("s9", 9);
-  stagger("s9k", start + 0.05);
-  stagger("s9h", start + 0.15);
-  stagger("s9p", start + 2.8);
-  type("s9code", "curl -fsSL .../install.sh | sh", start + 0.6, { until: start + SHOT });
-}
-
-/* Shot 10 — the repository. ---------------------------------------------- */
-{
-  const start = shot("s10", 10);
-  stagger("s10k", start + 0.05);
-  stagger("s10h", start + 0.15);
-  stagger("s10p", start + 2.7);
-  type(
-    "s10code",
-    "git diff stage.html\n  - const rise = span(1.2, 4.6)\n  + const rise = span(1.2, 5.4)",
-    start + 0.6,
-    { over: 1.3, until: start + SHOT, prompt: false },
-  );
-}
-
-/* Shot 11 — the end card, which holds to the last frame. ----------------- */
-{
-  const start = shot("s11", 11, { last: true });
-  stagger("s11p", start + 0.6);
-  stagger("install", start + 0.9, { distance: 20 });
-  stagger("site", start + 1.2);
-  const g = outExpo(span(start + 0.05, start + 1.1));
-  set("mark2", { fontVariationSettings: `"wdth" ${fix(92 + 33 * g, 1)}` });
+  const start = shot("s9", 9, { last: true });
+  stagger("s9p", start + 0.7);
+  stagger("site", start + 1.1);
+  const g = outExpo(span(start + 0.05, start + 1.2));
+  set("endmark", {
+    opacity: fix(clamp01(g * 1.5), 3),
+    fontVariationSettings: `"wdth" ${fix(86 + 39 * g, 1)}`,
+  });
 }
 
 /*
- * The 3D beat, drawn by three.js — and only when the film is in it.
- *
- * Every frame is a fresh page load, so an import at the top of the file would
- * cost every one of the 1152 frames the time it takes to parse three.js, for
- * the sake of 96 of them. Loading it inside the window that needs it keeps the
- * other ninety per cent of the render on the DOM's budget.
+ * The 3D shot draws a real scene, and three.js is imported only inside the
+ * window that needs it: every frame is a fresh page load, so a top-level import
+ * would charge all 960 frames for the benefit of 96.
  */
-const THREE_SHOT = 5 * SHOT;
+const THREE_SHOT = 3 * SHOT;
 if (t >= THREE_SHOT - 0.2 && t <= THREE_SHOT + SHOT) {
   const THREE = await import("./three.module.js");
   const canvas = el("three");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(1);
-  renderer.setSize(600, 400, false);
+  renderer.setSize(820, 440, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.setClearColor(0x2b1520, 1);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(40, 600 / 400, 0.1, 100);
-  const local = t - THREE_SHOT;                 // seconds into this shot
-  const angle = (local / SHOT) * Math.PI * 1.4;
-  camera.position.set(Math.sin(angle) * 9.5, 3.6, Math.cos(angle) * 9.5);
+  const camera = new THREE.PerspectiveCamera(40, 820 / 440, 0.1, 100);
+  const local = t - THREE_SHOT;
+  const angle = (local / SHOT) * Math.PI * 1.5;
+  camera.position.set(Math.sin(angle) * 9.5, 3.4, Math.cos(angle) * 9.5);
   camera.lookAt(0, 0.9, 0);
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.45));
   const key = new THREE.DirectionalLight(0xffffff, 2.4);
   key.position.set(4, 6, 3);
   scene.add(key);
-  const rim = new THREE.DirectionalLight(0xd946a6, 2.4);
+  const rim = new THREE.DirectionalLight(0xd946a6, 2.6);
   rim.position.set(-5, 2, -4);
   scene.add(rim);
 
-  /* The same staggered rise as the DOM shots, in three dimensions. */
-  const COUNT = 14;
+  const COUNT = 16;
   for (let i = 0; i < COUNT; i++) {
     const phase = i / COUNT;
-    const rise = clamp01((local - (0.4 + phase * 0.8)) / 1.2);
-    const height = 0.4 + (1 - Math.pow(1 - rise, 4)) * (1.1 + Math.sin(phase * Math.PI * 3) * 0.8);
+    const rise = clamp01((local - (0.3 + phase * 0.9)) / 1.2);
+    const height = 0.4 + (1 - Math.pow(1 - rise, 4)) * (1.2 + Math.sin(phase * Math.PI * 3) * 0.8);
     const bar = new THREE.Mesh(
       new THREE.BoxGeometry(0.44, height, 0.44),
       new THREE.MeshStandardMaterial({
@@ -521,21 +469,20 @@ if (t >= THREE_SHOT - 0.2 && t <= THREE_SHOT + SHOT) {
       }),
     );
     const around = phase * Math.PI * 2;
-    bar.position.set(Math.sin(around) * 2.7, height / 2, Math.cos(around) * 2.7);
+    bar.position.set(Math.sin(around) * 2.8, height / 2, Math.cos(around) * 2.8);
     scene.add(bar);
   }
 
   const shell = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.3 * (1 + Math.sin(local * Math.PI) * 0.07), 2),
+    new THREE.IcosahedronGeometry(1.35 * (1 + Math.sin(local * Math.PI) * 0.07), 2),
     new THREE.MeshBasicMaterial({ color: 0xd946a6, wireframe: true, transparent: true, opacity: 0.6 }),
   );
-  shell.position.y = 1.3;
+  shell.position.y = 1.35;
   shell.rotation.set(local * 0.35, local * 0.5, 0);
   scene.add(shell);
 
   renderer.render(scene, camera);
 }
 
-/* Told you so. */
 markReady();
 </script>

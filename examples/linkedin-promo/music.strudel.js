@@ -10,18 +10,16 @@
  * and each section below turns over on the same boundary, so a cut lands on a
  * downbeat rather than near one.
  *
- *   cycles  0-1   the wordmark        pad, and one rising sweep
- *   cycles  2-3   the contract        kick arrives
- *   cycles  4-5   determinism         hats and sub
- *   cycles  6-7   the commands        bass starts moving
- *   cycles  8-9   the deliverables    snare on the backbeat
- *   cycles 10-11  3D                  filtered down, low and wide
- *   cycles 12-13  React, GSAP, plain  everything back, bells in
- *   cycles 14-15  sound               breakdown — bass and bells alone
- *   cycles 16-17  TypeScript          full again
- *   cycles 18-19  install             bells an octave up
- *   cycles 20-21  the repository      the loudest it gets
- *   cycles 22-23  the end card        everything drops but pad and one bell
+ *   cycles  0-1   the hook            pad, one rising sweep
+ *   cycles  2-3   a page, as frames   kick arrives
+ *   cycles  4-5   every size          hats and sub
+ *   cycles  6-7   3D                  bass, filtered wide
+ *   cycles  8-9   your own tools      snare on the backbeat
+ *   cycles 10-11  sound               the tune, alone for a bar
+ *   cycles 12-13  re-cut one shot     everything back
+ *   cycles 14-15  in your repo        bells an octave up
+ *   cycles 16-17  free, one command   the loudest it gets
+ *   cycles 18-19  the end card        pad and one bell
  *
  * Every voice is synthesised. Nothing here loads a sample, which is why the
  * render needs no network and the repo carries no audio.
@@ -34,15 +32,15 @@ const ROOT = "<c2 ab1 eb2 bb1>";
 const BASS = "<c3 ab2 eb3 bb2>";
 const VOICING = "<[c3,eb3,g3] [ab2,c3,eb3] [eb3,g3,bb3] [bb2,d3,f3]>";
 
-// Which cycles each layer sounds in. Twenty-four digits, twenty-four cycles.
-const KICK  = "<0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 0 0>";
-const HATS  = "<0 0 0 0 1 1 1 1 1 1 0 0 1 1 0 0 1 1 1 1 1 1 0 0>";
-const SUB   = "<0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0>";
-const BASSY = "<0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0>";
-const SNARE = "<0 0 0 0 0 0 0 0 1 1 0 0 1 1 0 0 1 1 1 1 1 1 0 0>";
-const BELLS = "<0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 0>";
-const HIGH  = "<0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0>";
-const SWEEP = "<0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0>";
+// Which cycles each layer sounds in. Twenty digits, twenty cycles.
+const KICK  = "<0 0 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 0 0>";
+const HATS  = "<0 0 0 0 1 1 1 1 1 1 0 0 1 1 1 1 1 1 0 0>";
+const SUB   = "<0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0>";
+const BASSY = "<0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0>";
+const SNARE = "<0 0 0 0 0 0 0 0 1 1 0 0 1 1 1 1 1 1 0 0>";
+const BELLS = "<0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0>";
+const HIGH  = "<0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0>";
+const SWEEP = "<0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 1 0 0>";
 
 stack(
   /* Pad: under the whole film, slow enough to swell into the wordmark rather

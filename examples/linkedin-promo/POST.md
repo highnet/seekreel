@@ -9,10 +9,10 @@ a second per frame.
 
 | Slot | File | Why |
 |---|---|---|
-| Feed video | `deliver/seekreel-promo.mp4` | 1080×1080, 48 seconds. The square is the safe feed shape on LinkedIn and reads the same on desktop and mobile. |
+| Feed video | `deliver/seekreel-promo.mp4` | 1080×1080, 40 seconds. The square is the safe feed shape on LinkedIn and reads the same on desktop and mobile. |
 | Feed video, taller | `deliver/seekreel-promo-4x5.mp4` | 1080×1350, if you want more vertical space in a mobile feed. |
 | Vertical video feed | `deliver/seekreel-promo-vertical.mp4` | 1080×1920, for LinkedIn's vertical video surface. |
-| Thumbnail | `deliver/seekreel-promo-poster.png` | Frame 1104 — the end card, wordmark, clone command and URL. |
+| Thumbnail | `deliver/seekreel-promo-poster.png` | Frame 912 — the end card: wordmark, line and URL on magenta. |
 | Comment, DM, or the repo README | `deliver/seekreel-promo-loop.gif` | 12fps, silent, plays anywhere a video player is not welcome. |
 
 Upload the poster as the custom thumbnail. LinkedIn otherwise picks its own,
@@ -26,53 +26,47 @@ idea on their own.
 
 > Your launch film should live in the repo, not in someone's Downloads folder.
 >
-> I built seekreel to make that possible: it renders an animated web page to
-> video by seeking it, one frame at a time. Frame 512 is always "whatever the
-> page looks like at t = 21.333" — on any machine, every time.
+> seekreel turns a web page into finished video. You build the thing in the
+> browser you already work in — React, GSAP, three.js, plain CSS, whatever you
+> reach for — and it renders an MP4, frame by frame, at whatever sizes the feed
+> is asking for this month.
 >
-> The forty-eight seconds above are the whole feature list, rendered with the
-> tool itself:
+> What that changes:
 >
-> → The contract is three lines. Read t from the URL, draw that frame, set
-> data-seekreel-ready. There is no library to import.
-> → Deterministic by construction. Nothing is recorded; every pixel is computed.
-> → Four commands. probe one moment in about a second, render a range in place,
-> encode every variant off frames already on disk, or build to do all three.
-> → One render, every cut. 1:1, 4:5, 9:16, a named pixel size, mp4, webm, mov,
-> gif, a silent copy and a poster frame — all from the same pass.
-> → 3D with three.js, rendered through software GL so every machine agrees on
-> the pixels, byte for byte.
-> → React, GSAP, three.js or no library at all. If it runs in a browser, it
-> ships as video.
-> → The soundtrack is source too: a Strudel pattern rendered offline, or a JSON
-> cue sheet when it just has to land on cuts.
-> → TypeScript with no build step. Node runs it as it is — what you clone is
-> what executes.
-> → Installed by git, not by a package registry. One curl line, or clone it.
+> → One build, every size. 1:1, 4:5, 9:16, a named pixel size, mp4, webm, gif,
+> a poster frame — cut from the same render rather than exported six times.
+> → 3D included. Real WebGL, rendered clean, no capture card and no dropped
+> frames.
+> → Fix second eight without shooting the whole thing again. Re-render one shot
+> and leave the other 900 frames alone.
+> → Music that ships with the film and moves when the film moves. Nothing to
+> licence.
+> → It lives in your repo: reviewed like code, rebuilt in CI when the brand
+> changes, identical from every machine.
 >
-> The trade-off is real and worth stating: one screenshot per frame, so budget
-> about a second per frame, two for WebGL. It is the right tool for a film you
-> cut once and then tweak in pieces, and the wrong one for anything interactive.
+> The honest trade: it renders a frame at a time, so budget about a second per
+> frame. Right for a film you cut once and then tweak; wrong for anything
+> interactive.
 >
-> MIT, and free. Install it with one line, no package registry involved:
+> Free and MIT, installed with one line and no package registry:
 > `curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh`
 >
-> Homepage, with a scrubbable viewer and a 3D one you can drive yourself:
+> Homepage, with a playground you can drive yourself:
 > https://seekreel.vercel.app/
 > Source: https://github.com/highnet/seekreel
+>
+> (The video above was rendered with it, naturally.)
 >
 > #devtools #opensource #frontend #designengineering
 
 Shorter variant, if the feed is being unkind to long posts:
 
-> Frame 512 is always the frame at t = 21.333.
+> Build your launch video the way you build everything else — in the browser —
+> and get an MP4 back. Every size the feed wants, from one render. 3D, React and
+> GSAP included; music too.
 >
-> seekreel renders an animated web page to video by seeking it, one frame at a
-> time — so a film can live in the repo, diff in review and rebuild in CI.
-> Probe one moment in a second. Re-render one shot without touching the rest.
->
-> Free and MIT, installed by git rather than a registry. Scrub it yourself at
-> https://seekreel.vercel.app/ — this post was rendered with it.
+> Free and MIT: https://seekreel.vercel.app/ — the video above was made with
+> it.
 >
 > #devtools #opensource #designengineering
 
@@ -91,14 +85,18 @@ Shorter variant, if the feed is being unkind to long posts:
 
 ## Alt text (LinkedIn allows it on video and images)
 
-> A white square in an animator's dope-sheet layout. A ruled margin of magenta
-> frame numbers scrolls down the left edge while the readout in the corner
-> counts the timestamp and frame number. Title cards spell out what seekreel
-> does: turn an animated web page into a video file, one frame at a time; the
-> three-rule page contract; the probe, render and build commands typed at a
-> prompt; and an end card with the wordmark, the command
-> `git clone https://github.com/highnet/seekreel`, and the homepage URL
-> https://seekreel.vercel.app/.
+> A square video in a bold magenta and white brand. It opens full-bleed magenta
+> with the seekreel wordmark and the line "Ship the film, not the screen
+> recording." White cards follow on a faintly ruled background: a mock web page
+> turning into a row of film frames; a canvas changing shape from 1:1 to 4:5 to
+> 9:16 while the picture inside it stays the same size, beside chips reading
+> mp4, webm, gif and poster; a dark panel holding a rotating 3D scene of magenta
+> and white bars inside a wireframe sphere; the words React, GSAP, three.js,
+> CSS, Canvas and SVG; a row of audio levels rising; a strip of frames with one
+> highlighted in magenta; three numbered lines about reviewing, rebuilding and
+> shipping from any machine; and the command
+> `git clone https://github.com/highnet/seekreel`. It closes back on magenta
+> with the wordmark and https://seekreel.vercel.app/.
 
 ## Notes for whoever posts it
 
@@ -111,13 +109,16 @@ Shorter variant, if the feed is being unkind to long posts:
   install line sits in the first comment where it is copyable without expanding
   the post. The homepage URL is also on the film's end card, for anyone who
   watches it somewhere the caption did not travel with it.
-- **Forty-eight seconds, four per shot.** The first cut of this film gave each
-  shot 3.2 seconds and it read as a slideshow you could not keep up with. Every
-  shot now puts its words up inside the first second and then holds, which is
-  the difference between showing a feature and letting someone read it. The
-  claim is still on screen inside the first two seconds, for the people who
-  leave after that.
-- **It is a feature list, and it says so.** The margin counts 01/9 through 09/9
-  as the film goes, so a viewer knows how much is left.
+- **Forty seconds, four per shot.** Every shot puts its words up inside the
+  first second and then holds, which is the difference between showing someone
+  a feature and letting them read it. The claim is on screen inside the first
+  two seconds, for the people who leave after that.
+- **It sells rather than explains.** An earlier cut spent its runtime on the
+  tool's own mechanics — a frame counter, a timestamp readout, a scrubber
+  demonstrating its own seek. None of that is a reason for anyone to install
+  something. What is left is what a viewer gets: the video, the sizes, the 3D,
+  the music, the repo. That it was rendered with seekreel is a good proof
+  point, so it sits in the caption rather than taking ten shots of screen
+  time.
 - If you want a second post out of the same material, the three-rule contract
   shot works on its own as a document post or a still.

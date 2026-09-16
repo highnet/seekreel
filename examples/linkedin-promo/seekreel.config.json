@@ -1,11 +1,11 @@
 {
   "name": "seekreel-promo",
   "stage": "stage.html",
-  "duration": 48,
+  "duration": 40,
   "fps": 24,
   "width": 1080,
   "height": 1080,
-  "poster": 46.0,
+  "poster": 38.0,
   "background": "#ffffff",
   "audio": {
     "engine": "strudel",
