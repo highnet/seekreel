@@ -1,9 +1,10 @@
 # LinkedIn post — seekreel
 
 The video in this folder is the post. Everything below is the text that goes
-with it. Nothing here claims anything that is not true of the tool as
-published: no adoption numbers, no benchmarks beyond the honest cost of about
-a second per frame.
+with it, written first person and in plain words — it is Joaquin posting about
+something he built, not a product speaking about itself. Nothing here claims
+anything that is not true of the tool as published: no adoption numbers, no
+benchmarks beyond the honest cost of about a second per frame.
 
 ## What to upload
 
@@ -21,67 +22,65 @@ still.
 
 ## Post
 
-The first two lines are what shows before "…see more". They have to carry the
-idea on their own.
+First person, plain words. The first two lines are all that shows before
+"…see more", so they have to say what this is on their own.
 
-> Your launch film should live in the repo, not in someone's Downloads folder.
+> I built a tool that turns a web page into a video.
 >
-> seekreel turns a web page into finished video. You build the thing in the
-> browser you already work in — React, GSAP, three.js, plain CSS, whatever you
-> reach for — and it renders an MP4, frame by frame, at whatever sizes the feed
-> is asking for this month.
+> It's called seekreel. You make the thing in a browser — React, GSAP,
+> three.js, plain CSS, whatever you already use — and it hands you back an MP4.
 >
-> What that changes:
+> Why I made it:
 >
-> → One build, every size. 1:1, 4:5, 9:16, a named pixel size, mp4, webm, gif,
-> a poster frame — cut from the same render rather than exported six times.
-> → 3D included. Real WebGL, rendered clean, no capture card and no dropped
+> → One build, every size. Square, 4:5, 9:16, mp4, webm, gif, a thumbnail. All
+> from one render, instead of exporting the same video six times.
+> → 3D works. Real WebGL, drawn properly — no screen recording, no dropped
 > frames.
-> → Fix second eight without shooting the whole thing again. Re-render one shot
-> and leave the other 900 frames alone.
-> → Music that ships with the film and moves when the film moves. Nothing to
-> licence.
-> → It lives in your repo: reviewed like code, rebuilt in CI when the brand
-> changes, identical from every machine.
+> → Need to fix second eight? Re-render that bit. The rest stays as it was.
+> → Music comes with it, so there's nothing to licence.
+> → It sits in your repo. You can review it like code and rebuild it in CI when
+> the brand changes.
 >
-> The honest trade: it renders a frame at a time, so budget about a second per
-> frame. Right for a film you cut once and then tweak; wrong for anything
+> One catch, and it's a real one: it draws a frame at a time, about a second
+> each. Good for a video you cut once and keep tweaking. No good for anything
 > interactive.
 >
-> Free and MIT, installed with one line and no package registry:
+> It's free and open source. One line to install:
 > `curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh`
 >
-> Homepage, with a playground you can drive yourself:
-> https://seekreel.vercel.app/
-> Source: https://github.com/highnet/seekreel
+> Site: https://seekreel.vercel.app/
+> Code: https://github.com/highnet/seekreel
 >
-> (The video above was rendered with it, naturally.)
+> I made the video above with it.
 >
 > #devtools #opensource #frontend #designengineering
 
-Shorter variant, if the feed is being unkind to long posts:
+Shorter version, if you would rather not run long:
 
-> Build your launch video the way you build everything else — in the browser —
-> and get an MP4 back. Every size the feed wants, from one render. 3D, React and
-> GSAP included; music too.
+> I built seekreel: it turns a web page into a video.
 >
-> Free and MIT: https://seekreel.vercel.app/ — the video above was made with
-> it.
+> Build it in the browser like you build everything else, get an MP4 back —
+> every size the feed wants, from one render. 3D, React and GSAP all work, and
+> the music comes with it.
+>
+> Free and open source: https://seekreel.vercel.app/
+>
+> I made the video above with it.
 >
 > #devtools #opensource #designengineering
 
 ## First comment
 
-> Install: `curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh`
-> — it clones the repo to ~/.seekreel and links the CLI. There is no npm package;
-> `git clone https://github.com/highnet/seekreel` works just as well, because the
-> tool is TypeScript that Node runs without a build step. Needs Node 22.18+, a
-> Chromium and ffmpeg. Docs: https://seekreel.vercel.app/
+> To install: `curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh`
+> It clones the repo to ~/.seekreel and puts the command on your path. There's
+> no npm package — `git clone https://github.com/highnet/seekreel` works just as
+> well, since it's TypeScript that Node runs as-is, with nothing to build. You
+> need Node 22.18 or newer, a Chromium and ffmpeg.
 >
-> The film in this post is `examples/linkedin-promo` in the repo: one HTML
-> file, a Strudel pattern for the music, no animation library. The five sizes
-> above all came out of the same 1080×1080 render. There is a three.js example
-> in there too, for the 3D question this always gets.
+> The video in this post is `examples/linkedin-promo` in the repo: one HTML
+> file, a short music file, no animation library. All five sizes came out of the
+> same render. There's a three.js example in there too, for the 3D question this
+> always gets.
 
 ## Alt text (LinkedIn allows it on video and images)
 
