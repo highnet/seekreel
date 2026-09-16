@@ -181,10 +181,13 @@ a `file://` document may not import one. seekreel serves the project directory
 on a loopback port for the length of the render, so `import` works, and so does
 `fetch` of a data file beside the stage.
 
-Cost, and it is worth knowing before a long render: the flag applies to the
-browser, not to the shot. Turning it on took the promo film in this repo from
-roughly a fifth of a second a frame to about a third — on every frame, including
-the eleven shots that are pure DOM. A scene with real shading costs more again. If only part of a film is 3D, import the library inside the window
+Cost, and it is worth knowing before a long render, in two parts. The flag
+applies to the browser rather than to the shot, so every frame gets slower:
+measured on this repo's promo, DOM frames went from about a fifth of a second to
+about a third. The frames that actually draw a scene cost far more than that —
+the promo's 3D shot runs around two and a half seconds a frame at 820×440 with
+sixteen lit meshes, and a scene with shadow maps or heavy shading costs more
+again. If only part of a film is 3D, import the library inside the window
 that needs it (`examples/linkedin-promo` does) and `seekreel probe` a frame
 before committing to a pass.
 

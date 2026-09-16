@@ -116,9 +116,11 @@ document.documentElement.setAttribute("data-seekreel-ready", "1");
 - An `AnimationMixer` is driven with `mixer.setTime(t)`, never
   `mixer.update(delta)`.
 - `"webgl": true` applies to the browser, not to one shot: every frame gets
-  slower, DOM ones included. In this repo's promo it took frames from about a
-  fifth of a second to about a third. Import three.js inside the window that
-  needs it if only part of the film is 3D.
+  slower, DOM ones included — about a fifth of a second to about a third, on
+  this repo's promo. Frames that actually draw a scene cost much more: that
+  promo's 3D shot is around two and a half seconds a frame. Budget accordingly,
+  and import three.js inside the window that needs it if only part of the film
+  is 3D.
 
 ## React
 
