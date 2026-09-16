@@ -25,21 +25,28 @@ still.
 First person, plain words. The first two lines are all that shows before
 "…see more", so they have to say what this is on their own.
 
-> I built a tool that turns a web page into a video.
+The framing is the use case: showing your website off in a video for social,
+not "make an animation". Everything below stays true to how it actually works —
+you build the page that shows the product off, using the components and brand
+your site already has, and seekreel renders it. It does not screen-record an
+arbitrary site, and the copy never implies it does.
+
+> I built a tool for turning your website into a video for social media.
 >
-> It's called seekreel. You make the thing in a browser — React, GSAP,
-> three.js, plain CSS, whatever you already use — and it hands you back an MP4.
+> It's called seekreel. You put your real components on a page — the same
+> React, the same CSS, the same fonts your site ships — say what should happen
+> over time, and it renders an MP4 you can post.
 >
 > Why I made it:
 >
-> → One build, every size. Square, 4:5, 9:16, mp4, webm, gif, a thumbnail. All
-> from one render, instead of exporting the same video six times.
-> → 3D works. Real WebGL, drawn properly — no screen recording, no dropped
-> frames.
-> → Need to fix second eight? Re-render that bit. The rest stays as it was.
+> → It looks like your product because it is your product. No mockups, no
+> re-drawing your UI in a video editor.
+> → One build, every size. Square for the feed, 4:5, 9:16 for stories and
+> reels, plus a gif and a thumbnail. All from one render.
+> → The site changed? Change the page and rebuild. You are not booking another
+> video shoot because a button moved.
+> → 3D works, if your site has it. Real WebGL, drawn properly.
 > → Music comes with it, so there's nothing to licence.
-> → It sits in your repo. You can review it like code and rebuild it in CI when
-> the brand changes.
 >
 > One catch, and it's a real one: it draws a frame at a time, about a second
 > each. Good for a video you cut once and keep tweaking. No good for anything
@@ -57,11 +64,10 @@ First person, plain words. The first two lines are all that shows before
 
 Shorter version, if you would rather not run long:
 
-> I built seekreel: it turns a web page into a video.
+> I built seekreel: it turns your website into a video for social.
 >
-> Build it in the browser like you build everything else, get an MP4 back —
-> every size the feed wants, from one render. 3D, React and GSAP all work, and
-> the music comes with it.
+> Your real components, your real brand, on a page that moves — and an MP4 out
+> the other end, in every size the feed asks for. 3D and music included.
 >
 > Free and open source: https://seekreel.vercel.app/
 >
@@ -79,8 +85,8 @@ Shorter version, if you would rather not run long:
 >
 > The video in this post is `examples/linkedin-promo` in the repo: one HTML
 > file, a short music file, no animation library. All five sizes came out of the
-> same render. There's a three.js example in there too, for the 3D question this
-> always gets.
+> same render. There's a React example and a three.js one in there too — the
+> React one matters if you want to drop your own components straight in.
 
 ## Alt text (LinkedIn allows it on video and images)
 
