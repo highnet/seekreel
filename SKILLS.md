@@ -113,6 +113,32 @@ document.documentElement.setAttribute("data-seekreel-ready", "1");
   `mixer.update(delta)`.
 - Budget about two seconds a frame rather than one, more with real shading.
 
+## React
+
+The contract is unchanged; one detail is mandatory.
+
+```js
+import { createRoot } from "./vendor/react-dom-client.js";
+import { flushSync } from "./vendor/react-dom.js";
+import { time, renderReact } from "/_seekreel/stage.js";
+
+renderReact({ root: createRoot(document.getElementById("stage")), flushSync },
+            html`<${Film} t=${time()} />`);
+```
+
+- **`flushSync` or the frame is blank.** React 19 schedules rendering, so
+  `root.render()` returns before the commit. Marking ready on the next line
+  screenshots an empty document, silently, on every frame.
+- **`/_seekreel/stage.js` is served with every render** — `time`, `span`,
+  `frame`, `markReady`, `markReadyWhenLoaded`, `renderReact`. Nothing to install
+  or vendor. Types in `src/stage/stage.d.ts`.
+- **Pure props only.** No state that survives a page load, no `useEffect` (it
+  runs after the commit), no suspense fallback where the real content should be.
+  Await data, then render, then mark ready.
+- **JSX needs a bundler; React does not.** `examples/react-stage` uses htm
+  tagged templates and browser modules to avoid a build step. With a bundler,
+  point `stage` at the HTML it writes.
+
 ## Commands
 
 | Command | What it does |
@@ -249,6 +275,8 @@ than an error.
   that ships with the video.
 - `examples/three-orbit` — eight seconds of three.js: `"webgl": true`, a camera
   angle computed from `t`, and frames that match byte for byte across processes.
+- `examples/react-stage` — six seconds of React with no build step: browser
+  modules, htm templates, `flushSync`, `renderReact`.
 - `examples/collection-dex` — forty-three seconds, a paused GSAP timeline, a
   JSON cue sheet lined up with a shot table.
 - `templates/starter` — what `seekreel init` writes: the contract in ninety

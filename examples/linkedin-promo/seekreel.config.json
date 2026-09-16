@@ -1,17 +1,17 @@
 {
   "name": "seekreel-promo",
   "stage": "stage.html",
-  "duration": 16,
+  "duration": 48,
   "fps": 24,
   "width": 1080,
   "height": 1080,
-  "poster": 14.8,
+  "poster": 46.0,
   "background": "#ffffff",
   "audio": {
     "engine": "strudel",
     "pattern": "music.strudel.js",
     "bundle": "strudel.mjs",
-    "cps": 0.625,
+    "cps": 0.5,
     "wav": "soundtrack.wav",
     "peak": 0.74,
     "fadeIn": 0.05,
@@ -38,5 +38,6 @@
       "name": "silent",
       "audio": false
     }
-  ]
+  ],
+  "webgl": true
 }

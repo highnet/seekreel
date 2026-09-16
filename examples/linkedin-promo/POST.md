@@ -9,10 +9,10 @@ a second per frame.
 
 | Slot | File | Why |
 |---|---|---|
-| Feed video | `deliver/seekreel-promo.mp4` | 1080×1080. The square is the safe feed shape on LinkedIn and reads the same on desktop and mobile. |
+| Feed video | `deliver/seekreel-promo.mp4` | 1080×1080, 48 seconds. The square is the safe feed shape on LinkedIn and reads the same on desktop and mobile. |
 | Feed video, taller | `deliver/seekreel-promo-4x5.mp4` | 1080×1350, if you want more vertical space in a mobile feed. |
 | Vertical video feed | `deliver/seekreel-promo-vertical.mp4` | 1080×1920, for LinkedIn's vertical video surface. |
-| Thumbnail | `deliver/seekreel-promo-poster.png` | Frame 355 — the end card, wordmark and install line. |
+| Thumbnail | `deliver/seekreel-promo-poster.png` | Frame 1104 — the end card, wordmark, clone command and URL. |
 | Comment, DM, or the repo README | `deliver/seekreel-promo-loop.gif` | 12fps, silent, plays anywhere a video player is not welcome. |
 
 Upload the poster as the custom thumbnail. LinkedIn otherwise picks its own,
@@ -30,27 +30,29 @@ idea on their own.
 > video by seeking it, one frame at a time. Frame 512 is always "whatever the
 > page looks like at t = 21.333" — on any machine, every time.
 >
-> What that changes in practice:
+> The forty-eight seconds above are the whole feature list, rendered with the
+> tool itself:
 >
-> → Render a single moment to a PNG in about a second, instead of waiting out
-> the other thousand frames to check one shot.
-> → Redraw frames 480 to 620 in place when the middle needs a fix. The rest of
-> the film is untouched.
-> → Keep the source in version control. The page diffs, it goes through review,
-> and it rebuilds in CI — nobody has to remember how the video was made.
->
-> The contract a page has to honour is three lines: read t from the URL, draw
-> that frame, set data-seekreel-ready. There is no library to import — and it
-> holds for WebGL too, so a three.js scene renders the same way, software-shaded
-> so every machine agrees on the pixels.
+> → The contract is three lines. Read t from the URL, draw that frame, set
+> data-seekreel-ready. There is no library to import.
+> → Deterministic by construction. Nothing is recorded; every pixel is computed.
+> → Four commands. probe one moment in about a second, render a range in place,
+> encode every variant off frames already on disk, or build to do all three.
+> → One render, every cut. 1:1, 4:5, 9:16, a named pixel size, mp4, webm, mov,
+> gif, a silent copy and a poster frame — all from the same pass.
+> → 3D with three.js, rendered through software GL so every machine agrees on
+> the pixels, byte for byte.
+> → React, GSAP, three.js or no library at all. If it runs in a browser, it
+> ships as video.
+> → The soundtrack is source too: a Strudel pattern rendered offline, or a JSON
+> cue sheet when it just has to land on cuts.
+> → TypeScript with no build step. Node runs it as it is — what you clone is
+> what executes.
+> → Installed by git, not by a package registry. One curl line, or clone it.
 >
 > The trade-off is real and worth stating: one screenshot per frame, so budget
-> about a second per frame. It is the right tool for a film you cut once and
-> then tweak in pieces, and the wrong one for anything interactive.
->
-> This post was rendered with it — one HTML file, no animation library, cut to
-> five sizes from a single render. Even the music is source: a Strudel pattern,
-> rendered offline, cut to the same grid the picture is.
+> about a second per frame, two for WebGL. It is the right tool for a film you
+> cut once and then tweak in pieces, and the wrong one for anything interactive.
 >
 > MIT, and free. Install it with one line, no package registry involved:
 > `curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh`
@@ -109,8 +111,13 @@ Shorter variant, if the feed is being unkind to long posts:
   install line sits in the first comment where it is copyable without expanding
   the post. The homepage URL is also on the film's end card, for anyone who
   watches it somewhere the caption did not travel with it.
-- **Sixteen seconds is deliberate.** LinkedIn will take far longer, but the
-  drop-off after the first few seconds is steep and this film puts its claim
-  on screen inside the first two.
+- **Forty-eight seconds, four per shot.** The first cut of this film gave each
+  shot 3.2 seconds and it read as a slideshow you could not keep up with. Every
+  shot now puts its words up inside the first second and then holds, which is
+  the difference between showing a feature and letting someone read it. The
+  claim is still on screen inside the first two seconds, for the people who
+  leave after that.
+- **It is a feature list, and it says so.** The margin counts 01/9 through 09/9
+  as the film goes, so a viewer knows how much is left.
 - If you want a second post out of the same material, the three-rule contract
   shot works on its own as a document post or a still.

@@ -10,9 +10,11 @@ sh examples/linkedin-promo/setup.sh          # the two typefaces, fetched
 seekreel build -c examples/linkedin-promo/seekreel.config.json
 ```
 
-384 frames, then five encodes and a poster off the same frames. The repo's rule
-of thumb is about a second per frame; this stage is light — no library, no
-images — so it came in under two minutes on the machine it was cut on.
+1152 frames, then five encodes and a poster off the same frames. Most of the
+stage is DOM and renders faster than the repo's one-second-a-frame rule of
+thumb; the ninety-six frames of the 3D shot cost about half a second each,
+because three.js is imported only inside the window that needs it rather than on
+every frame of the film.
 
 Out the other end, in `deliver/`:
 
@@ -38,8 +40,13 @@ because LinkedIn autoplays muted.
 ## The stage
 
 `stage.html` obeys the three-rule contract and nothing else: it reads `t`,
-draws that moment, and stamps `data-seekreel-ready`. Two details are worth
+draws that moment, and stamps `data-seekreel-ready`. Three details are worth
 stealing:
+
+- **three.js is imported inside the shot that uses it.** Every frame is a fresh
+  page load, so a top-level import would cost all 1152 frames the parse time for
+  the sake of 96 of them. `if (t >= 20 && t <= 24) await import(...)` keeps the
+  rest of the render on the DOM's budget.
 
 - **The dope-sheet margin is rebuilt, not moved.** There is no previous frame
   to move it from, so the ruled rows are computed from `t` every time and the
@@ -58,18 +65,24 @@ and rendered offline by `seekreel audio` — no realtime playback, no recording,
 the same WAV every time. Every voice is synthesised, so the render needs no
 network and the repo carries no audio.
 
-It runs at `cps` 0.625, so a cycle is 1.6 seconds and the film is exactly ten of
-them. The arrangement changes every two cycles — 3.2, 6.4, 9.6, 12.8 — and the
-picture cuts on the same numbers, which is why each cut lands on the downbeat
-the arrangement turns over on:
+It runs at `cps` 0.5, so a cycle is two seconds and the film is twenty-four of
+them. The arrangement changes every two cycles — every four seconds, on the cut —
+so a shot change lands on the downbeat the arrangement turns over on:
 
-| Cycles | Seconds | Picture | Sound |
+| Cycles | Seconds | Shot | Sound |
 |---|---|---|---|
-| 0–1 | 0–3.2 | the wordmark | pad only, one rising sweep |
-| 2–3 | 3.2–6.4 | the scrubber | kick, hats, sub, bass |
-| 4–5 | 6.4–9.6 | the contract | bells arrive on the three rules |
-| 6–7 | 9.6–12.8 | the commands | snare on the backbeat, second sweep |
-| 8–9 | 12.8–16 | the end card | everything drops but the pad and one bell |
+| 0–1 | 0–4 | the wordmark | pad, one rising sweep |
+| 2–3 | 4–8 | the contract | kick arrives |
+| 4–5 | 8–12 | determinism | hats and sub |
+| 6–7 | 12–16 | the commands | bass starts moving |
+| 8–9 | 16–20 | the deliverables | snare on the backbeat |
+| 10–11 | 20–24 | 3D | filtered down, low and wide |
+| 12–13 | 24–28 | React, GSAP, plain JS | everything back, bells in |
+| 14–15 | 28–32 | sound | breakdown — bass and bells alone |
+| 16–17 | 32–36 | TypeScript | full again |
+| 18–19 | 36–40 | install | bells an octave up |
+| 20–21 | 40–44 | the repository | the loudest it gets |
+| 22–23 | 44–48 | the end card | pad and one bell |
 
 Moving a section is one number in two files. That is the whole reason the
 soundtrack is source rather than an audio asset.

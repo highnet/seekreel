@@ -1,0 +1,11 @@
+{
+  "name": "react-stage",
+  "stage": "stage.html",
+  "duration": 6,
+  "fps": 24,
+  "width": 1080,
+  "height": 1080,
+  "background": "#ffffff",
+  "poster": 4.5,
+  "variants": [{ "name": "" }, { "name": "loop", "format": "gif", "fps": 12 }]
+}

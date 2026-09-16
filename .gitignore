@@ -9,6 +9,8 @@ gsap.min.js
 strudel.mjs
 three.module.js
 three.core.js
+# React, fetched as browser modules by the react-stage example.
+vendor/
 grain.png
 __pycache__/
 *.pyc

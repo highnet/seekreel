@@ -1,8 +1,10 @@
 import { mkdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { launch } from "./browser.ts";
 import { serveDirectory } from "./serve.ts";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
 import type { Config } from "./types.ts";
 
 /**
@@ -56,7 +58,12 @@ export async function renderFrames(
    */
   const inside =
     config.stagePath === config.root || config.stagePath.startsWith(config.root + path.sep);
-  const server = inside ? await serveDirectory(config.root) : null;
+  /*
+   * The stage helpers ride along at a path no project would use for its own
+   * files, so a stage can import them without vendoring anything.
+   */
+  const helpers = { "/_seekreel/stage.js": path.join(here, "stage/stage.js") };
+  const server = inside ? await serveDirectory(config.root, helpers) : null;
   const url = server
     ? `${server.origin}/${path.relative(config.root, config.stagePath).split(path.sep).join("/")}`
     : pathToFileURL(config.stagePath).href;

@@ -75,6 +75,14 @@ camera.lookAt(0, 1.1, 0);
 renderer.render(scene, camera);
 document.documentElement.setAttribute("data-seekreel-ready", "1");`;
 
+const REACT_STAGE = `import { createRoot } from "react-dom/client";
+import { flushSync } from "react-dom";
+import { time, renderReact } from "/_seekreel/stage.js";
+
+// flushSync or the frame is blank: React 19 returns before it commits.
+renderReact({ root: createRoot(document.getElementById("stage")), flushSync },
+            <Film t={time()} />);`;
+
 const COMMANDS: [string, string][] = [
   ['seekreel init <dir>', 'scaffold a project from the starter template'],
   ['seekreel doctor', 'check Chromium, ffmpeg and the formats before rendering'],
@@ -111,6 +119,10 @@ const TRAPS: [string, string][] = [
   [
     'Reaching for npm i -g seekreel',
     'There is no registry package. Install with the curl line above, or clone the repo — the tool is TypeScript that Node runs without a build step, so a checkout is already runnable.',
+  ],
+  [
+    'Rendering React without flushSync',
+    'React 19 schedules rendering, so root.render() returns before the commit and a frame marked ready on the next line screenshots an empty document — every frame, with nothing in the logs. Use renderReact({ root, flushSync }, element) from /_seekreel/stage.js, and keep the tree a pure function of props: no surviving state, no effects, no suspense fallback standing in for content.',
   ],
   [
     'Driving a 3D scene with a delta',
@@ -156,6 +168,12 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
       '## Config',
       '```json',
       CONFIG,
+      '```',
+      '',
+      '## React',
+      'A tree that is a pure function of t. flushSync or the frame is blank.',
+      '```jsx',
+      REACT_STAGE,
       '```',
       '',
       '## 3D',
@@ -271,6 +289,19 @@ node bin/seekreel.ts doctor
         <Pre className="mt-5">{THREE_STAGE}</Pre>
       </Section>
 
+      <Section title="React">
+        <p className="max-w-[68ch] leading-relaxed text-muted">
+          A component tree that is a pure function of <code className="data text-ink">t</code> is a
+          film. The helpers at <code className="data text-ink">/_seekreel/stage.js</code> are served
+          with every render — <code className="data text-ink">time</code>,{' '}
+          <code className="data text-ink">span</code>, <code className="data text-ink">frame</code>,{' '}
+          <code className="data text-ink">markReady</code>,{' '}
+          <code className="data text-ink">markReadyWhenLoaded</code> and{' '}
+          <code className="data text-ink">renderReact</code> — so there is nothing to install.
+        </p>
+        <Pre className="mt-5">{REACT_STAGE}</Pre>
+      </Section>
+
       <Section title="Config">
         <p className="max-w-[68ch] leading-relaxed text-muted">
           Every path resolves against the config file, not the working directory. One render feeds
@@ -337,6 +368,7 @@ node bin/seekreel.ts doctor
           {[
             ['examples/linkedin-promo', 'sixteen seconds, plain JavaScript, a Strudel soundtrack, five deliverables from one render'],
             ['examples/three-orbit', 'eight seconds of three.js: webgl on, camera angle computed from t, frames identical across processes'],
+            ['examples/react-stage', 'six seconds of React with no build step: browser modules, htm templates, flushSync'],
             ['examples/collection-dex', 'forty-three seconds, a paused GSAP timeline, a JSON cue sheet'],
             ['templates/starter', 'what seekreel init writes: the contract in ninety lines, no dependencies'],
           ].map(([where, what]) => (

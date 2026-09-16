@@ -23,6 +23,19 @@ const STAGE_SAMPLE = `
 </script>
 `;
 
+const REACT_SAMPLE = `
+import { createRoot } from "react-dom/client";
+import { flushSync } from "react-dom";
+import { time, renderReact } from "/_seekreel/stage.js";
+
+// flushSync is not optional: React 19 returns before it commits, and
+// a frame marked ready before the commit screenshots an empty page.
+renderReact(
+  { root: createRoot(document.getElementById("stage")), flushSync },
+  <Film t={time()} />,
+);
+`;
+
 const GSAP_SAMPLE = `
 const tl = gsap.timeline({ paused: true });
 tl.from("#card", { y: 24, opacity: 0, duration: 0.9, ease: "expo.out" }, 0.1)
@@ -123,7 +136,7 @@ export default function Home() {
                 every frame drawn exactly as you designed it. Same result on your laptop and in CI.
               </p>
               <ul className="mt-6 flex list-none flex-wrap gap-x-2 gap-y-2 p-0">
-                {['Launch films', 'Feature reels', '3D scenes'].map((use) => (
+                {['Launch films', 'Feature reels', '3D scenes', 'React'].map((use) => (
                   <li key={use} className="data rounded-sm bg-primary-deep px-2.5 py-1 text-white">
                     {use}
                   </li>
@@ -177,7 +190,8 @@ export default function Home() {
                 </h2>
                 <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
                   No timeline app to learn, no export plugin, no runtime to install. Your page takes a
-                  timestamp and draws that moment. Three rules, and seekreel does the rest.
+                  timestamp and draws that moment — React, GSAP, three.js or no library at all.
+                  Three rules, and seekreel does the rest.
                 </p>
                 <ol className="mt-8 grid list-none grid-cols-1 gap-6 p-0">
                   {[
@@ -207,6 +221,19 @@ export default function Home() {
                   </p>
                   <div className="mt-4 min-w-0">
                     <Code code={GSAP_SAMPLE} lang="js" file="stage.js" />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-bold">Or a React component</h3>
+                  <p className="mt-2 max-w-[52ch] leading-relaxed text-muted">
+                    A tree that is a pure function of the timestamp is already a film. Helpers are
+                    served to every render at{' '}
+                    <span className="data text-ink">/_seekreel/stage.js</span> — nothing to install,
+                    and nothing to vendor.
+                  </p>
+                  <div className="mt-4 min-w-0">
+                    <Code code={REACT_SAMPLE} lang="jsx" file="stage.jsx" />
                   </div>
                 </div>
               </div>

@@ -35,6 +35,7 @@ There is a homepage too, with a viewer you can scrub:
 - [How a page talks to seekreel](#how-a-page-talks-to-seekreel)
 - [Animating with GSAP](#animating-with-gsap)
 - [3D with three.js](#3d-with-threejs)
+- [React stages](#react-stages)
 - [Commands](#commands)
 - [Configuration](#configuration)
 - [Sound](#sound)
@@ -181,6 +182,50 @@ a pass.
 `examples/three-orbit` is a working eight-second scene. For an `AnimationMixer`,
 use `mixer.setTime(t)` rather than `mixer.update(delta)` — the same move as
 GSAP's `tl.time(t)`.
+
+---
+
+## React stages
+
+A React tree that is a pure function of `t` is a film, and the contract does not
+change. One thing does have to be done exactly right:
+
+```js
+import { createRoot } from "./vendor/react-dom-client.js";
+import { flushSync } from "./vendor/react-dom.js";
+import { time, renderReact } from "/_seekreel/stage.js";
+
+renderReact(
+  { root: createRoot(document.getElementById("stage")), flushSync },
+  html`<${Film} t=${time()} />`,
+);
+```
+
+**`flushSync` is not optional.** React 19 schedules rendering rather than doing
+it, so `root.render(element)` returns before anything is on the page — a stage
+that marks itself ready on the next line screenshots an empty document, on every
+frame, with nothing in the logs to explain it.
+
+`/_seekreel/stage.js` is served with every render and needs no installing:
+`time`, `span`, `frame`, `markReady`, `markReadyWhenLoaded` and `renderReact`.
+Types are in `src/stage/stage.d.ts` for a stage that goes through a bundler.
+
+What React brings with it, because a stage is one frame in a document that has
+never existed before:
+
+- **No state that survives a page load.** `useState` as a value derived from
+  props is fine; expecting it to carry from frame 61 to 62 is not. There is no
+  frame 61 in this process.
+- **No effects.** `useEffect` runs after the commit, and the screenshot may
+  already have been taken.
+- **Await your data before rendering.** A suspense fallback is a perfectly valid
+  frame to screenshot, which is exactly the problem.
+
+`examples/react-stage` runs with no build step at all — React as browser modules
+and [htm](https://github.com/developit/htm) tagged templates, since JSX is the
+one part of React that genuinely needs a compiler. If your project already has a
+bundler, use it and point `stage` at the HTML your build writes; TSX works as it
+always has.
 
 ---
 
@@ -424,6 +469,14 @@ on every machine.
 ```sh
 sh examples/three-orbit/setup.sh           # three.js, fetched
 seekreel build -c examples/three-orbit/seekreel.config.json
+```
+
+`examples/react-stage` is six seconds of React with no build step: browser
+modules, htm templates, `flushSync`, done.
+
+```sh
+sh examples/react-stage/setup.sh           # react, react-dom and htm, fetched
+seekreel build -c examples/react-stage/seekreel.config.json
 ```
 
 ---

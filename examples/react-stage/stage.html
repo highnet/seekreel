@@ -1,0 +1,110 @@
+<meta charset="utf-8">
+<title>seekreel — a React stage</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: oklch(1 0 0);
+    --ink: oklch(0.2 0.03 340);
+    --muted: oklch(0.52 0.02 340);
+    --primary: oklch(0.55 0.21 340);
+    --surface: oklch(0.971 0.006 340);
+    --rule: oklch(0.88 0.01 340);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1080px; overflow: hidden; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 400 20px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  /* The mount point is bare; the component renders the film inside it, so the
+     padding belongs to .film and is not applied twice. */
+  #stage { width: 1080px; height: 1080px; }
+  .film { position: relative; width: 1080px; height: 1080px; padding: 96px; }
+  h1 { font-size: 84px; line-height: 0.98; letter-spacing: -0.04em; font-weight: 700; }
+  .lede { margin-top: 28px; font-size: 27px; line-height: 1.4; color: var(--muted); max-width: 26ch; }
+  .rows { position: absolute; left: 96px; right: 96px; bottom: 132px; display: grid; gap: 18px; }
+  .row { display: grid; grid-template-columns: 96px 1fr 132px; align-items: center; gap: 20px;
+         border-top: 1px solid var(--rule); padding-top: 16px; }
+  .row .name { font-size: 26px; font-weight: 600; }
+  .row .meter { height: 10px; background: var(--surface); }
+  .row .meter i { display: block; height: 100%; background: var(--primary); transform-origin: left; }
+  .row .num { font: 500 22px/1 ui-monospace, monospace; color: var(--muted); text-align: right;
+              font-variant-numeric: tabular-nums; }
+  .badge { position: absolute; left: 96px; bottom: 64px;
+           font: 500 19px/1 ui-monospace, monospace; color: var(--primary); letter-spacing: 0.04em; }
+</style>
+
+<div id="stage"></div>
+
+<script type="module">
+/*
+ * A React stage, with no build step anywhere in sight.
+ *
+ * React is vendored as browser ES modules (fetch-react.sh) and the markup is
+ * htm's tagged templates rather than JSX, because JSX is the one part of React
+ * that genuinely needs compiling. A project that already has a bundler skips
+ * all of this: build as usual and point `stage` at the HTML your build writes.
+ *
+ * The rule React brings with it: the component tree has to be a pure function
+ * of `t`. No state that survives a page load — there is no previous page —, no
+ * effects, no data arriving after the commit. Props in, one frame out.
+ */
+import { createRoot } from "./vendor/react-dom-client.js";
+import { flushSync } from "./vendor/react-dom.js";
+import { html } from "./vendor/htm.js";
+
+/* Served with every render. Nothing is vendored to get at these. */
+import { time, span, frame, renderReact } from "/_seekreel/stage.js";
+
+const t = time();
+const FPS = 24;
+
+const FEATURES = [
+  { name: "probe", at: 0.6, detail: "one moment, one PNG" },
+  { name: "render", at: 1.0, detail: "a range, in place" },
+  { name: "encode", at: 1.4, detail: "every variant, one pass" },
+  { name: "build", at: 1.8, detail: "all three, in order" },
+];
+
+const outExpo = (x) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x));
+
+function Row({ name, at, detail }) {
+  /* Each row's own window on t. Same `span` the plain stages use. */
+  const enter = outExpo(span(at, at + 0.7));
+  const fill = span(at + 0.2, at + 2.4);
+  return html`
+    <div class="row" style=${{ opacity: enter, transform: `translateY(${16 * (1 - enter)}px)` }}>
+      <span class="name">${name}</span>
+      <span class="meter"><i style=${{ transform: `scaleX(${fill.toFixed(4)})` }}></i></span>
+      <span class="num">${Math.round(fill * 100)}%</span>
+    </div>
+  `;
+}
+
+function Film({ t }) {
+  const title = outExpo(span(0.1, 0.9));
+  return html`
+    <div class="film">
+      <h1 style=${{ opacity: title, transform: `translateY(${20 * (1 - title)}px)` }}>
+        React renders<br />frames too.
+      </h1>
+      <p class="lede" style=${{ opacity: outExpo(span(0.4, 1.2)) }}>
+        A component tree that is a pure function of the timestamp is, by definition, a film.
+      </p>
+      <div class="rows">
+        ${FEATURES.map((feature) => html`<${Row} key=${feature.name} ...${feature} />`)}
+      </div>
+      <div class="badge">t ${t.toFixed(3)} · frame ${String(frame(FPS, t)).padStart(3, "0")}</div>
+    </div>
+  `;
+}
+
+/*
+ * flushSync is not optional. React 19 schedules rendering rather than doing it,
+ * so without it the screenshot lands on an empty document.
+ */
+renderReact(
+  { root: createRoot(document.getElementById("stage")), flushSync },
+  html`<${Film} t=${t} />`,
+);
+</script>
