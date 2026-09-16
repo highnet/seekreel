@@ -1,0 +1,126 @@
+<meta charset="utf-8">
+<title>seekreel — strudel engine</title>
+<script type="module">
+/*
+ * The Strudel engine's browser half.
+ *
+ * Strudel is a live-coding language: a pattern is normally queried by a
+ * scheduler against a running clock, a few hundred milliseconds ahead of the
+ * speakers. None of that survives being rendered to a file, and none of it has
+ * to — a pattern is a pure function from a stretch of time to the events in
+ * it, which is the same bargain the picture side of seekreel makes.
+ *
+ * So: query the whole film's worth of cycles at once, hand every event to
+ * superdough scheduled at its own absolute time, and let an OfflineAudioContext
+ * render the lot as fast as the machine can manage. No clock, no dropouts, and
+ * the same WAV on every machine.
+ */
+import * as strudel from "./strudel.mjs";
+
+const ready = (async () => {
+  /* The scope a pattern is compiled against: the controls, the core, mini
+     notation, tonal. This is what `note(...)` and `s(...)` resolve to. */
+  await strudel.evalScope(strudel.controls, strudel);
+  await strudel.registerSynthSounds();
+  /* initStrudel builds the REPL that `evaluate` delegates to. It also wires an
+     audio context of its own, which the render replaces before every pass. */
+  strudel.initStrudel();
+})();
+
+async function render(code, { duration, cps, sampleRate }) {
+  const context = new OfflineAudioContext(2, Math.ceil(duration * sampleRate), sampleRate);
+  strudel.setAudioContext(context);
+
+  let evaluated;
+  try {
+    evaluated = await strudel.evaluate(code, false);
+  } catch (error) {
+    /* Strudel's own message names the line and the token, which is the whole
+       of what anyone needs; the stack below it is the transpiler's, not the
+       pattern's. */
+    throw new Error(`the pattern did not evaluate: ${error?.message ?? error}`);
+  }
+  const pattern = evaluated?.query ? evaluated : evaluated?.pattern;
+  if (!pattern) {
+    throw new Error(
+      "the pattern file evaluated to nothing. Its last statement has to be the " +
+      "pattern itself — a `stack(...)` or a single voice, not an assignment.",
+    );
+  }
+
+  /*
+   * One query for the whole film. `hasOnset` drops the tail of any event that
+   * began before the window, which would otherwise be retriggered at 0.
+   */
+  const haps = pattern.queryArc(0, duration * cps)
+    .filter((hap) => hap.hasOnset() && hap.whole.begin.valueOf() / cps < duration);
+
+  /*
+   * A voice is registered asynchronously, and superdough drops any event that
+   * asks for one still loading rather than stalling the clock. So every voice
+   * the pattern uses is triggered once, silent, well past the end of the film —
+   * the render stops at `duration`, so those never reach the file — and then
+   * the loop that counts runs a beat later, by which time they have all loaded.
+   *
+   * The warm-up has to happen in this context and not a throwaway one: the
+   * effect buses superdough builds are cached, and a node from one context
+   * cannot be connected to another.
+   */
+  const voices = new Map();
+  for (const hap of haps) {
+    const key = `${hap.value?.s ?? "default"}`;
+    if (!voices.has(key)) voices.set(key, hap.value);
+  }
+  for (const value of voices.values()) {
+    try {
+      strudel.superdough({ ...value, gain: 0 }, duration + 10, 0.05, cps);
+    } catch {
+      /* A voice that cannot even be warmed will report itself properly below. */
+    }
+  }
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
+  let played = 0;
+  for (const hap of haps) {
+    const begin = hap.whole.begin.valueOf() / cps;
+    const end = hap.whole.end.valueOf() / cps;
+    /* superdough reads the deadline against the context's currentTime, which
+       in an offline context never leaves zero — so a deadline is just the
+       event's own timestamp, in seconds. */
+    strudel.superdough(hap.value, begin, end - begin, cps);
+    played++;
+  }
+
+  const buffer = await context.startRendering();
+  return { buffer, haps: haps.length, played, voices: [...voices.keys()] };
+}
+
+window.seekreelRender = async (code, options) => {
+  await ready;
+  const { buffer, haps, played, voices } = await render(code, options);
+  const left = buffer.getChannelData(0);
+  const right = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : left;
+
+  let peak = 0;
+  for (let i = 0; i < left.length; i++) {
+    peak = Math.max(peak, Math.abs(left[i]), Math.abs(right[i]));
+  }
+
+  /* Interleaved 32-bit float, base64'd: a string crosses the CDP bridge in one
+     piece, where a 1.5-million-element array would be serialised elementwise. */
+  const interleaved = new Float32Array(left.length * 2);
+  for (let i = 0; i < left.length; i++) {
+    interleaved[i * 2] = left[i];
+    interleaved[i * 2 + 1] = right[i];
+  }
+  const bytes = new Uint8Array(interleaved.buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+
+  return { pcm: btoa(binary), frames: left.length, haps, played, voices, peak };
+};
+
+document.documentElement.setAttribute("data-seekreel-ready", "1");
+</script>

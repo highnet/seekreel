@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { cp, mkdir, readdir } from "node:fs/promises";
+import { cp, mkdir, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "../src/config.js";
@@ -23,7 +23,8 @@ Commands
   seekreel init [dir]            create a new project from the starter template
   seekreel probe <t,t,...>       render just those timestamps, into probe/
   seekreel render [a] [b]        render every frame, or only frames a..b, in place
-  seekreel audio                 render the cue sheet to a WAV file
+  seekreel audio                 render the soundtrack to a WAV file
+  seekreel strudel               fetch the Strudel bundle the audio engine needs
   seekreel encode                turn frames (plus the WAV) into deliver/*.mp4
   seekreel build                 audio, then render, then encode
   seekreel doctor                check that Chromium and ffmpeg are available
@@ -61,11 +62,62 @@ function python(script, args) {
   });
 }
 
+const strudelEngine = () => import("../src/audio/strudel.js");
+
+/*
+ * Strudel, pinned. It is an 850KB bundle and it is not a dependency of this
+ * package: a project renders against the version it fetched, and upgrading is
+ * a decision with an audible result rather than whatever `npm install` brought
+ * in this week.
+ */
+const STRUDEL_VERSION = "1.3.0";
+const STRUDEL_URL = `https://cdn.jsdelivr.net/npm/@strudel/web@${STRUDEL_VERSION}/dist/index.mjs`;
+
+async function doStrudelFetch(config) {
+  const target =
+    config.audio?.engine === "strudel"
+      ? config.audio.bundle
+      : path.resolve(config.root, "strudel.mjs");
+
+  let body;
+  try {
+    const response = await fetch(STRUDEL_URL);
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    body = Buffer.from(await response.arrayBuffer());
+  } catch (error) {
+    throw Object.assign(
+      new Error(
+        `Could not fetch Strudel from ${STRUDEL_URL}: ${error.message}\n` +
+          `Download it by hand and put it at ${target}.`,
+      ),
+      { expected: true },
+    );
+  }
+
+  await writeFile(target, body);
+  console.log(
+    `${path.relative(process.cwd(), target)}  @strudel/web ${STRUDEL_VERSION}  ` +
+      `${Math.round(body.length / 1024)}KB`,
+  );
+}
+
 async function doAudio(config) {
   if (!config.audio) {
     console.log("No audio is configured in this project, so there is nothing to render.");
     return;
   }
+
+  if (config.audio.engine === "strudel") {
+    const { renderStrudel } = await strudelEngine();
+    const result = await renderStrudel(config);
+    console.log(
+      `${path.relative(process.cwd(), config.audio.wav)}  ${result.seconds.toFixed(0)}s  ` +
+        `${result.events} events  peak ${result.peak.toFixed(3)}`,
+    );
+    if (result.failures.length) console.warn(`pattern errors:\n  ${result.failures.join("\n  ")}`);
+    return;
+  }
+
   await python(path.join(PACKAGE, "src/audio/render.py"), [
     "--cues", config.audio.cues,
     "--out", config.audio.wav,
@@ -89,7 +141,11 @@ async function main() {
     }
     console.log(
       `Scaffolded into ${target}\n\n  cd ${path.relative(process.cwd(), target) || "."}\n` +
-        `  seekreel build\n`,
+        `  seekreel strudel   # fetch the audio engine's bundle, once\n` +
+        `  seekreel build\n\n` +
+        `The starter renders sound from music.strudel.js. It also ships cues.json —\n` +
+        `set audio.engine to "cues" in the config to use that instead, which needs\n` +
+        `python3 rather than the bundle.\n`,
     );
     return;
   }
@@ -111,7 +167,8 @@ async function main() {
     }
     console.log(`chromium   ${process.env.CHROMIUM ?? "(auto-detected)"} — ${browser}`);
     console.log(`ffmpeg     ${ffmpeg}`);
-    console.log(`python     ${process.env.PYTHON ?? "python3"} — only needed if you want sound`);
+    console.log(`python     ${process.env.PYTHON ?? "python3"} — only needed for the cues audio engine`);
+    console.log(`strudel    the strudel audio engine needs no python — it renders in the same chromium`);
     if (formats) {
       const list = Object.entries(formats)
         .map(([name, ok]) => `${name} ${ok ? "yes" : "NO"}`)
@@ -133,6 +190,8 @@ async function main() {
     if (result.errors.length) console.warn(`page errors:\n  ${result.errors.join("\n  ")}`);
     return;
   }
+
+  if (command === "strudel") return doStrudelFetch(config);
 
   if (command === "audio") return doAudio(config);
 

@@ -5,6 +5,7 @@ import Code from '@/components/code';
 import CopyCommand from '@/components/copy-command';
 import Timing from '@/components/timing';
 import Shapes from '@/components/shapes';
+import AudienceFork from '@/components/audience';
 
 const REPO = 'https://github.com/highnet/seekreel';
 
@@ -58,6 +59,17 @@ const CUES_SAMPLE = `
 }
 `;
 
+const STRUDEL_SAMPLE = `
+setcps(0.625) // a cycle is 1.6s, so a 16s film is exactly ten of them
+
+stack(
+  note("c1").s("sine").struct("x ~ ~ ~ x ~ ~ ~").decay(.26).sustain(0),
+  s("white").struct("x*8").decay(.03).hpf(7200).gain("[.3 .14]*4"),
+  note("<c2 ab1 eb2 bb1>").s("sawtooth").lpf(sine.range(420, 1500).slow(4)),
+  note("<c5 eb5 g5 bb4>(3,8)").s("triangle").delay(.4).room(.6)
+)
+`;
+
 const SOUNDS = ['marimba', 'bass', 'pad', 'swell', 'chime', 'pip', 'tick', 'shutter', 'pop', 'whoosh', 'stamp', 'tray', 'shaker'];
 
 export default function Home() {
@@ -70,6 +82,9 @@ export default function Home() {
         Skip to content
       </a>
 
+      {/* Everything below the fork bar depends on who is reading: an agent gets
+          the brief instead of the film, the folds and the closing pitch. */}
+      <AudienceFork>
       <header className="bg-primary text-white">
         <div className="mx-auto flex max-w-[76rem] items-center justify-between gap-6 px-5 py-5 sm:px-8">
           <span className="wide text-2xl font-extrabold tracking-[-0.045em]">seekreel</span>
@@ -282,9 +297,15 @@ export default function Home() {
                   Sound you can move by half a second.
                 </h2>
                 <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
-                  Cues are synthesized, not sampled — no library to licence, no clearance to chase,
-                  and no re-editing audio when a shot shifts. Change the number, rebuild, done. A
-                  looping bed sits under one-off hits placed by time, and all it needs is{' '}
+                  Synthesized, not sampled — no library to licence, no clearance to chase, and no
+                  re-editing audio when a shot shifts. Write a{' '}
+                  <a className="text-primary underline underline-offset-4" href="https://strudel.cc">
+                    Strudel
+                  </a>{' '}
+                  pattern and you get music with a grid of its own, rendered offline in the same
+                  Chromium that shoots the frames — set the cycle length to divide your film and the
+                  cuts land on downbeats. Or keep the cue sheet: one-off hits placed by timestamp,
+                  under a looping bed, from{' '}
                   <span className="data text-ink">python3</span> and its standard library.
                 </p>
                 <ul className="mt-7 flex list-none flex-wrap gap-2 p-0">
@@ -295,7 +316,10 @@ export default function Home() {
                   ))}
                 </ul>
               </div>
-              <Code code={CUES_SAMPLE} lang="json" file="cues.json" />
+              <div className="grid min-w-0 grid-cols-1 content-start gap-6">
+                <Code code={STRUDEL_SAMPLE} lang="js" file="music.strudel.js" />
+                <Code code={CUES_SAMPLE} lang="json" file="cues.json" />
+              </div>
             </div>
           </div>
         </section>
@@ -337,6 +361,7 @@ export default function Home() {
           </p>
         </div>
       </footer>
+      </AudienceFork>
     </>
   );
 }

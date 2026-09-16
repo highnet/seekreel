@@ -9,12 +9,33 @@
   "deliver": "deliver",
   "poster": 3.0,
   "background": "#111315",
-  "audio": { "cues": "cues.json", "wav": "soundtrack.wav" },
+  "audio": {
+    "engine": "strudel",
+    "pattern": "music.strudel.js",
+    "bundle": "strudel.mjs",
+    "cps": 0.5,
+    "wav": "soundtrack.wav"
+  },
   "variants": [
-    { "name": "" },
-    { "name": "4x5", "ratio": "4:5" },
-    { "name": "story", "ratio": "9:16" },
-    { "name": "loop", "format": "gif", "fps": 12 },
-    { "name": "silent", "audio": false }
+    {
+      "name": ""
+    },
+    {
+      "name": "4x5",
+      "ratio": "4:5"
+    },
+    {
+      "name": "story",
+      "ratio": "9:16"
+    },
+    {
+      "name": "loop",
+      "format": "gif",
+      "fps": 12
+    },
+    {
+      "name": "silent",
+      "audio": false
+    }
   ]
 }

@@ -47,7 +47,8 @@ idea on their own.
 > then tweak in pieces, and the wrong one for anything interactive.
 >
 > This post was rendered with it — one HTML file, no animation library, cut to
-> five sizes from a single render.
+> five sizes from a single render. Even the music is source: a Strudel pattern,
+> rendered offline, cut to the same grid the picture is.
 >
 > MIT, and free: github.com/highnet/seekreel. There is a scrubbable viewer on
 > the homepage at seekreel.vercel.app.
@@ -72,7 +73,7 @@ Shorter variant, if the feed is being unkind to long posts:
 > pulls straight from the repository. Needs Node 20+, a Chromium and ffmpeg.
 >
 > The film in this post is `examples/linkedin-promo` in the repo: one HTML
-> file, a JSON cue sheet for the sound, no animation library. The five sizes
+> file, a Strudel pattern for the music, no animation library. The five sizes
 > above all came out of the same 1080×1080 render.
 
 ## Alt text (LinkedIn allows it on video and images)

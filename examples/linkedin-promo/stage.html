@@ -151,6 +151,13 @@ p{font-size:29px;line-height:1.35;color:var(--muted);max-width:26ch}
  */
 const DURATION = 16;
 const FPS = 24;
+
+/*
+ * The cuts are on the soundtrack's grid, not near it. music.strudel.js runs at
+ * 0.625 cycles per second, so a cycle is 1.6s and a section is two of them:
+ * 3.2, 6.4, 9.6, 12.8. A shot leaves exactly as the next one arrives, so the
+ * cut lands on the downbeat the arrangement changes on.
+ */
 const t = parseFloat(new URLSearchParams(location.search).get("t") || "0");
 
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -199,7 +206,7 @@ set("rows", { transform: `translateY(${fix(-(scrolled - Math.floor(scrolled)) * 
  * progress so the things inside it can be staggered against the same clock.
  */
 function shot(id, start, end, { last = false } = {}) {
-  const arrive = outExpo(span(start, start + 0.6));
+  const arrive = outExpo(span(start, start + 0.45));
   const leave = last ? 0 : inOutSine(span(end - 0.45, end));
   set(id, {
     opacity: fix(arrive * (1 - leave), 4),
@@ -208,17 +215,22 @@ function shot(id, start, end, { last = false } = {}) {
   return arrive;
 }
 
-/** A child of a shot, entering `at` seconds with the same curve. */
+/*
+ * A child of a shot, entering `at` seconds with the same curve. The first child
+ * of a shot enters within a frame or two of the shot itself: a child that waits
+ * leaves the cut showing an empty page, and at these lengths a fifth of a
+ * second of white is a hole, not a beat.
+ */
 function stagger(id, at, { distance = 16 } = {}) {
   const g = outExpo(span(at, at + 0.7));
   set(id, { opacity: fix(g, 4), transform: `translateY(${fix(distance * (1 - g), 2)}px)` });
 }
 
 /* Shot 0 — the wordmark. ------------------------------------------------- */
-shot("s0", 0.1, 3.4);
-stagger("s0k", 0.25);
-stagger("s0h", 0.95);
-stagger("s0p", 1.25);
+shot("s0", 0.1, 3.2);
+stagger("s0k", 0.15);
+stagger("s0h", 0.9);
+stagger("s0p", 1.2);
 /* The mark is printed rather than faded: it widens into place, which is the
    one thing Anybody's wdth axis is here for. */
 {
@@ -230,20 +242,20 @@ stagger("s0p", 1.25);
 }
 
 /* Shot 1 — a film inside the film. --------------------------------------- */
-shot("s1", 3.5, 6.9);
-stagger("s1h", 3.65);
-stagger("s1p", 5.5);
+shot("s1", 3.2, 6.4);
+stagger("s1h", 3.25);
+stagger("s1p", 5.2);
 {
   /*
    * The scrubber drags back and forth, and the gate shows the moment it lands
    * on. The disc's position is derived from `u`, never accumulated — which is
    * the claim the shot is making, made in the only way that proves it.
    */
-  const sweepIn = outExpo(span(3.9, 4.5));
+  const sweepIn = outExpo(span(3.5, 4.1));
   set("gate", { opacity: fix(sweepIn, 4) });
   set("track", { opacity: fix(sweepIn, 4) });
 
-  const drag = span(4.2, 6.6);
+  const drag = span(3.8, 6.1);
   const u = clamp01(0.5 - 0.5 * Math.cos(Math.PI * (0.15 + 1.7 * drag)));
   const inner = u * 26.2;
   set("disc", {
@@ -257,14 +269,14 @@ stagger("s1p", 5.5);
 }
 
 /* Shot 2 — the three-rule contract. -------------------------------------- */
-shot("s2", 7.0, 10.2);
-stagger("s2k", 7.15);
-stagger("s2h", 7.3);
-["r0", "r1", "r2"].forEach((id, i) => stagger(id, 7.8 + i * 0.42, { distance: 22 }));
+shot("s2", 6.4, 9.6);
+stagger("s2k", 6.45);
+stagger("s2h", 6.55);
+["r0", "r1", "r2"].forEach((id, i) => stagger(id, 7.0 + i * 0.42, { distance: 22 }));
 
 /* Shot 3 — the commands, typed one character at a time. ------------------ */
-shot("s3", 10.3, 13.3);
-stagger("s3h", 10.45);
+shot("s3", 9.6, 12.8);
+stagger("s3h", 9.65);
 {
   /* Typing is a slice of a string by progress: deterministic, and the caret
      blinks on the frame grid rather than on a CSS animation's own clock. */
@@ -280,9 +292,9 @@ stagger("s3h", 10.45);
     set(id, { opacity: cut > 0 ? "1" : "0" });
   };
   const commands = [
-    ["c0", "d0", "seekreel probe 21.3", 10.7, 11.5],
-    ["c1", "d1", "seekreel render 480 620", 11.5, 12.3],
-    ["c2", "d2", "seekreel build", 12.3, 13.4],
+    ["c0", "d0", "seekreel probe 21.3", 10.0, 10.8],
+    ["c1", "d1", "seekreel render 480 620", 10.8, 11.6],
+    ["c2", "d2", "seekreel build", 11.6, 12.8],
   ];
   for (const [cmd, said, text, at, until] of commands) {
     type(cmd, text, at, 0.5, until);
@@ -291,12 +303,12 @@ stagger("s3h", 10.45);
 }
 
 /* Shot 4 — the end card, which holds to the last frame. ------------------ */
-shot("s4", 13.4, DURATION, { last: true });
-stagger("s4p", 14.0);
-stagger("install", 14.3, { distance: 20 });
-stagger("site", 14.6);
+shot("s4", 12.8, DURATION, { last: true });
+stagger("s4p", 13.3);
+stagger("install", 13.6, { distance: 20 });
+stagger("site", 13.9);
 {
-  const g = outExpo(span(13.5, 14.6));
+  const g = outExpo(span(12.85, 13.9));
   set("mark2", { fontVariationSettings: `"wdth" ${fix(92 + 33 * g, 1)}` });
 }
 

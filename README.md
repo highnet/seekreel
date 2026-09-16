@@ -28,6 +28,7 @@ There is a homepage too, with a viewer you can scrub:
 - [What you need installed](#what-you-need-installed)
 - [A full example](#a-full-example)
 - [Things to know before you start](#things-to-know-before-you-start)
+- [For agents](#for-agents)
 
 ---
 
@@ -126,7 +127,8 @@ JavaScript instead of trying to tween it.
 | `seekreel doctor` | Check that Chromium, ffmpeg and python are available |
 | `seekreel probe <t,t,...>` | Render only those timestamps, into `probe/` |
 | `seekreel render [a] [b]` | Render every frame, or just frames `a` to `b`, in place |
-| `seekreel audio` | Render the cue sheet to a WAV file |
+| `seekreel audio` | Render the soundtrack to a WAV file |
+| `seekreel strudel` | Fetch the Strudel bundle the audio engine needs, once |
 | `seekreel encode` | Turn the frames (plus the WAV) into every variant in `deliver/` |
 | `seekreel build` | Audio, then render, then encode |
 
@@ -152,7 +154,7 @@ seekreel build -c examples/collection-dex/seekreel.config.json
   "height": 1080,
   "poster": 22.1,
   "background": "#111315",
-  "audio": { "cues": "cues.json", "wav": "soundtrack.wav" },
+  "audio": { "engine": "strudel", "pattern": "music.strudel.js", "cps": 0.5 },
   "variants": [
     { "name": "" },
     { "name": "4x5", "ratio": "4:5" },
@@ -203,10 +205,70 @@ autoplay loop and an OG image — is five lines of config and one render.
 
 ## Sound
 
-Soundtracks are synthesized from a JSON cue sheet. There is no sample library to
-ship and no licences to keep track of, and moving a shot half a second later is
-a one-number edit. `seekreel audio` renders the cue sheet; `seekreel build` does
-it for you first.
+Two engines, and the choice is about what the soundtrack is for. Both synthesize
+everything: there is no sample library to ship and no licences to track.
+`seekreel audio` renders whichever one the config names, and `seekreel build`
+does it first.
+
+### Strudel patterns — music with a grid of its own
+
+[Strudel](https://strudel.cc) is TidalCycles' pattern language in JavaScript. A
+pattern is a pure function from a stretch of time to the events in it, which is
+the same bargain the picture side of seekreel makes — so seekreel queries the
+whole film's worth of cycles at once and renders them through an
+`OfflineAudioContext` in the same Chromium that shoots the frames. Nothing plays
+in realtime, nothing is recorded, and sixteen seconds of music takes about three.
+
+```json
+"audio": {
+  "engine": "strudel",
+  "pattern": "music.strudel.js",
+  "bundle": "strudel.mjs",
+  "cps": 0.625
+}
+```
+
+```js
+setcps(0.625) // a cycle is 1.6s, so a sixteen-second film is exactly ten of them
+
+stack(
+  note("c1").s("sine").struct("x ~ ~ ~ x ~ ~ ~").decay(.26).sustain(0),
+  s("white").struct("x*8").decay(.03).sustain(0).hpf(7200).gain("[.3 .14]*4"),
+  note("<c2 ab1 eb2 bb1>").s("sawtooth").lpf(sine.range(420, 1500).slow(4)),
+  note("<c5 eb5 g5 bb4>(3,8)").s("triangle").delay(.4).room(.6)
+)
+```
+
+`cps` is cycles per second, and it is the only number tying the pattern's grid
+to the film's seconds. Pick one where a cycle divides the duration and you can
+put the picture's cuts on the same boundaries — which is the difference between
+a cut that lands on a downbeat and one that lands near it.
+
+Three things to know:
+
+- **The file's last statement has to be the pattern.** An assignment evaluates
+  to nothing, and the render says so rather than writing silence.
+- **Strudel is fetched, not bundled.** `seekreel strudel` downloads the pinned
+  850KB build next to your config, once. A project then renders against the
+  version it fetched rather than whatever `npm install` brought in this week.
+- **Synth voices render offline; samples do not.** `sine`, `sawtooth`,
+  `triangle`, `square`, `white`, `pink` and `brown` need nothing. `s("bd")` and
+  the drum banks download sample packs the first time they are asked for.
+
+Anything you can write at [strudel.cc](https://strudel.cc) renders here, which
+makes the REPL a usable preview: get the pattern right there, paste it into the
+file, build.
+
+### Cue sheets — sound that lands on cuts
+
+A JSON sheet of one-off sounds placed by timestamp, over an optional looping
+bed. Moving a shot half a second later is a one-number edit, and the file diffs
+usefully against the version before it. This is still the better tool when the
+soundtrack exists to punctuate a shot table rather than to be music.
+
+```json
+"audio": { "engine": "cues", "cues": "cues.json" }
+```
 
 ```json
 {
@@ -238,7 +300,8 @@ itself, so `note`, `dur`, `freq` and `seed` work wherever that sound supports
 them. The whole synth is about three hundred lines in `src/audio/synth.py` —
 it is worth reading, and easy to add to.
 
-Audio needs `python3` (standard library only). Nothing else in seekreel does.
+This engine needs `python3` (standard library only). The Strudel engine does
+not: it renders in the browser seekreel already drives.
 
 ---
 
@@ -253,7 +316,8 @@ Audio needs `python3` (standard library only). Nothing else in seekreel does.
   used if it is installed; otherwise seekreel uses `ffmpeg` from your `PATH`, or
   whatever `FFMPEG` points at. The `webm` and `mov` formats also want
   `libvpx-vp9` and `prores_ks` — `seekreel doctor` says which ones you have.
-- **python3**, but only if you want sound.
+- **python3**, but only for the `cues` audio engine. The `strudel` engine
+  renders in the Chromium that is already there.
 
 Run `seekreel doctor` to see which of these it can find.
 
@@ -301,6 +365,15 @@ seekreel build -c examples/linkedin-promo/seekreel.config.json
   other way, wait for it yourself before marking the frame ready.
 - **No transparency.** Output is yuv420p H.264, because that is what social
   platforms accept. If you need an alpha channel, encode the frames yourself.
+
+---
+
+## For agents
+
+[SKILLS.md](SKILLS.md) is the same tool described for something that is driving
+it rather than learning it: the contract, the config, the commands, and the
+failure modes that produce a file which is technically valid and visibly wrong.
+The homepage has the same brief behind its *I'm an agent* fork.
 
 ---
 

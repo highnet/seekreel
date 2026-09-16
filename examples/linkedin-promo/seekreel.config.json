@@ -8,8 +8,14 @@
   "poster": 14.8,
   "background": "#ffffff",
   "audio": {
-    "cues": "cues.json",
-    "wav": "soundtrack.wav"
+    "engine": "strudel",
+    "pattern": "music.strudel.js",
+    "bundle": "strudel.mjs",
+    "cps": 0.625,
+    "wav": "soundtrack.wav",
+    "peak": 0.74,
+    "fadeIn": 0.05,
+    "fadeOut": 1.2
   },
   "variants": [
     {

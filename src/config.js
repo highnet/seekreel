@@ -85,12 +85,7 @@ export async function loadConfig(configPath) {
   config.probeDir = path.resolve(root, config.probe);
   config.deliverDir = path.resolve(root, config.deliver);
 
-  if (config.audio) {
-    config.audio = {
-      cues: path.resolve(root, config.audio.cues ?? "cues.json"),
-      wav: path.resolve(root, config.audio.wav ?? "soundtrack.wav"),
-    };
-  }
+  if (config.audio) config.audio = normalizeAudio(config, root, parsed.audio);
 
   if (!Array.isArray(config.variants) || config.variants.length === 0) {
     fail(`variants must be a non-empty array`);
@@ -154,6 +149,63 @@ function normalizeVariant(config, variant, index) {
     background: variant.background ?? config.background,
     scale: variant.scale ?? null,
     pad: variant.pad ?? null,
+  };
+}
+
+/**
+ * Sound, whichever engine makes it.
+ *
+ * Two engines, because they answer different questions. `cues` is a JSON sheet
+ * of one-off sounds placed by timestamp — right when the soundtrack exists to
+ * land on cuts. `strudel` is a pattern in the language strudel.cc speaks —
+ * right when you want music with a grid of its own, and the reason this is a
+ * choice rather than a replacement is that a cue sheet lined up with a shot
+ * table is still the better tool for a forty-three second film.
+ */
+const AUDIO_ENGINES = ["cues", "strudel"];
+
+function normalizeAudio(config, root, audio) {
+  const engine = audio.engine ?? "cues";
+  if (!AUDIO_ENGINES.includes(engine)) {
+    fail(`audio.engine must be one of ${AUDIO_ENGINES.join(", ")}, got ${JSON.stringify(audio.engine)}`);
+  }
+
+  const resolved = {
+    engine,
+    wav: path.resolve(root, audio.wav ?? "soundtrack.wav"),
+  };
+
+  if (engine === "cues") {
+    resolved.cues = path.resolve(root, audio.cues ?? "cues.json");
+    return resolved;
+  }
+
+  /*
+   * A cycle is Strudel's bar. `cps` is how many of them go by in a second, so
+   * it is also the only number that ties the pattern's grid to the film's
+   * seconds: at 0.625, a cycle is 1.6s and a sixteen-second film is exactly
+   * ten of them.
+   */
+  const cps = audio.cps ?? 0.5;
+  if (!(cps > 0)) fail(`audio.cps must be positive, got ${JSON.stringify(audio.cps)}`);
+
+  const sampleRate = audio.sampleRate ?? 48000;
+  if (!(sampleRate >= 8000)) fail(`audio.sampleRate must be at least 8000, got ${JSON.stringify(audio.sampleRate)}`);
+
+  const peak = audio.peak ?? 0.72;
+  if (!(peak > 0) || peak > 1) fail(`audio.peak must be between 0 and 1, got ${JSON.stringify(audio.peak)}`);
+
+  return {
+    ...resolved,
+    pattern: path.resolve(root, audio.pattern ?? "music.strudel.js"),
+    /* Fetched into the project, not vendored here: it is 850KB, and a project
+       that pins its own copy should keep pinning it. */
+    bundle: path.resolve(root, audio.bundle ?? "strudel.mjs"),
+    cps,
+    sampleRate,
+    peak,
+    fadeIn: audio.fadeIn ?? 0.05,
+    fadeOut: audio.fadeOut ?? 1.0,
   };
 }
 

@@ -1,47 +1,7 @@
-import { chromium } from "playwright-core";
 import { mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-
-/**
- * Where Chromium is.
- *
- * Not bundled: a browser is 150MB and most machines that want this already
- * have one, whether from a full `playwright` install or from the system. The
- * env var is checked first so CI can point at whatever it cached.
- */
-function chromiumPath() {
-  if (process.env.CHROMIUM) return process.env.CHROMIUM;
-  try {
-    // A full `playwright` install knows where it put its browsers.
-    return chromium.executablePath();
-  } catch {
-    return undefined;
-  }
-}
-
-async function launch() {
-  const executablePath = chromiumPath();
-  try {
-    return await chromium.launch({
-      executablePath,
-      args: [
-        // Type has to be identical from frame to frame, and subpixel hinting
-        // is the one thing that will not be: it shifts with the glyph cache.
-        "--font-render-hinting=none",
-        "--disable-lcd-text",
-        "--force-color-profile=srgb",
-      ],
-    });
-  } catch (error) {
-    const hint =
-      "No Chromium found. Either install one with `npm i -D playwright && npx playwright install chromium`, " +
-      "or point CHROMIUM at a Chrome or Chromium binary you already have.";
-    const wrapped = new Error(`${hint}\n\n${error.message}`);
-    wrapped.expected = true;
-    throw wrapped;
-  }
-}
+import { launch } from "./browser.js";
 
 /**
  * Shoot frames.

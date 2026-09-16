@@ -53,7 +53,23 @@ homepage are demonstrably the same brand.
 
 ## Sound
 
-`cues.json` is the soundtrack: a four-chord bed under the whole thing, a stamp
-on the wordmark, ticks while the scrubber drags, three pips for the three
-rules, a tray click per command, and a shutter into the end card. Moving a beat
-is one number in a JSON file that diffs.
+`music.strudel.js` is the soundtrack, written in [Strudel](https://strudel.cc)
+and rendered offline by `seekreel audio` — no realtime playback, no recording,
+the same WAV every time. Every voice is synthesised, so the render needs no
+network and the repo carries no audio.
+
+It runs at `cps` 0.625, so a cycle is 1.6 seconds and the film is exactly ten of
+them. The arrangement changes every two cycles — 3.2, 6.4, 9.6, 12.8 — and the
+picture cuts on the same numbers, which is why each cut lands on the downbeat
+the arrangement turns over on:
+
+| Cycles | Seconds | Picture | Sound |
+|---|---|---|---|
+| 0–1 | 0–3.2 | the wordmark | pad only, one rising sweep |
+| 2–3 | 3.2–6.4 | the scrubber | kick, hats, sub, bass |
+| 4–5 | 6.4–9.6 | the contract | bells arrive on the three rules |
+| 6–7 | 9.6–12.8 | the commands | snare on the backbeat, second sweep |
+| 8–9 | 12.8–16 | the end card | everything drops but the pad and one bell |
+
+Moving a section is one number in two files. That is the whole reason the
+soundtrack is source rather than an audio asset.

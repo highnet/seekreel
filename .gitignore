@@ -6,6 +6,7 @@ deliver/
 *.wav
 fonts/
 gsap.min.js
+strudel.mjs
 grain.png
 __pycache__/
 *.pyc
