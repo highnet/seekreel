@@ -1,12 +1,13 @@
-# examples/instagram-promo
+# examples/linkedin-promo
 
-A sixteen-second film promoting seekreel, rendered by seekreel. One HTML file,
+A sixteen-second film promoting seekreel, rendered by seekreel, cut for a
+LinkedIn post. One HTML file,
 one JSON cue sheet, no animation library — every value on the stage is
 arithmetic on `t`, which is the claim the film is making.
 
 ```sh
-sh examples/instagram-promo/setup.sh          # the two typefaces, fetched
-seekreel build -c examples/instagram-promo/seekreel.config.json
+sh examples/linkedin-promo/setup.sh          # the two typefaces, fetched
+seekreel build -c examples/linkedin-promo/seekreel.config.json
 ```
 
 384 frames, then five encodes and a poster off the same frames. The repo's rule
@@ -17,20 +18,22 @@ Out the other end, in `deliver/`:
 
 | File | Size | For |
 |---|---|---|
-| `seekreel-promo-4x5.mp4` | 1080×1350 | the feed post |
-| `seekreel-promo.mp4` | 1080×1080 | square, if the grid wants it |
-| `seekreel-promo-story.mp4` | 1080×1920 | Reels and Stories |
-| `seekreel-promo-loop.gif` | 1080×1080, 12fps | chat, README, link previews |
-| `seekreel-promo-silent.mp4` | 1080×1080 | when the feed supplies the music |
-| `seekreel-promo-poster.png` | frame 355 | the Reels cover and the still post |
+| `seekreel-promo.mp4` | 1080×1080 | the feed post |
+| `seekreel-promo-4x5.mp4` | 1080×1350 | the feed post, taller, for mobile |
+| `seekreel-promo-vertical.mp4` | 1080×1920 | LinkedIn's vertical video feed |
+| `seekreel-promo-loop.gif` | 1080×1080, 12fps | comments, DMs, a README |
+| `seekreel-promo-silent.mp4` | 1080×1080 | posting it without a soundtrack |
+| `seekreel-promo-poster.png` | frame 355 | the custom thumbnail |
 
 The 4:5 and 9:16 variants pad the square render with white rather than cropping
 it, which is why the config's `background` is `#ffffff` and why the layout
 keeps to the square: the padding has to read as the page continuing, not as
-bars.
+bars. The square is first in the config because it is the one LinkedIn's feed
+treats best on both desktop and mobile.
 
-[`POST.md`](POST.md) has the caption, the first comment, the alt text and which
-file goes in which slot.
+[`POST.md`](POST.md) has the post text, the first comment, the alt text and
+which file goes in which slot. The film carries every claim as on-screen type
+because LinkedIn autoplays muted.
 
 ## The stage
 
