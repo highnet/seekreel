@@ -176,10 +176,9 @@ on a loopback port for the length of the render, so `import` works, and so does
 `fetch` of a data file beside the stage.
 
 Cost, and it is worth knowing before a long render: the flag applies to the
-browser, not to the shot. Turning it on slowed the promo film in this repo from
-roughly a fifth of a second a frame to about seven tenths — on every frame,
-including the eleven shots that are pure DOM. A scene with real shading costs
-more again. If only part of a film is 3D, import the library inside the window
+browser, not to the shot. Turning it on took the promo film in this repo from
+roughly a fifth of a second a frame to about a third — on every frame, including
+the eleven shots that are pure DOM. A scene with real shading costs more again. If only part of a film is 3D, import the library inside the window
 that needs it (`examples/linkedin-promo` does) and `seekreel probe` a frame
 before committing to a pass.
 

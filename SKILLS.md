@@ -113,8 +113,8 @@ document.documentElement.setAttribute("data-seekreel-ready", "1");
   `mixer.update(delta)`.
 - `"webgl": true` applies to the browser, not to one shot: every frame gets
   slower, DOM ones included. In this repo's promo it took frames from about a
-  fifth of a second to about seven tenths. Import three.js inside the window
-  that needs it if only part of the film is 3D.
+  fifth of a second to about a third. Import three.js inside the window that
+  needs it if only part of the film is 3D.
 
 ## React
 
