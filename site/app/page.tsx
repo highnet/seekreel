@@ -128,15 +128,15 @@ export default function Home() {
           <div className="mx-auto grid max-w-[76rem] gap-12 px-5 sm:px-8 grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:items-center lg:gap-16 lg:pb-8">
             <div>
               <h1 className="max-w-[16ch] text-[clamp(2.5rem,6vw,4.6rem)] leading-[0.94] font-extrabold">
-                Ship the film, not the screen recording.
+                Turn your website into a video.
               </h1>
               <p className="mt-7 max-w-[46ch] text-lg leading-relaxed text-white/90 sm:text-xl">
-                seekreel turns the animation you already built in the browser into finished video —
-                every ratio, format and frame rate your feed asks for, cut from one render, with
-                every frame drawn exactly as you designed it. Same result on your laptop and in CI.
+                Put your real components on a page — the same React, CSS and fonts your site ships —
+                say what happens over time, and seekreel renders the MP4. Every size the feed asks
+                for, from one build. Made to be driven by an agent as readily as by you.
               </p>
               <ul className="mt-6 flex list-none flex-wrap gap-x-2 gap-y-2 p-0">
-                {['Launch films', 'Feature reels', '3D scenes', 'React'].map((use) => (
+                {['Launch videos', 'Feature reels', 'Store listings', 'Agent-driven'].map((use) => (
                   <li key={use} className="data rounded-sm bg-primary-deep px-2.5 py-1 text-white">
                     {use}
                   </li>
@@ -165,13 +165,14 @@ export default function Home() {
           <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
             <div className="grid gap-8 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-end">
               <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-                Re-cut one shot. Leave the other 287 alone.
+The site changed? Rebuild the shot that moved.
               </h2>
               <p className="max-w-[58ch] text-lg leading-relaxed text-muted">
-                Changed your mind about second eight? Render second eight. Check any single moment as
-                a PNG in about a second — <span className="data text-ink">seekreel probe 3.25</span> —
-                before committing to a full pass. Your film stops being a take you have to get right
-                and starts being a file you edit.
+                A button moved, the brand shifted, the pricing changed. Edit the page and re-render
+                the seconds that changed — check any single moment as a PNG in about a second,{' '}
+                <span className="data text-ink">seekreel probe 3.25</span>, before committing to a
+                full pass. Your promo video stops being a shoot you have to get right and starts
+                being a file you edit.
               </p>
             </div>
             <div className="mt-12">
@@ -186,7 +187,7 @@ export default function Home() {
             <div className="grid gap-12 grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
               <div>
                 <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-                  If it runs in a browser, it ships as video.
+If it runs in your browser, it ships as video.
                 </h2>
                 <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
                   No timeline app to learn, no export plugin, no runtime to install. Your page takes a
@@ -393,10 +394,10 @@ export default function Home() {
           <div className="grid gap-10 grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-end">
             <div>
               <h2 className="max-w-[16ch] text-[clamp(2.2rem,5vw,3.8rem)] leading-[0.95] font-extrabold">
-                Your next launch film is a page away.
+Your website is already the video.
               </h2>
               <p className="mt-5 max-w-[46ch] leading-relaxed text-white/80">
-                It was built to cut a 43-second film for{' '}
+It was built to cut a 43-second launch film for{' '}
                 <a className="text-primary-lit underline underline-offset-4" href="https://collectiondex.com">
                   Collection Dex
                 </a>

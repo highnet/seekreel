@@ -7,16 +7,20 @@ still.
 
 ## In one paragraph
 
-seekreel renders an animated web page to video by seeking it. The page draws
-the frame belonging to a timestamp; seekreel loads it once per frame, screenshots
-each one, and ffmpeg stitches the frames into every variant the config asks for.
-Frame N is the same picture on any machine and on any run, because it is derived
-from a number rather than captured from a clock. The cost is a page load and a
-screenshot per frame — about a second each, so a 43-second film is roughly twenty
-minutes.
+seekreel turns a website into video. You build a page that shows the product off
+— the site's own components, brand and fonts — and seekreel renders it by
+seeking: the page draws the frame belonging to a timestamp, seekreel loads it
+once per frame, screenshots each one, and ffmpeg stitches the frames into every
+variant the config asks for. Frame N is the same picture on any machine and on
+any run, because it is derived from a number rather than captured from a clock.
+That is what makes the job safe to hand to you: render, probe one frame, fix
+that bit, rebuild, with nobody checking over your shoulder. The cost is a page
+load and a screenshot per frame — about a second each, so a 43-second film is
+roughly twenty minutes.
 
-Use it for a film that is cut once and then edited in pieces: a launch video, a
-feature reel, a social post, a loop for a store page. Do not use it for anything
+Use it for a video that is cut once and then edited in pieces: a launch video, a
+feature reel, a social post, a loop for a store page. The common job is showing
+a website off in the feed. Do not use it for anything
 interactive, and do not reach for it when a screen recording of a real product
 session is what was actually asked for.
 

@@ -1,10 +1,16 @@
 # seekreel
 
-**Turn an animated web page into a video file — one frame at a time.**
+**Turn your website into a video — one frame at a time. For agents and humans.**
 
-You write a normal HTML page that knows how to draw itself at any moment in
-time. seekreel walks through every moment in the video, screenshots the page at
-each one, and stitches the screenshots into an MP4 with ffmpeg.
+You write a page that shows the product off, built from the components your site
+already ships. It knows how to draw itself at any moment in time; seekreel walks
+through every moment in the video, screenshots the page at each one, and
+stitches the screenshots into an MP4 with ffmpeg.
+
+Because every step is a file and every run draws the same frames, an agent can
+do the whole job — render, look at one frame, fix that bit, rebuild — without
+anyone watching. [SKILLS.md](SKILLS.md) is the version of these docs written for
+one.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh

@@ -85,11 +85,12 @@ p{font-size:31px;line-height:1.4;color:var(--muted);max-width:24ch}
 #film span.hot{background:var(--primary);border-color:var(--primary)}
 #film span.hot::after{content:"";position:absolute;inset:16px;border:2px solid rgba(255,255,255,0.7)}
 
-/* Shot 7 — in the repo. */
-.lines{display:grid;gap:16px;max-width:820px}
-.lines div{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:18px;
-  font-size:29px;color:var(--ink)}
-.lines b{font:700 22px/1 "Martian Mono",ui-monospace,monospace;color:var(--primary)}
+/* Shot 7 — the two people who drive it. */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:860px}
+.pair div{border-top:3px solid var(--primary);padding-top:20px}
+.pair b{display:block;font-size:40px;font-weight:750;letter-spacing:-0.035em;
+  font-variation-settings:"wdth" 112;color:var(--primary)}
+.pair span{display:block;margin-top:10px;font-size:26px;line-height:1.35;color:var(--muted)}
 
 /* Shot 8 — the command. */
 .cmd{font:500 30px/1.5 "Martian Mono",ui-monospace,monospace;letter-spacing:-0.05em;
@@ -109,16 +110,16 @@ p{font-size:31px;line-height:1.4;color:var(--muted);max-width:24ch}
   <!-- 0 · the hook -->
   <section class="shot on-wash" id="s0">
     <div class="mark" id="s0m">seekreel</div>
-    <h1 id="s0h">Ship the film,<br>not the screen<br>recording.</h1>
-    <p id="s0p">Finished video, straight out of the browser you already build in.</p>
+    <h1 id="s0h">Turn your<br>website into<br>a video.</h1>
+    <p id="s0p">For the feed, for the launch, for the pitch. Built for agents and humans.</p>
   </section>
 
   <!-- 1 · the idea, in one line -->
   <section class="shot" id="s1">
-    <h2 id="s1h">Your next video is a web&nbsp;page.</h2>
+    <h2 id="s1h">Your real components, on&nbsp;camera.</h2>
     <div id="page"><i></i><i></i><i></i></div>
     <div class="strip" id="strip"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
-    <p id="s1p">Build it the way you build everything else. Get an MP4 back.</p>
+    <p id="s1p">The same React, the same CSS, the same fonts your site ships. Not a mockup of them.</p>
   </section>
 
   <!-- 2 · every shape the feed wants -->
@@ -130,42 +131,48 @@ p{font-size:31px;line-height:1.4;color:var(--muted);max-width:24ch}
 
   <!-- 3 · 3D -->
   <section class="shot" id="s3">
-    <h2 id="s3h">3D comes with it.</h2>
+    <h2 id="s3h">3D, if your site has&nbsp;it.</h2>
     <canvas id="three" width="820" height="440"></canvas>
-    <p id="s3p">Real WebGL, rendered clean — no capture card, no dropped frames.</p>
+    <p id="s3p">Real WebGL, drawn properly. No capture card, no dropped frames.</p>
   </section>
 
   <!-- 4 · anything that runs in a browser -->
   <section class="shot" id="s4">
-    <h2 id="s4h">Use what you already know.</h2>
+    <h2 id="s4h">Whatever your site is built&nbsp;with.</h2>
     <div class="words" id="words">
       <span>React</span><span>GSAP</span><span>three.js</span><span>CSS</span><span>Canvas</span><span>SVG</span>
     </div>
-    <p id="s4p">If it runs in a browser, it ships as video.</p>
+    <p id="s4p">If it runs in your browser, it ships as video.</p>
   </section>
 
   <!-- 5 · sound -->
   <section class="shot" id="s5">
     <h2 id="s5h">Music included, not licensed.</h2>
     <div id="levels"></div>
-    <p id="s5p">A soundtrack that ships with the film and moves when the film moves.</p>
+    <p id="s5p">A soundtrack that ships with the video and moves when the video moves.</p>
   </section>
 
   <!-- 6 · re-cut one shot -->
   <section class="shot" id="s6">
-    <h2 id="s6h">Fix second eight. Keep the rest.</h2>
+    <h2 id="s6h">The site changed? Rebuild it.</h2>
     <div id="film"></div>
-    <p id="s6p">Re-render one shot in a minute instead of shooting the whole thing again.</p>
+    <p id="s6p">Change the page, re-render the shot that moved. No second video shoot.</p>
   </section>
 
-  <!-- 7 · it lives in the repo -->
+  <!-- 7 · agents and humans -->
   <section class="shot" id="s7">
-    <h2 id="s7h">It belongs in your repo.</h2>
-    <div class="lines" id="lines">
-      <div><b>01</b><span>Review it like code, because it is code</span></div>
-      <div><b>02</b><span>Rebuild it in CI whenever the brand changes</span></div>
-      <div><b>03</b><span>Ship the same file from every machine</span></div>
+    <h2 id="s7h">Built for agents and humans.</h2>
+    <div class="pair" id="pair">
+      <div>
+        <b>You</b>
+        <span>Edit the page. Watch a frame. Build.</span>
+      </div>
+      <div>
+        <b>Your agent</b>
+        <span>Reads the skill file, renders, checks a frame, fixes it, rebuilds.</span>
+      </div>
     </div>
+    <p id="s7p">It lives in your repo either way — plain files, same result every run.</p>
   </section>
 
   <!-- 8 · free -->
@@ -173,13 +180,13 @@ p{font-size:31px;line-height:1.4;color:var(--muted);max-width:24ch}
     <div class="free" id="s8k">free · open source · MIT</div>
     <h2 id="s8h">One command to start.</h2>
     <div class="cmd" id="s8c">git clone https://github.com/highnet/seekreel</div>
-    <p id="s8p">Node, a browser and ffmpeg. Nothing else to buy or sign up for.</p>
+    <p id="s8p">Node, a browser and ffmpeg. Nothing to buy and nothing to sign up for.</p>
   </section>
 
   <!-- 9 · end card -->
   <section class="shot on-wash" id="s9">
     <div id="endmark">seekreel</div>
-    <p id="s9p" style="max-width:22ch">Turn the page you already built into the video you need.</p>
+    <p id="s9p" style="max-width:22ch">Your website, in the feed. Made by you or by your agent.</p>
     <div id="site">https://seekreel.vercel.app/</div>
   </section>
 </div>
@@ -392,15 +399,16 @@ function stagger(id, at, { distance = 16 } = {}) {
   }).join("");
 }
 
-/* 7 — in the repository. ------------------------------------------------- */
+/* 7 — the two people who drive it. --------------------------------------- */
 {
   const start = shot("s7", 7);
   stagger("s7h", start + 0.05);
-  el("lines").querySelectorAll("div").forEach((line, i) => {
-    const g = outExpo(span(start + 0.55 + i * 0.35, start + 1.15 + i * 0.35));
-    Object.assign(line.style, {
+  stagger("s7p", start + 2.4);
+  el("pair").querySelectorAll("div").forEach((column, i) => {
+    const g = outExpo(span(start + 0.55 + i * 0.4, start + 1.2 + i * 0.4));
+    Object.assign(column.style, {
       opacity: fix(g, 3),
-      transform: `translateY(${fix(18 * (1 - g), 2)}px)`,
+      transform: `translateY(${fix(20 * (1 - g), 2)}px)`,
     });
   });
 }

@@ -145,9 +145,11 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
     const markdown = [
       '# seekreel — brief for agents',
       '',
-      'Renders an animated web page to video by seeking it: the page draws the frame for a',
-      'timestamp, seekreel screenshots every frame and ffmpeg stitches them. Deterministic —',
-      'frame N is the same on any machine. Cost: about one second per frame, two for WebGL.',
+      'Turns a website into video: build a page from the site\'s own components, and seekreel',
+      'renders it a frame at a time. The page draws the frame for a timestamp, seekreel',
+      'screenshots every frame, ffmpeg stitches them. Deterministic — frame N is the same on any',
+      'machine, which is what makes it safe for an agent to render, check a frame and rebuild.',
+      'Cost: about one second per frame, two for WebGL.',
       '',
       'Install (git, not npm):',
       '  curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh',
@@ -206,9 +208,11 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
         seekreel, for agents
       </h1>
       <p className="mt-5 max-w-[68ch] text-lg leading-relaxed text-muted">
-        A CLI that renders an animated web page to video by seeking it: the page draws the frame for
-        a timestamp, seekreel screenshots every frame, ffmpeg stitches them. Frame N is identical on
-        any machine and on any run, which is what makes a film reviewable in a repository. The cost
+        A CLI for turning a website into video: you build a page that draws the product off — the
+        site&apos;s own components, brand and fonts — and seekreel renders it a frame at a time.
+        The page draws the frame for a timestamp, seekreel screenshots every frame, ffmpeg stitches
+        them. Frame N is identical on any machine and on any run, which is what makes this
+        agent-drivable: render, look at one frame, fix it, rebuild, with nobody watching. The cost
         is a page load and a screenshot per frame — budget about a second each.
       </p>
 

@@ -79,11 +79,11 @@ export default function AudienceFork({ children }: { children: React.ReactNode }
     <>
       <div className="border-b border-white/20 bg-primary text-white">
         <div className="mx-auto flex max-w-[76rem] flex-wrap items-center gap-x-4 gap-y-2 px-5 py-2.5 sm:px-8">
-          <span className="data text-white/75">Reading this as</span>
+          <span className="data text-white/75">Built for both. Reading this as</span>
           <div role="group" aria-label="Who is reading" className="flex gap-1.5">
             {(
               [
-                ['human', "I'm a human", 'The film, the scrubber, the argument.'],
+                ['human', "I'm a human", 'The video, the playground, the argument.'],
                 ['agent', "I'm an agent", 'The contract, the flags, the failure modes.'],
               ] as const
             ).map(([value, label, hint]) => (
