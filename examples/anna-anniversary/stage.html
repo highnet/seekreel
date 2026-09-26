@@ -1,0 +1,1275 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Fries for Two</title>
+<style>
+  @font-face {
+    font-family: "Bricolage";
+    src: url("fonts/bricolage.ttf") format("truetype");
+    font-weight: 200 800;
+    font-stretch: 75% 100%;
+  }
+  :root {
+    --plum: #3a1f3d;
+    --plum-soft: #6b4a6e;
+    --rose: #e0607e;
+    --cream: #fff6ec;
+    --butter: #ffe3a3;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100vw; height: 100vh; overflow: hidden; background: #ffd9b8; }
+  body { font-family: "Bricolage", system-ui, sans-serif; color: var(--plum); }
+
+  #sky, #view, #fx, #bubbles, #photos, #captions, #card { position: absolute; inset: 0; }
+  #view { display: block; width: 100vw; height: 100vh; }
+
+  .orb { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); }
+  #sun { width: 12vh; height: 12vh; background: radial-gradient(circle, #fff7d6 0 45%, #ffd88a 60%, rgba(255,216,138,0) 72%); }
+  #moon { width: 8vh; height: 8vh; background: radial-gradient(circle at 38% 38%, #fffaf0 0 50%, #efe4ff 64%, rgba(239,228,255,0) 72%); }
+  .star { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff8e8; }
+
+  /* vignette, soft and warm */
+  #fx { pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(80,30,60,.16) 100%); }
+
+  /* speech bubbles */
+  .bubble {
+    position: absolute; left: 0; top: 0;
+    padding: .55em .9em .6em;
+    background: var(--cream); border-radius: 1.1em;
+    font-size: 3.1vh; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+    box-shadow: 0 .35vh 0 rgba(58,31,61,.18);
+    transform-origin: 50% 100%;
+  }
+  .bubble::after {
+    content: ""; position: absolute; left: 50%; bottom: -.9vh; width: 1.8vh; height: 1.8vh;
+    background: var(--cream); transform: translateX(-50%) rotate(45deg); border-radius: .2vh;
+  }
+
+  /* captions: one line of words that each spring in */
+  #captions { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 7.5vh; pointer-events: none; }
+  .line {
+    position: absolute; bottom: 7.5vh; left: 8vw; right: 8vw;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .28em;
+    font-size: 5.4vh; font-weight: 780; font-stretch: 92%; letter-spacing: -.025em; line-height: 1.15;
+    color: var(--plum);
+    text-shadow: 0 .25vh 0 rgba(255,246,236,.75), 0 0 2.2vh rgba(255,246,236,.55);
+  }
+  .line.aside { font-size: 3.8vh; font-weight: 560; color: var(--plum-soft); bottom: 8vh; }
+  .line.big { font-size: 10vh; font-weight: 800; font-stretch: 85%; color: var(--rose); bottom: auto; top: 7vh; letter-spacing: -.035em;
+    text-shadow: 0 .5vh 0 rgba(255,246,236,.9), 0 0 4vh rgba(255,246,236,.7); }
+  .line.title { font-size: 8.5vh; bottom: auto; top: 9vh; font-stretch: 85%; }
+  .night .line { color: var(--cream); text-shadow: 0 .3vh 0 rgba(30,20,60,.7), 0 0 2.4vh rgba(30,20,60,.6); }
+  .night .line.aside { color: #e9dcf5; }
+  .word { display: inline-block; transform-origin: 50% 90%; will-change: transform; }
+
+  /* the real photos */
+  #photos { pointer-events: none; }
+  .polaroid {
+    position: absolute; width: 21vh; padding: 1.1vh 1.1vh 0; background: #fffdf8;
+    box-shadow: 0 1.2vh 2.4vh rgba(58,31,61,.22), 0 .2vh .4vh rgba(58,31,61,.15);
+  }
+  .polaroid img { display: block; width: 100%; height: 22vh; object-fit: cover; }
+  .polaroid figcaption { font-size: 2.2vh; font-weight: 650; color: var(--plum); text-align: center; padding: .9vh 0 1.2vh; letter-spacing: -.01em; }
+
+  /* chapter cards */
+  #card { background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #card[hidden] { display: none; }
+  #card .n { font-size: 3.4vh; font-weight: 650; letter-spacing: .02em; color: var(--plum-soft); margin-bottom: 1.2vh; }
+  #card .t { font-size: 14vh; font-weight: 800; font-stretch: 80%; letter-spacing: -.04em; color: var(--rose); line-height: 1; }
+  #card svg { width: 5vh; height: 5vh; margin-top: 3.4vh; }
+</style>
+
+<div id="sky"></div>
+<canvas id="view"></canvas>
+<div id="fx"></div>
+<div id="bubbles"></div>
+<div id="photos"></div>
+<div id="captions"></div>
+<div id="card" hidden>
+  <div class="n"></div>
+  <div class="t"></div>
+  <svg viewBox="0 0 32 30"><path d="M16 29 C 5 21 0 14 0 8.5 C 0 3.5 3.8 0 8.4 0 C 11.6 0 14.4 1.8 16 4.6 C 17.6 1.8 20.4 0 23.6 0 C 28.2 0 32 3.5 32 8.5 C 32 14 27 21 16 29 Z" fill="#e0607e"/></svg>
+</div>
+
+<script src="motion.js"></script>
+<script type="module">
+/*
+ * Fries for Two — an anniversary film for Anna.
+ *
+ * A seekreel stage: everything on screen is computed from `t`. Framer Motion
+ * (the `motion` package) supplies the springs, easings and colour mixing, but
+ * its spring is *sampled* at an elapsed time rather than run on a clock, so
+ * frame N is the same picture every time it is drawn.
+ */
+import * as THREE from "./three.module.js";
+
+const { spring, interpolate, mix, mixColor, easeInOut, easeOut, easeIn, cubicBezier } = window.Motion;
+
+const rawT = parseFloat(new URLSearchParams(location.search).get("t") || "0");
+/*
+ * "Adventures" was added after the rest of the film was timed, so it is spliced
+ * in: 68–84s of the video is its own scene, and everything written before it
+ * keeps its original story time `t` (video time minus sixteen seconds after the
+ * insert). `clock` is plain video time, for idle motion that should never stop.
+ */
+const ADV = 68, ADV_LEN = 16;
+const inAdv = rawT >= ADV && rawT < ADV + ADV_LEN;
+const t = rawT < ADV ? rawT : inAdv ? ADV - 0.03 : rawT - ADV_LEN;
+const clock = rawT;
+const W = innerWidth, H = innerHeight;
+
+// ---------------------------------------------------------------------------
+// helpers
+// ---------------------------------------------------------------------------
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const span = (a, b, x = t) => clamp01((x - a) / (b - a));
+const within = (a, b) => t >= a && t < b;
+const TAU = Math.PI * 2;
+
+/* A Motion spring, sampled `sec` seconds after it was let go. */
+function springAt(sec, from = 0, to = 1, opts = {}) {
+  if (sec <= 0) return from;
+  const g = spring({ keyframes: [from, to], stiffness: 260, damping: 14, mass: 1, ...opts });
+  return g.next(sec * 1000).value;
+}
+/* Pop in at `a`, drop out at `b`. */
+function popInOut(a, b, opts, outDur = 0.35, time = t) {
+  if (time < a || time > b + outDur) return 0;
+  const inV = springAt(time - a, 0, 1, opts);
+  const out = easeIn(span(b, b + outDur, time));
+  return inV * (1 - out);
+}
+
+/* Seeded random, so the confetti lands in the same place every frame. */
+function rng(seed) {
+  let s = seed >>> 0 || 1;
+  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+}
+
+/* Keyframe tracks: [{t, p:[x,z,y?], hops?, ry?}] → position at time t. */
+function track(keys, time = t) {
+  if (time <= keys[0].t) return { x: keys[0].p[0], z: keys[0].p[1], y: keys[0].p[2] || 0, air: 0, moving: false, dir: 0 };
+  for (let i = 1; i < keys.length; i++) {
+    const a = keys[i - 1], b = keys[i];
+    if (time < b.t) {
+      const u = (time - a.t) / (b.t - a.t);
+      const e = b.hops ? u : easeInOut(u);
+      const x = mix(a.p[0], b.p[0], e), z = mix(a.p[1], b.p[1], e);
+      const y = mix(a.p[2] || 0, b.p[2] || 0, e);
+      const moved = Math.hypot(b.p[0] - a.p[0], b.p[1] - a.p[1]) > 0.01 || (b.p[2] || 0) !== (a.p[2] || 0);
+      let air = 0;
+      if (b.hops) air = Math.abs(Math.sin(Math.PI * b.hops * u)) * (b.hh ?? 0.55);
+      return { x, z, y: y + air, air, moving: moved, dir: Math.atan2(b.p[0] - a.p[0], b.p[1] - a.p[1]), hopU: b.hops ? (b.hops * u) % 1 : 0 };
+    }
+  }
+  const l = keys[keys.length - 1];
+  return { x: l.p[0], z: l.p[1], y: l.p[2] || 0, air: 0, moving: false, dir: 0 };
+}
+
+// ---------------------------------------------------------------------------
+// the film, as data
+// ---------------------------------------------------------------------------
+const CARDS = [
+  { at: 8,   n: "Chapter one",   title: "How we met" },
+  { at: 36,  n: "Chapter two",   title: "The early days" },
+  { at: 68,  n: "Chapter three", title: "Now" },
+  { at: 104, n: "Chapter four",  title: "The future" },
+];
+const CARD_LEN = 4;
+
+/* Captions: style is "" (normal), "aside", "big" or "title". */
+const CAPTIONS = [
+  { at: 0.8,   to: 3.4,   s: "title", text: "A very serious documentary" },
+  { at: 3.7,   to: 5.6,   s: "title", text: "about Anna and me." },
+  { at: 5.7,   to: 7.6,   s: "aside", text: "(and some fries)" },
+
+  { at: 12.5,  to: 15.2,  text: "Once upon a time, I was a simple blob." },
+  { at: 15.5,  to: 18.6,  text: "Minding my own business. Eating my own fries." },
+  { at: 19.1,  to: 21.8,  text: "Then she showed up." },
+  { at: 24.9,  to: 27.4,  text: "…and stole a fry." },
+  { at: 27.8,  to: 30.0,  text: "I should have been furious." },
+  { at: 30.3,  to: 33.0,  text: "Instead I thought: “wow. marry her.”" },
+  { at: 33.3,  to: 35.6,  text: "So I did." },
+
+  { at: 40.3,  to: 42.9,  text: "Then came the baby." },
+  { at: 43.2,  to: 45.6,  text: "A very good baby." },
+  { at: 46.0,  to: 48.4,  text: "Who also steals fries." },
+  { at: 48.6,  to: 50.8,  s: "aside", text: "(learned from the best.)" },
+  { at: 51.2,  to: 53.9,  text: "We built a home." },
+  { at: 54.2,  to: 57.6,  s: "aside", text: "(she built it. I held the instructions upside down.)" },
+  { at: 59.0,  to: 62.2,  text: "She laughs at all my jokes." },
+  { at: 62.5,  to: 64.5,  text: "Even the bad ones." },
+  { at: 64.8,  to: 67.6,  s: "aside", text: "(especially the bad ones. we don't talk about it.)" },
+
+  { at: 72.6,  to: 76.2,  text: "There's something I don't say enough." },
+  { at: 76.6,  to: 79.9,  text: "I see how hard you work." },
+  { at: 80.3,  to: 83.9,  text: "How you keep going when things get heavy." },
+  { at: 84.3,  to: 87.3,  text: "What an amazing mom you are." },
+  { at: 87.6,  to: 90.8,  s: "aside", text: "(even at 3am. even to fry thieves.)" },
+  { at: 91.4,  to: 93.0,  s: "big", text: "Anna," },
+  { at: 93.2,  to: 97.8,  s: "big", text: "I am so proud of you." },
+  { at: 98.1,  to: 102.8, s: "aside", text: "(like, SO proud. obnoxiously proud. I tell strangers.)" },
+
+  { at: 108.4, to: 111.2, text: "Forecast for the next fifty years:" },
+  { at: 111.5, to: 113.3, text: "More adventures." },
+  { at: 113.5, to: 115.3, text: "More bad jokes." },
+  { at: 115.5, to: 116.9, text: "More sleep?" },
+  { at: 117.0, to: 118.8, s: "aside", text: "(unlikely)" },
+  { at: 119.1, to: 121.6, text: "And I promise to always share my fries." },
+  { at: 121.8, to: 123.8, s: "aside", text: "(terms and conditions apply)" },
+
+  { at: 128.4, to: 132.2, s: "big", text: "I love you, Anna." },
+  { at: 132.5, to: 135.2, text: "Happy anniversary." },
+  { at: 135.5, to: 138.4, text: "Here's to every year. And every fry." },
+  { at: 139.0, to: 141.2, s: "aside", text: "(except that one. that one's the baby's.)" },
+  { at: 141.6, to: 144.5, s: "aside", text: "— the end —" },
+];
+
+const BUBBLES = [
+  { at: 22.0,  to: 23.9,  who: "anna", text: "hi." },
+  { at: 23.2,  to: 24.8,  who: "me",   text: "h-hi" },
+  { at: 25.9,  to: 27.6,  who: "me",   text: "!!!" },
+  { at: 42.0,  to: 43.8,  who: "baby", text: "goo!" },
+  { at: 49.0,  to: 50.9,  who: "baby", text: "who, me?" },
+  { at: 54.6,  to: 57.2,  who: "me",   text: "step 1: ???" },
+  { at: 58.4,  to: 60.8,  who: "me",   text: "why did the fry…" },
+  { at: 61.0,  to: 63.4,  who: "anna", text: "hahaha" },
+  { at: 99.0,  to: 101.8, who: "baby", text: "(also proud)" },
+  { at: 120.5, to: 121.8, who: "anna", text: "aww" },
+  { at: 122.3, to: 123.7, who: "anna", text: "hey!" },
+  { at: 126.9, to: 128.2, who: "anna", text: "♥" },
+  { at: 126.9, to: 128.2, who: "me",   text: "♥" },
+];
+
+
+/* The inserted chapter, on video time. */
+const ADV_CAPTIONS = [
+  { at: 72.3, to: 74.6, text: "We took the baby on a plane." },
+  { at: 74.8, to: 76.5, s: "aside", text: "(row 14 will never forget us.)" },
+  { at: 77.0, to: 79.7, text: "Sicily. Sun, sea, and zero sleep." },
+  { at: 80.0, to: 82.0, s: "aside", text: "(I was fine. I was a lobster.)" },
+  { at: 82.2, to: 83.9, text: "Best. Trip. Ever." },
+];
+const ADV_BUBBLES = [
+  { at: 72.7, to: 74.6, who: "plane", text: "WAAAAH" },
+  { at: 74.9, to: 76.4, who: "plane", text: "sorry! sorry!" },
+  { at: 78.2, to: 79.6, who: "adv_anna", text: "sunscreen!" },
+  { at: 79.0, to: 80.4, who: "adv_me", text: "I'm fine" },
+];
+/* The photos, landing as polaroids in the finale (video time). */
+const POLAROIDS = [
+  { src: "kiss",       x: 11, y: 27, r: -6, label: "us" },
+  { src: "vienna",     x: 89, y: 27, r: 5,  label: "Vienna" },
+  { src: "sicily",     x: 10, y: 70, r: 4,  label: "Sicily" },
+  { src: "pool",       x: 90, y: 70, r: -5, label: "pool days" },
+  { src: "grimace",    x: 30, y: 19, r: 3,  label: "family portrait" },
+  { src: "watermelon", x: 70, y: 19, r: -4, label: "the fry thief" },
+  { src: "airport",    x: 27, y: 62, r: -3, label: "row 14 survivors" },
+  { src: "bottle",     x: 73, y: 62, r: 4,  label: "breakfast club" },
+];
+const POLAROID_AT = 148.8;
+
+/* Where everyone stands. p = [x, z, y]. */
+const ME_KEYS = [
+  { t: 0,     p: [-1.75, 1.45] },
+  { t: 34.0,  p: [-1.75, 1.45] },
+  { t: 35.4,  p: [-1.05, 1.5], hops: 2 },
+  { t: 52.4,  p: [-1.05, 1.5] },
+  { t: 53.8,  p: [2.9, 0.1], hops: 4 },
+  { t: 57.6,  p: [2.9, 0.1] },
+  { t: 58.2,  p: [-1.75, 1.45], hops: 4 },
+  { t: 72.0,  p: [-1.75, 1.45] },
+  { t: 106,   p: [-1.75, 1.45] },
+  { t: 107.9, p: [-1.05, 0.55, 0.42] },
+  { t: 124.0, p: [-1.05, 0.55, 0.42] },
+  { t: 124.6, p: [-1.4, 1.2], hops: 1 },
+  { t: 126.4, p: [-0.74, 1.2], hops: 3, hh: 0.4 },
+];
+const ANNA_KEYS = [
+  { t: 0,     p: [5.5, -0.8] },
+  { t: 19.0,  p: [4.2, -0.6] },
+  { t: 21.6,  p: [0.55, 1.5], hops: 5 },
+  { t: 52.4,  p: [0.55, 1.5] },
+  { t: 53.8,  p: [1.1, -0.3], hops: 2 },
+  { t: 57.6,  p: [1.1, -0.3] },
+  { t: 58.2,  p: [0.55, 1.5], hops: 2 },
+  { t: 73.0,  p: [0.55, 1.5] },
+  { t: 74.6,  p: [0.8, 0.15, 0.9], hops: 2, hh: 0.9 },
+  { t: 104,   p: [0.8, 0.15, 0.9] },
+  { t: 105.4, p: [0.55, 1.5], hops: 2 },
+  { t: 106,   p: [0.55, 1.5] },
+  { t: 107.9, p: [0.15, 0.55, 0.42], hops: 1 },
+  { t: 124.0, p: [0.15, 0.55, 0.42] },
+  { t: 124.6, p: [0.4, 1.2], hops: 1 },
+  { t: 126.4, p: [0.34, 1.2], hops: 3, hh: 0.4 },
+];
+const BABY_KEYS = [
+  { t: 0,     p: [2.6, 1.9, 0.62] },
+  { t: 41.5,  p: [2.6, 1.9, 0.62] },
+  { t: 42.4,  p: [1.9, 2.5], hops: 1, hh: 0.6 },
+  { t: 45.2,  p: [1.9, 2.5] },
+  { t: 46.2,  p: [-0.35, 1.95], hops: 3, hh: 0.3 },
+  // the victory lap, around the island
+  { t: 46.9,  p: [-0.9, 2.9], hops: 2, hh: 0.2 },
+  { t: 47.6,  p: [-2.9, 1.8], hops: 2, hh: 0.2 },
+  { t: 48.3,  p: [-3.3, -0.4], hops: 2, hh: 0.2 },
+  { t: 49.0,  p: [-1.6, 1.0], hops: 2, hh: 0.2 },
+  { t: 52.0,  p: [-0.2, 2.4], hops: 5, hh: 0.2 },
+  { t: 70.0,  p: [-0.2, 2.4] },
+  { t: 72.0,  p: [-2.6, 1.6] },
+  { t: 97.5,  p: [-2.6, 1.6] },
+  { t: 98.6,  p: [-0.6, 1.4], hops: 3, hh: 0.35 },
+  { t: 106,   p: [-0.15, 2.25] },
+  { t: 107.5, p: [1.2, 1.8], hops: 3, hh: 0.25 },
+  { t: 138.0, p: [1.2, 1.8] },
+  { t: 139.0, p: [-0.35, 1.95], hops: 3, hh: 0.3 },
+  { t: 141.0, p: [2.2, 2.6], hops: 5, hh: 0.25 },
+];
+
+/* Fries leaving the box. Each one flies from the box to a mouth. */
+const FRY_BOX = new THREE.Vector3(-0.6, 0, 1.6);
+const FRIES = [
+  { at: 16.3, dur: 0.6, to: "me" },
+  { at: 24.8, dur: 0.6, to: "anna" },
+  { at: 45.9, dur: 0.4, to: "baby", carry: [46.3, 51.2] },
+  { at: 119.8, dur: 0.6, to: "anna", carry: [120.4, 121.9], back: [121.95, 122.5] },
+  { at: 139.0, dur: 0.3, to: "baby", carry: [139.3, 144] },
+];
+const FRY_COUNT = 5;
+
+/* One-off reactions: squash (chew, laugh, land), eyes (surprise), blush. */
+const REACT = {
+  me: [
+    { at: 16.9, k: "chew", len: 1.4 },
+    { at: 23.2, k: "blush", len: 11 },
+    { at: 25.4, k: "shock", len: 2.2 },
+    { at: 30.4, k: "swoon", len: 2.6 },
+    { at: 58.4, k: "talk", len: 2.2 },
+    { at: 93.2, k: "swoon", len: 6 },
+    { at: 122.5, k: "chew", len: 1.2 },
+  ],
+  anna: [
+    { at: 22.0, k: "talk", len: 1.2 },
+    { at: 25.4, k: "chew", len: 1.4 },
+    { at: 61.0, k: "laugh", len: 2.4 },
+    { at: 93.2, k: "shy", len: 6 },
+    { at: 120.4, k: "chew", len: 1.0 },
+    { at: 122.3, k: "shock", len: 1.2 },
+  ],
+  baby: [
+    { at: 41.4, k: "laugh", len: 1.2 },
+    { at: 116.0, k: "laugh", len: 1.4 },
+  ],
+  /* the Sicily scene runs on video time */
+  adv_baby: [{ at: 77.0, k: "chew", len: 6.5 }],
+  adv_me:   [{ at: 79.0, k: "talk", len: 1.4 }, { at: 80.2, k: "shock", len: 1.6 }],
+  adv_anna: [{ at: 78.2, k: "talk", len: 1.2 }, { at: 80.3, k: "laugh", len: 2.0 }],
+};
+
+/* Camera shots: position and target, eased between consecutive keys. */
+const CAM = [
+  { t: 0,     p: [0, 16, 26],     l: [0, 0, 0] },
+  { t: 7.8,   p: [0.5, 5.2, 12.5], l: [0, 0.4, 0] },
+  { t: 12.0,  p: [-1.4, 2.4, 7.6], l: [-1.2, 0.7, 1.2] },
+  { t: 18.4,  p: [-0.9, 2.6, 8.2], l: [-0.8, 0.7, 1.1] },
+  { t: 21.6,  p: [-0.4, 2.1, 6.6], l: [-0.55, 0.75, 1.4] },
+  { t: 26.0,  p: [-0.9, 1.7, 5.6], l: [-0.9, 0.75, 1.4] },
+  { t: 30.0,  p: [-0.5, 1.9, 6.2], l: [-0.6, 0.8, 1.4] },
+  { t: 35.8,  p: [-0.3, 2.3, 5.8], l: [-0.3, 0.8, 1.4] },
+
+  { t: 40.0,  p: [1.4, 2.6, 7.2],  l: [1.4, 0.5, 1.6] },
+  { t: 45.4,  p: [1.0, 2.8, 7.8],  l: [0.6, 0.5, 1.6] },
+  { t: 46.4,  p: [0.0, 5.5, 10.5], l: [-0.8, 0.2, 0.6] },
+  { t: 50.8,  p: [0.0, 5.8, 11.0], l: [-0.5, 0.2, 0.5] },
+  { t: 51.2,  p: [2.2, 4.2, 9.6],  l: [1.5, 1.3, -1.4] },
+  { t: 57.8,  p: [3.2, 3.4, 8.8],  l: [1.5, 1.2, -1.0] },
+  { t: 58.6,  p: [-0.5, 2.3, 7.4], l: [-0.6, 0.7, 1.2] },
+  { t: 67.8,  p: [-0.7, 1.9, 6.4], l: [-0.6, 0.7, 1.3] },
+
+  { t: 72.0,  p: [0.2, 2.6, 8.4],  l: [0.2, 1.1, 0.6] },
+  { t: 80.0,  p: [1.2, 2.0, 6.8],  l: [0.6, 1.4, 0.4] },
+  { t: 91.0,  p: [0.9, 1.9, 6.8],  l: [0.6, 1.5, 0.3] },
+  { t: 97.0,  p: [0.8, 2.0, 6.4],  l: [0.6, 1.6, 0.3] },
+  { t: 103.8, p: [0.0, 3.4, 9.4],  l: [0.3, 1.0, 0.5] },
+
+  { t: 108.0, p: [0.0, 3.6, 10.0], l: [-0.2, 1.1, 0.6] },
+  { t: 118.6, p: [-0.3, 2.2, 6.8], l: [-0.4, 0.9, 0.8] },
+  { t: 123.9, p: [-0.3, 2.0, 6.4], l: [-0.4, 0.9, 0.9] },
+
+  { t: 124.0, p: [-0.2, 2.2, 7.4], l: [-0.2, 0.8, 1.2] },
+  { t: 127.0, p: [-0.2, 1.8, 5.8], l: [-0.2, 0.8, 1.2] },
+  { t: 137.0, p: [3.5, 7.0, 13.5], l: [0, 0.6, 0.6] },
+  { t: 144.0, p: [4.8, 8.6, 15.5], l: [0, 0.6, 0.4] },
+];
+function cameraAt(time) {
+  let a = CAM[0], b = CAM[0];
+  for (let i = 1; i < CAM.length; i++) {
+    if (time < CAM[i].t) { a = CAM[i - 1]; b = CAM[i]; break; }
+    a = b = CAM[i];
+  }
+  if (a === b) return { p: a.p, l: a.l };
+  const u = easeInOut(clamp01((time - a.t) / (b.t - a.t)));
+  return {
+    p: a.p.map((v, i) => mix(v, b.p[i], u)),
+    l: a.l.map((v, i) => mix(v, b.l[i], u)),
+  };
+}
+// ---------------------------------------------------------------------------
+// light and sky: `night` goes 0 (golden hour) → 1 (deep night)
+// ---------------------------------------------------------------------------
+function nightAt(time) {
+  if (time >= 108.4 && time < 122.8) {
+    const u = (time - 108.4) / 14.4;              // two days go by
+    return 0.5 - 0.5 * Math.cos(u * TAU * 2);
+  }
+  if (time >= 68 && time < 104) return 0.08;
+  if (time >= 136) return 0.18 * span(136, 144, time);
+  return 0;
+}
+const night = nightAt(t);
+const SKY_DAY   = ["#c8b4e6", "#f5bfd0", "#ffd3b4", "#ffe8c4"];
+const SKY_NIGHT = ["#1d2150", "#3a3170", "#6a4a8a", "#a3729c"];
+const sky = SKY_DAY.map((c, i) => mixColor(c, SKY_NIGHT[i])(night));
+document.getElementById("sky").style.background =
+  `linear-gradient(180deg, ${sky[0]} 0%, ${sky[1]} 34%, ${sky[2]} 62%, ${sky[3]} 100%)`;
+
+/* the sun and moon, orbiting through the time-lapse */
+{
+  const skyEl = document.getElementById("sky");
+  const sun = document.createElement("div"); sun.id = "sun"; sun.className = "orb";
+  const moon = document.createElement("div"); moon.id = "moon"; moon.className = "orb";
+  let sunA;
+  if (t >= 108.4 && t < 122.8) sunA = ((t - 108.4) / 14.4) * 2 * TAU;   // two turns
+  else sunA = 1.05;                                                    // low, golden
+  const orbit = (a) => [50 + Math.sin(a) * 44, 72 - Math.cos(a) * 62];
+  const [sx, sy] = orbit(sunA), [mx, my] = orbit(sunA + Math.PI);
+  sun.style.left = sx + "vw"; sun.style.top = sy + "vh";
+  moon.style.left = mx + "vw"; moon.style.top = my + "vh";
+  skyEl.append(sun, moon);
+  const r = rng(7);
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement("div"); s.className = "star";
+    s.style.left = r() * 100 + "vw"; s.style.top = r() * 55 + "vh";
+    const tw = 0.6 + 0.4 * Math.sin(clock * 3 + i);
+    s.style.opacity = String(clamp01((night - 0.35) * 2) * tw);
+    skyEl.append(s);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// three.js scene
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById("view");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H, false);
+renderer.setClearColor(0x000000, 0);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(new THREE.Color(sky[3]), 22, 48);
+
+const camera = new THREE.PerspectiveCamera(38, W / H, 0.1, 200);
+const cam = cameraAt(t);
+camera.position.set(...cam.p);
+camera.lookAt(...cam.l);
+
+const warm = new THREE.Color(mixColor("#ffe2c0", "#8a86d8")(night));
+scene.add(new THREE.HemisphereLight(mixColor("#ffe9d6", "#6f6ab8")(night), mixColor("#c9a2c9", "#2a2450")(night), mix(1.6, 0.9, night)));
+const key = new THREE.DirectionalLight(warm, mix(2.2, 0.8, night));
+key.position.set(5, 8, 6);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.normalBias = 0.03;
+key.shadow.camera.left = -7; key.shadow.camera.right = 7;
+key.shadow.camera.top = 7; key.shadow.camera.bottom = -7;
+key.shadow.radius = 4;
+key.shadow.bias = -0.0005;
+scene.add(key);
+
+/* Toon shading: three soft steps, which reads as "drawn" rather than "rendered". */
+const steps = new Uint8Array([90, 170, 255]);
+const gradient = new THREE.DataTexture(steps, 3, 1, THREE.RedFormat);
+gradient.minFilter = gradient.magFilter = THREE.NearestFilter;
+gradient.needsUpdate = true;
+const toon = (color, extra = {}) => new THREE.MeshToonMaterial({ color, gradientMap: gradient, ...extra });
+
+function add(mesh, parent = scene, shadow = true) {
+  mesh.castShadow = shadow; mesh.receiveShadow = true;
+  parent.add(mesh);
+  return mesh;
+}
+
+// --- a heart shape, for the box, the bursts and the finale ------------------
+function heartShape() {
+  const s = new THREE.Shape();
+  s.moveTo(0, -1);
+  s.bezierCurveTo(-0.6, -0.5, -1.0, -0.1, -1.0, 0.35);
+  s.bezierCurveTo(-1.0, 0.8, -0.6, 1.0, -0.33, 1.0);
+  s.bezierCurveTo(-0.12, 1.0, 0, 0.85, 0, 0.7);
+  s.bezierCurveTo(0, 0.85, 0.12, 1.0, 0.33, 1.0);
+  s.bezierCurveTo(0.6, 1.0, 1.0, 0.8, 1.0, 0.35);
+  s.bezierCurveTo(1.0, -0.1, 0.6, -0.5, 0, -1);
+  return s;
+}
+const HEART_GEO = new THREE.ExtrudeGeometry(heartShape(), { depth: 0.35, bevelEnabled: true, bevelSize: 0.12, bevelThickness: 0.12, bevelSegments: 2, curveSegments: 10 });
+HEART_GEO.center();
+function heartMesh(size, color, opacity = 1) {
+  const m = new THREE.Mesh(HEART_GEO, toon(color, { transparent: opacity < 1, opacity }));
+  m.scale.setScalar(size);
+  return m;
+}
+
+// --- sea -------------------------------------------------------------------
+const sea = new THREE.Mesh(new THREE.CircleGeometry(60, 64), new THREE.MeshBasicMaterial({ color: mixColor("#a8c4ee", "#343a70")(night) }));
+sea.rotation.x = -Math.PI / 2; sea.position.y = -0.85;
+scene.add(sea);
+for (let i = 0; i < 3; i++) {
+  const phase = ((clock * 0.22 + i / 3) % 1);
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(5.6 + phase * 5, 5.75 + phase * 5, 64),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 * (1 - phase) }),
+  );
+  ring.rotation.x = -Math.PI / 2; ring.position.y = -0.83;
+  scene.add(ring);
+}
+
+// --- island ----------------------------------------------------------------
+const island = new THREE.Group();
+scene.add(island);
+add(new THREE.Mesh(new THREE.CylinderGeometry(5.4, 4.6, 1.2, 14), toon("#f6d8a8")), island).position.y = -0.62;
+const grass = add(new THREE.Mesh(new THREE.CylinderGeometry(4.9, 5.0, 0.16, 14), toon(mixColor("#a8d8a0", "#4f7a6c")(night * 0.8))), island);
+grass.position.y = -0.06;
+
+/* palm-ish tree */
+{
+  const g = new THREE.Group(); g.position.set(-3.2, 0, -1.7); island.add(g);
+  const sway = Math.sin(clock * 1.3) * 0.04;
+  const trunk = add(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 2.7, 8), toon("#c99468")), g);
+  trunk.position.set(0.2 + sway * 2, 1.35, 0);
+  trunk.rotation.z = -0.12 - sway;
+  trunk.receiveShadow = false;
+  for (let i = 0; i < 3; i++) {
+    const coco = add(new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), toon("#8a5a3c")), g);
+    coco.position.set(0.32 + sway * 5 + (i - 1) * 0.16, 2.55, 0.12 + (i % 2) * 0.1);
+  }
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * TAU;
+    const leaf = add(new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 6), toon(i % 2 ? "#7fc38b" : "#95d19b")), g);
+    leaf.scale.set(1.6, 0.22, 0.55);
+    leaf.position.set(0.3 + sway * 5 + Math.cos(a) * 0.7, 2.85 - 0.12, Math.sin(a) * 0.7);
+    leaf.rotation.y = -a;
+    leaf.rotation.z = -0.35;
+  }
+}
+
+/* picnic blanket and the box of fries */
+{
+  const b = add(new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.04, 1.7), toon("#fff1e2")), island, false);
+  b.position.set(-0.6, 0.03, 1.6);
+  for (let i = 0; i < 4; i++) {
+    const s = add(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.045, 1.7), toon("#f39aa9")), island, false);
+    s.position.set(-1.8 + i * 0.8, 0.035, 1.6);
+  }
+}
+const fryMat = toon("#ffd36b");
+const fryBox = new THREE.Group(); fryBox.position.copy(FRY_BOX); island.add(fryBox);
+{
+  const box = add(new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.17, 0.36, 4, 1), toon("#e8574f")), fryBox);
+  box.rotation.y = Math.PI / 4; box.position.y = 0.2;
+  const heart = heartMesh(0.07, "#fff1e2");
+  heart.position.set(0, 0.2, 0.2); heart.rotation.x = -0.18; fryBox.add(heart);
+}
+/* How many fries are still in the box. */
+const taken = FRIES.filter((f) => t >= f.at).length;
+{
+  const r = rng(3);
+  for (let i = 0; i < FRY_COUNT; i++) {
+    const fry = add(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.36, 0.05), fryMat), fryBox);
+    fry.position.set((r() - 0.5) * 0.2, 0.44, (r() - 0.5) * 0.14);
+    fry.rotation.set((r() - 0.5) * 0.5, 0, (r() - 0.5) * 0.5);
+    fry.visible = i >= taken;
+  }
+}
+
+// --- blobs -----------------------------------------------------------------
+function reactions(who) {
+  const out = { squash: 0, eyes: 1, blush: 0.35, happy: 0, mouth: 1, tilt: 0 };
+  const now = who.startsWith("adv") ? rawT : t;
+  for (const r of REACT[who] || []) {
+    const e = now - r.at;
+    if (e < 0 || e > r.len + 0.6) continue;
+    const on = popInOut(r.at, r.at + r.len, { stiffness: 320, damping: 16 }, 0.35, now);
+    if (r.k === "chew")  { out.squash += Math.sin(e * 22) * 0.07 * on; out.mouth = 1 + Math.abs(Math.sin(e * 22)) * 0.8 * on; }
+    if (r.k === "talk")  { out.mouth = 1 + Math.abs(Math.sin(e * 16)) * 1.3 * on; }
+    if (r.k === "laugh") { out.squash += Math.abs(Math.sin(e * 18)) * 0.12 * on; out.happy = Math.max(out.happy, on); out.mouth = 1 + 1.3 * on; out.tilt = Math.sin(e * 9) * 0.1 * on; }
+    if (r.k === "shock") { out.eyes = 1 + 0.75 * on; out.squash -= 0.1 * on; }
+    if (r.k === "blush") { out.blush = Math.max(out.blush, 0.35 + 0.65 * on); }
+    if (r.k === "swoon") { out.happy = Math.max(out.happy, on); out.blush = Math.max(out.blush, 1 * on); out.tilt = Math.sin(e * 2.2) * 0.12 * on; }
+    if (r.k === "shy")   { out.happy = Math.max(out.happy, on); out.blush = Math.max(out.blush, 1.1 * on); out.tilt = Math.sin(e * 1.6) * 0.08 * on; }
+  }
+  return out;
+}
+
+
+/* Me: a navy cap and round black glasses. */
+function capAndGlasses(b) {
+  const navy = toon("#27304f");
+  const cap = add(new THREE.Mesh(new THREE.SphereGeometry(0.575, 28, 10, 0, TAU, 0, 1.05), navy), b.body);
+  cap.rotation.x = -0.18;
+  const brim = add(new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.05, 24, 1, false, -Math.PI / 2, Math.PI), toon("#1c2340")), b.body);
+  brim.position.set(0, 0.33, 0.44);
+  brim.rotation.x = -0.12;
+  const button = add(new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), navy), b.body);
+  button.position.y = 0.575;
+  const frame = toon("#1d1b22");
+  for (const side of [-1, 1]) {
+    const ring = add(new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.02, 8, 26), frame), b.face, false);
+    ring.position.set(side * 0.19 * b.sxz, 0.05, 0.535 * b.sxz);
+    const arm = add(new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.3), frame), b.face, false);
+    arm.position.set(side * 0.29 * b.sxz, 0.07, 0.4 * b.sxz);
+    arm.rotation.y = side * 0.5;
+  }
+  const bridge = add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.02, 0.02), frame), b.face, false);
+  bridge.position.set(0, 0.08, 0.56 * b.sxz);
+}
+
+/* Anna: brown hair pulled up into a bun. */
+function hairAndBun(b) {
+  const brown = toon("#7a4e33");
+  const hair = add(new THREE.Mesh(new THREE.SphereGeometry(0.58, 28, 12, 0, TAU, 0, 1.2), brown), b.body);
+  hair.rotation.x = -0.55;
+  const bun = add(new THREE.Mesh(new THREE.SphereGeometry(0.19, 16, 12), brown), b.body);
+  bun.position.set(0, 0.5, -0.3);
+  const tie = add(new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.03, 6, 16), toon("#e0607e")), b.body);
+  tie.position.set(0, 0.42, -0.24);
+  tie.rotation.x = 1.0;
+}
+
+/* The baby: a curl, a pacifier, sometimes watermelon. */
+function babyBits(b, { eating = false, melon = false } = {}) {
+  const curl = add(new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.035, 8, 16, Math.PI * 1.5), toon("#8a5a3c")), b.body);
+  curl.position.set(0.02, 0.6, 0.05);
+  curl.rotation.set(0, Math.PI / 2, 0.4);
+  if (!eating) {
+    const pac = new THREE.Group();
+    pac.position.set(0, -0.09, 0.55 * b.sxz);
+    b.face.add(pac);
+    const shield = add(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.035, 20), toon("#ffffff")), pac, false);
+    shield.rotation.x = Math.PI / 2;
+    shield.scale.set(1.25, 1, 0.8);
+    const ring = add(new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.022, 8, 18), toon("#9a7fd6")), pac, false);
+    ring.position.set(0, -0.02, 0.05);
+  }
+  if (melon) {
+    const w = new THREE.Group();
+    w.position.set(0.42, 0.5, 0.35);
+    w.rotation.set(0.2, -0.4, -0.5 + Math.sin(clock * 3) * 0.1);
+    b.g.add(w);
+    const tri = new THREE.Shape([new THREE.Vector2(-0.22, 0), new THREE.Vector2(0.22, 0), new THREE.Vector2(0, 0.34)]);
+    const flesh = add(new THREE.Mesh(new THREE.ExtrudeGeometry(tri, { depth: 0.08, bevelEnabled: false }), toon("#f06a6a")), w);
+    flesh.position.z = -0.04;
+    const rind = add(new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.06, 0.1), toon("#4f9a5a")), w);
+    rind.position.y = -0.03;
+  }
+}
+
+/* Everyone blinks, each on their own beat. */
+const blink = (offset, every = 3.7) => ((clock + offset) % every) < 0.13 ? 0.12 : 1;
+
+function blob({ color, cheek = "#ff8fa3", who, pos, scale = 1, parent = island }) {
+  const g = new THREE.Group();
+  g.position.set(pos.x, pos.y, pos.z);
+  g.scale.setScalar(scale);
+  parent.add(g);
+
+  const re = reactions(who);
+  const breathe = Math.sin(clock * 2.6 + (who.endsWith("anna") ? 1.3 : who.endsWith("baby") ? 2.1 : 0)) * 0.025;
+  /* squash & stretch across a hop: tall in the air, squat as it lands */
+  let hop = 0;
+  if (pos.air > 0.02) hop = 0.12 * Math.min(1, pos.air * 2);
+  else if (pos.moving && pos.hopU !== undefined) hop = -0.1 * Math.sin(Math.PI * (pos.hopU || 0));
+  const sy = 1 + breathe + hop - re.squash;
+  const sxz = 1 / Math.sqrt(Math.max(0.5, sy));
+
+  const body = add(new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 22), toon(color)), g);
+  body.scale.set(sxz, 1.12 * sy, sxz);
+  body.position.y = 0.55 * 1.12 * sy;
+
+  const face = new THREE.Group();
+  face.position.y = body.position.y + 0.08 * sy;
+  g.add(face);
+  const facing = pos.moving ? pos.dir : (pos.face ?? 0);
+  g.rotation.y = facing;
+  g.rotation.z = re.tilt;
+
+  /* eyes: dots, or happy arcs */
+  const eyeOpen = blink(who.endsWith("anna") ? 1.1 : who.endsWith("me") ? 0 : 2.3) * re.eyes;
+  for (const side of [-1, 1]) {
+    if (re.happy > 0.5) {
+      const arc = add(new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.022, 6, 12, Math.PI), toon("#2b1a2e")), face, false);
+      arc.position.set(side * 0.19 * sxz, 0.06, 0.5 * sxz);
+    } else {
+      const eye = add(new THREE.Mesh(new THREE.SphereGeometry(0.065, 12, 10), toon("#2b1a2e")), face, false);
+      eye.position.set(side * 0.19 * sxz, 0.05, 0.5 * sxz);
+      eye.scale.set(re.eyes, 1.25 * eyeOpen, 0.6);
+      const glint = add(new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffffff })), face, false);
+      glint.position.set(side * 0.19 * sxz + 0.02, 0.08 * eyeOpen + 0.02, 0.54 * sxz);
+      glint.visible = eyeOpen > 0.5;
+    }
+    const blush = add(new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 8), toon(cheek, { transparent: true, opacity: 0.85 })), face, false);
+    blush.position.set(side * 0.3 * sxz, -0.07, 0.43 * sxz);
+    blush.scale.set(1.2 * (0.6 + re.blush * 0.6), 0.6 * (0.6 + re.blush * 0.6), 0.5);
+  }
+  /* mouth: a small smile that opens to talk, chew and laugh */
+  const mouth = add(new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.018, 6, 14, Math.PI), toon("#2b1a2e")), face, false);
+  mouth.rotation.z = Math.PI;
+  mouth.position.set(0, -0.08, 0.53 * sxz);
+  mouth.scale.set(1, re.mouth, 1);
+
+  return { g, body, face, sxz, top: body.position.y * 2 };
+}
+
+function me() {
+  const pos = track(ME_KEYS);
+  pos.face = within(58.2, 68) || within(124.6, 144) ? 0.35 : 0.2;
+  if (within(72, 104)) pos.face = 0.5;
+  const b = blob({ color: "#ffd27a", who: "me", pos });
+  capAndGlasses(b);
+  /* the instructions, held upside down */
+  if (within(53.8, 57.8)) {
+    const on = popInOut(53.9, 57.4);
+    const paper = add(new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.36), toon("#ffffff", { side: THREE.DoubleSide })), b.g);
+    paper.position.set(0, 0.55, 0.62);
+    paper.rotation.set(-0.2, 0, Math.PI + Math.sin(t * 2.5) * 0.25);
+    paper.scale.setScalar(on);
+    for (let i = 0; i < 3; i++) {
+      const line = add(new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.03), new THREE.MeshBasicMaterial({ color: 0x9b86a0 })), paper, false);
+      line.position.set(0, 0.08 - i * 0.07, 0.002);
+    }
+    const arrow = add(new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.1, 3), new THREE.MeshBasicMaterial({ color: 0xe0607e })), paper, false);
+    arrow.position.set(0.15, 0.13, 0.002);
+  }
+  greyHair(b, true);
+  return { ...b, pos };
+}
+
+function anna() {
+  const pos = track(ANNA_KEYS);
+  pos.face = within(58.2, 68) || within(124.6, 144) ? -0.35 : -0.2;
+  if (within(21.6, 36)) pos.face = -0.45;
+  const b = blob({ color: "#f7a3b4", cheek: "#ff6f8e", who: "anna", pos });
+  hairAndBun(b);
+  /* the medal */
+  if (t >= 93.4 && t < 104.5) {
+    const on = springAt(t - 93.4, 0, 1, { stiffness: 220, damping: 9 }) * (1 - span(104, 104.5));
+    const medal = new THREE.Group();
+    medal.position.set(0, 0.36, 0.58);
+    medal.scale.setScalar(on);
+    b.g.add(medal);
+    const disk = add(new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.04, 20), toon("#ffcf4a")), medal);
+    disk.rotation.x = Math.PI / 2;
+    const s = starMesh(0.07, "#fff1c4"); s.position.z = 0.03; medal.add(s);
+    for (const side of [-1, 1]) {
+      const rib = add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.18, 0.02), toon(side < 0 ? "#6fa8e8" : "#e0607e")), medal);
+      rib.position.set(side * 0.06, 0.14, -0.02);
+      rib.rotation.z = side * -0.35;
+    }
+  }
+  greyHair(b);
+  return { ...b, pos };
+}
+
+/* The future: a few grey hairs arrive, and leave again when we come back to now. */
+function greyHair(b, sides = false) {
+  if (!within(113.3, 124)) return;
+  const on = springAt(t - 113.3, 0, 1, { stiffness: 300, damping: 12 });
+  for (let i = 0; i < 3; i++) {
+    const tuft = add(new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), toon("#f2eef5")), b.g);
+    if (sides) tuft.position.set((i - 1) * 0.5, b.top * 0.62, 0.12 - Math.abs(i - 1) * 0.1);
+    else tuft.position.set(-0.14 + i * 0.14, b.top - 0.1 - Math.abs(i - 1) * 0.04, 0.05);
+    tuft.scale.setScalar(on);
+  }
+}
+
+function baby() {
+  const pos = track(BABY_KEYS);
+  pos.face = within(97, 106) ? -0.5 : within(107.5, 138) ? -0.6 : 0.3;
+  const b = blob({ color: "#ffe0c8", cheek: "#ff9a9a", who: "baby", pos, scale: 0.5 });
+  let appear = 1;
+  if (t < 41.2) appear = 0;
+  else if (t < 43) appear = springAt(t - 41.2, 0, 1, { stiffness: 380, damping: 11 });
+  b.g.scale.multiplyScalar(Math.max(0.0001, appear));
+  const eating = FRIES.some((f) => f.to === "baby" && t >= f.at && t < (f.carry ? f.carry[1] : f.at + f.dur));
+  babyBits(b, { eating, melon: within(72, 104) });
+  return { ...b, pos };
+}
+
+function starMesh(size, color) {
+  const s = new THREE.Shape();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? 0.45 : 1, a = (i / 10) * TAU + Math.PI / 2;
+    const x = Math.cos(a) * r, y = Math.sin(a) * r;
+    i ? s.lineTo(x, y) : s.moveTo(x, y);
+  }
+  const geo = new THREE.ExtrudeGeometry(s, { depth: 0.25, bevelEnabled: true, bevelSize: 0.08, bevelThickness: 0.08, bevelSegments: 1 });
+  geo.center();
+  const m = new THREE.Mesh(geo, toon(color));
+  m.scale.setScalar(size);
+  return m;
+}
+
+// --- props that come and go ------------------------------------------------
+/* the gift box the baby arrives in */
+if (within(39.5, 44.5)) {
+  const g = new THREE.Group(); g.position.set(2.6, 0, 1.9); island.add(g);
+  const wob = t < 41.2 ? Math.sin(t * 20) * 0.06 * span(40.2, 41.2) : 0;
+  const s = springAt(t - 39.6, 0, 1, { stiffness: 300, damping: 12 }) * (1 - easeIn(span(43.4, 44.2)));
+  g.scale.setScalar(s);
+  g.rotation.z = wob;
+  const box = add(new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.8), toon("#b6a4e6")), g);
+  box.position.y = 0.3;
+  const rib = add(new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.62, 0.14), toon("#ffe3a3")), g);
+  rib.position.y = 0.3;
+  const lidFly = t > 41.2 ? springAt(t - 41.2, 0, 1, { stiffness: 120, damping: 9 }) : 0;
+  const lid = add(new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.16, 0.9), toon("#c8b8f0")), g);
+  lid.position.set(lidFly * 0.9, 0.68 + lidFly * 0.9 - Math.max(0, t - 41.6) * 0.8 * (t > 41.6 ? 1 : 0), 0);
+  lid.rotation.z = -lidFly * 1.2;
+}
+
+/* home: a yellow Vienna building, one floor at a time */
+if (t >= 51.2) {
+  const g = new THREE.Group(); g.position.set(1.6, 0, -2.5); g.rotation.y = -0.3; island.add(g);
+  const part = (at, mesh, y, drop = 1.5) => {
+    const s = springAt(t - at, 0, 1, { stiffness: 260, damping: 11 });
+    mesh.scale.setScalar(Math.max(0.0001, s));
+    mesh.position.y = y + (1 - Math.min(1, s)) * drop;
+    add(mesh, g);
+    return mesh;
+  };
+  const glass = mixColor("#b8d4ec", "#ffd978")(night);
+  const FLOOR = 0.78;
+  for (let f = 0; f < 3; f++) {
+    const at = 51.3 + f * 0.35;
+    part(at, new THREE.Mesh(new THREE.BoxGeometry(2.3, FLOOR, 1.6), toon(f === 0 ? "#f2c94c" : "#f6d86b")), FLOOR / 2 + f * FLOOR, f ? 1.5 : 0);
+    for (let w = 0; w < 4; w++) {
+      if (f === 0 && w === 1) continue;
+      const win = part(at + 0.9 + w * 0.06, new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.05), toon(glass)), FLOOR / 2 + f * FLOOR + 0.04);
+      win.position.set(-0.8 + w * 0.53, win.position.y, 0.81);
+      const sill = add(new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.05, 0.1), toon("#fff1e2")), win, false);
+      sill.position.set(0, -0.22, 0.02);
+    }
+  }
+  const ledge = part(52.6, new THREE.Mesh(new THREE.BoxGeometry(2.45, 0.14, 1.75), toon("#fff1e2")), FLOOR * 3 + 0.07);
+  const door = part(53.3, new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.62, 0.06), toon("#8a5a3c")), 0.31);
+  door.position.set(-0.27, door.position.y, 0.82);
+  const awning = part(53.5, new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.1, 0.34), toon("#4f9a5a")), 0.74);
+  awning.position.set(0.8, awning.position.y, 0.92);
+  const heart = heartMesh(0.13, "#e0607e");
+  heart.position.set(0, FLOOR * 3 + 0.36, 0.3);
+  heart.scale.setScalar(0.16 * springAt(t - 54.1, 0, 1, { stiffness: 260, damping: 9 }) + 0.0001);
+  g.add(heart);
+}
+
+/* the podium, for chapter three */
+if (within(72.2, 105)) {
+  const g = new THREE.Group(); g.position.set(0.8, 0, 0.15); island.add(g);
+  const s = springAt(t - 72.3, 0, 1, { stiffness: 220, damping: 12 }) * (1 - easeIn(span(104.2, 104.9)));
+  g.scale.set(1, Math.max(0.0001, s), 1);
+  const top = add(new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.8, 0.9, 20), toon("#fff1e2")), g);
+  top.position.y = 0.45;
+  const band = add(new THREE.Mesh(new THREE.CylinderGeometry(0.805, 0.805, 0.16, 20), toon("#ffcf4a")), g);
+  band.position.y = 0.6;
+}
+
+/* the bench, for the future */
+if (within(106.2, 124.3)) {
+  const g = new THREE.Group(); g.position.set(-0.45, 0, 0.55); island.add(g);
+  const s = springAt(t - 106.3, 0, 1, { stiffness: 260, damping: 13 }) * (1 - easeIn(span(123.9, 124.3)));
+  g.scale.setScalar(Math.max(0.0001, s));
+  const seat = add(new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.12, 0.7), toon("#c98f65")), g);
+  seat.position.y = 0.42;
+  const back = add(new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.5, 0.1), toon("#c98f65")), g);
+  back.position.set(0, 0.8, -0.32);
+  for (const x of [-1, 1]) {
+    const leg = add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.42, 0.6), toon("#a8704c")), g);
+    leg.position.set(x * 1.0, 0.21, 0);
+  }
+}
+
+// --- characters -----------------------------------------------------------
+const ME = me();
+const ANNA = t >= 18.8 ? anna() : null;
+const BABY = t >= 41.2 ? baby() : null;
+
+/* Hug: in the finale the two lean into each other. */
+if (t >= 126.4 && ANNA) {
+  const h = springAt(t - 126.4, 0, 1, { stiffness: 140, damping: 9 });
+  ME.g.rotation.z = -0.22 * h;
+  ANNA.g.rotation.z = 0.22 * h;
+  ME.g.position.x += 0.05 * h;
+  ANNA.g.position.x -= 0.05 * h;
+  ME.body.scale.x *= 1 + 0.08 * h;
+  ANNA.body.scale.x *= 1 + 0.08 * h;
+}
+
+/* mouth positions in world space, for fries */
+const mouthOf = (who) => {
+  const c = who === "me" ? ME : who === "anna" ? ANNA : BABY;
+  if (!c) return FRY_BOX.clone();
+  const local = c.mouthLocal ? c.mouthLocal.clone() : new THREE.Vector3(0, 0.62, 0.55);
+  c.g.updateMatrixWorld(true);
+  return local.applyMatrix4(c.g.matrixWorld);
+};
+
+// --- fries in flight -------------------------------------------------------
+for (const f of FRIES) {
+  const end = f.back ? f.back[1] : f.carry ? f.carry[1] : f.at + f.dur;
+  if (t < f.at || t > end) continue;
+  const fry = add(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.36, 0.05), fryMat), scene);
+  const from = FRY_BOX.clone().add(new THREE.Vector3(0, 0.45, 0));
+  if (t < f.at + f.dur) {
+    const u = easeOut((t - f.at) / f.dur);
+    const to = mouthOf(f.to);
+    fry.position.lerpVectors(from, to, u);
+    fry.position.y += Math.sin(Math.PI * u) * 0.8;
+    fry.rotation.set(u * 6, 0, u * 3);
+  } else if (f.carry && t < f.carry[1]) {
+    fry.position.copy(mouthOf(f.to));
+    const d = f.to === "baby" ? BABY : f.to === "anna" ? ANNA : ME;
+    fry.rotation.set(Math.PI / 2, (d?.g.rotation.y || 0) + Math.PI / 2, 0);
+  } else if (f.back && t < f.back[1]) {
+    const u = easeInOut((t - f.back[0]) / (f.back[1] - f.back[0]));
+    fry.position.lerpVectors(mouthOf("anna"), mouthOf("me"), u);
+    fry.position.y += Math.sin(Math.PI * u) * 0.7;
+    fry.rotation.set(-u * 6, 0, 0);
+  } else {
+    fry.visible = false;
+  }
+  if (!f.carry && t >= f.at + f.dur) fry.visible = false;
+}
+
+// --- hearts, confetti, flowers ----------------------------------------------
+const BURSTS = [
+  { at: 30.5, from: () => ME.g.position.clone().add(new THREE.Vector3(0, 1.3, 0)), n: 7, color: "#e0607e", len: 2.6, spread: 0.6 },
+  { at: 33.5, from: () => new THREE.Vector3(-0.6, 1.6, 1.4), n: 5, color: "#f7a3b4", len: 2.2, spread: 0.9 },
+  { at: 61.2, from: () => ANNA.g.position.clone().add(new THREE.Vector3(0, 1.3, 0)), n: 4, color: "#ffcf4a", len: 2.0, spread: 0.5 },
+  { at: 126.6, from: () => new THREE.Vector3(-0.2, 1.4, 1.2), n: 16, color: "#e0607e", len: 5.5, spread: 1.4 },
+  { at: 128.0, from: () => new THREE.Vector3(-0.2, 1.8, 1.2), n: 9, color: "#f7a3b4", len: 6.0, spread: 2.0 },
+];
+BURSTS.forEach((b, bi) => {
+  if (t < b.at || t > b.at + b.len) return;
+  const r = rng(100 + bi);
+  const o = b.from();
+  for (let i = 0; i < b.n; i++) {
+    const delay = r() * 0.6;
+    const e = t - b.at - delay;
+    const sx = (r() - 0.5) * 2 * b.spread, sz = (r() - 0.5) * b.spread, rise = 1.2 + r() * 1.6;
+    if (e < 0) continue;
+    const life = e / (b.len - delay);
+    if (life > 1) continue;
+    const h = heartMesh(0.16 * springAt(e, 0, 1, { stiffness: 360, damping: 10 }) * (1 - easeIn(clamp01((life - 0.7) / 0.3))) + 0.0001, b.color);
+    h.position.set(o.x + sx * easeOut(Math.min(1, e)), o.y + rise * life * 1.05, o.z + sz);
+    h.rotation.y = Math.sin(e * 3 + i) * 0.5;
+    h.rotation.z = Math.sin(e * 2 + i) * 0.15;
+    scene.add(h);
+  }
+});
+
+/* the star over Anna, and confetti */
+if (within(93.2, 104.4)) {
+  const s = starMesh(0.32, "#ffcf4a");
+  const up = springAt(t - 93.3, 0, 1, { stiffness: 140, damping: 10 });
+  s.position.set(0.8, 2.35 + up * 0.35 + Math.sin(t * 2) * 0.05, 0.15);
+  s.rotation.y = (t - 93.3) * 1.6;
+  s.scale.multiplyScalar(Math.max(0.0001, up * (1 - easeIn(span(103.8, 104.4)))));
+  scene.add(s);
+  const r = rng(42);
+  const COLORS = ["#e0607e", "#ffcf4a", "#8fd1a6", "#b6a4e6", "#6fa8e8", "#ffffff"];
+  for (let i = 0; i < 90; i++) {
+    const start = 93.4 + r() * 3.5;
+    const e = t - start;
+    const x0 = 0.8 + (r() - 0.5) * 4.5, z0 = 0.2 + (r() - 0.5) * 3, fall = 0.6 + r() * 0.5;
+    const spin = r() * 8, c = COLORS[i % COLORS.length];
+    if (e < 0) continue;
+    const y = 4.6 - e * fall;
+    if (y < 0.02) continue;
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.14), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide }));
+    p.position.set(x0 + Math.sin(e * 2 + i) * 0.25, y, z0);
+    p.rotation.set(e * spin, e * spin * 0.7, i);
+    scene.add(p);
+  }
+}
+
+/* sparkles around Anna while I list the things I see */
+if (within(76.5, 91)) {
+  const r = rng(9);
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * TAU + t * 0.6, rad = 0.95 + r() * 0.2;
+    const tw = 0.5 + 0.5 * Math.sin(t * 4 + i * 1.7);
+    const sp = starMesh(0.055 * tw * span(76.5, 77.5) * (1 - span(90.4, 91)) + 0.0001, "#ffe08a");
+    sp.position.set(0.8 + Math.cos(a) * rad, 1.4 + 0.9 + Math.sin(t * 1.5 + i) * 0.35, 0.15 + Math.sin(a) * rad);
+    scene.add(sp);
+  }
+}
+
+/* The world blooms in the finale: flowers ripple outwards from the hug. */
+if (t >= 126.8) {
+  const r = rng(77);
+  const COLORS = ["#f7a3b4", "#ffd27a", "#b6a4e6", "#ffffff", "#ff8fa3", "#9fd3f0"];
+  const origin = new THREE.Vector2(-0.2, 1.2);
+  for (let i = 0; i < 70; i++) {
+    const a = r() * TAU, d = 1.2 + Math.sqrt(r()) * 3.6;
+    const x = Math.cos(a) * d, z = Math.sin(a) * d;
+    if (Math.hypot(x + 0.6, z - 1.6) < 1.55 && Math.abs(z - 1.6) < 0.9) continue;   // not on the blanket
+    const dist = Math.hypot(x - origin.x, z - origin.y);
+    const at = 126.9 + dist * 0.42 + r() * 0.25;
+    const s = springAt(t - at, 0, 1, { stiffness: 300, damping: 10 });
+    if (s <= 0.001) continue;
+    const g = new THREE.Group(); g.position.set(x, 0, z); g.scale.setScalar(s); island.add(g);
+    const stem = add(new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3, 5), toon("#5e9e5b")), g, false);
+    stem.position.y = 0.15;
+    const head = add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.1, 0), toon(COLORS[i % COLORS.length])), g);
+    head.position.y = 0.34; head.scale.set(1.2, 0.7, 1.2);
+    head.rotation.y = i;
+    const mid = add(new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), toon("#ffcf4a")), g, false);
+    mid.position.y = 0.4;
+  }
+  /* lanterns of light: floating hearts over the island */
+  const r2 = rng(88);
+  for (let i = 0; i < 12; i++) {
+    const at = 129 + r2() * 5;
+    const e = t - at;
+    const x = (r2() - 0.5) * 9, z = (r2() - 0.5) * 7;
+    if (e < 0) continue;
+    const h = heartMesh(0.12 * Math.min(1, e * 2), i % 2 ? "#ffcf4a" : "#f7a3b4");
+    h.position.set(x + Math.sin(e + i) * 0.2, 0.6 + e * 0.35, z);
+    h.rotation.y = Math.sin(e * 0.8 + i) * 0.6;
+    scene.add(h);
+  }
+}
+
+// --- Adventures: the plane, then Sicily (video time) ---------------------------
+const SICILY = new THREE.Vector3(34, 0, -14);
+const advObjects = {};
+if (inAdv) {
+  /* Sicily: a sandy island, striped umbrellas, mountains and a little town */
+  const sic = new THREE.Group(); sic.position.copy(SICILY); scene.add(sic);
+  add(new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.0, 1.2, 14), toon("#f6d8a8")), sic).position.y = -0.6;
+  const stripes = document.createElement("canvas"); stripes.width = 256; stripes.height = 4;
+  const sx = stripes.getContext("2d");
+  for (let i = 0; i < 8; i++) { sx.fillStyle = i % 2 ? "#ffffff" : "#4f8fe0"; sx.fillRect(i * 32, 0, 32, 4); }
+  const stripeTex = new THREE.CanvasTexture(stripes); stripeTex.colorSpace = THREE.SRGBColorSpace;
+  const umbrella = (x, z, tilt) => {
+    const u = new THREE.Group(); u.position.set(x, 0, z); u.rotation.z = tilt; sic.add(u);
+    const pole = add(new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.5, 6), toon("#fff6ee")), u);
+    pole.position.y = 0.75;
+    const top = add(new THREE.Mesh(new THREE.ConeGeometry(0.85, 0.38, 16, 1, true), toon("#ffffff", { map: stripeTex, side: THREE.DoubleSide })), u);
+    top.position.y = 1.55;
+  };
+  [[-1.6, -0.4, 0.05], [1.5, -0.5, -0.06], [-3.0, 0.5, 0.03], [3.0, 0.7, -0.04], [0.0, -1.9, 0.02], [-1.9, -2.3, 0], [2.1, -2.4, 0]]
+    .forEach(([x, z, r]) => umbrella(x, z, r));
+  for (const [x, z] of [[-1.6, 0.3], [1.5, 0.2], [0.0, -1.2]]) {
+    const lounger = add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 1.0), toon("#4f8fe0")), sic);
+    lounger.position.set(x, 0.12, z);
+  }
+  const r = rng(12);
+  for (let i = 0; i < 5; i++) {
+    const m = add(new THREE.Mesh(new THREE.ConeGeometry(2.4 + r() * 1.4, 2.8 + r() * 1.8, 7), toon(i % 2 ? "#8dbf8a" : "#79aa7c")), sic);
+    m.position.set(-8 + i * 4 + r(), 1.2, -7.5 - r() * 2);
+  }
+  for (let i = 0; i < 14; i++) {
+    const h = add(new THREE.Mesh(new THREE.BoxGeometry(0.4 + r() * 0.3, 0.4 + r() * 0.5, 0.4), toon(i % 3 ? "#fff1e2" : "#f6d86b")), sic);
+    h.position.set(-6 + i * 0.9, 0.2, -5.6 - r() * 0.8);
+  }
+  /* us on the beach; I slowly turn into a lobster */
+  const lobster = mixColor("#ffd27a", "#ff7f66")(span(78.4, 81, rawT));
+  const aMe = blob({ color: lobster, who: "adv_me", pos: { x: -1.0, y: 0, z: 0.9, face: 0.25 }, parent: sic });
+  capAndGlasses(aMe);
+  const aAnna = blob({ color: "#f7a3b4", cheek: "#ff6f8e", who: "adv_anna", pos: { x: 1.0, y: 0, z: 0.9, face: -0.25 }, parent: sic });
+  hairAndBun(aAnna);
+  const aBaby = blob({ color: "#ffe0c8", cheek: "#ff9a9a", who: "adv_baby", pos: { x: 0.05, y: 0, z: 1.7, face: 0 }, scale: 0.5, parent: sic });
+  babyBits(aBaby, { eating: true, melon: true });
+  Object.assign(advObjects, { adv_me: aMe, adv_anna: aAnna, adv_baby: aBaby });
+
+  /* the plane: main island to Sicily */
+  const from = new THREE.Vector3(0, 3.6, 0), to = SICILY.clone().add(new THREE.Vector3(0, 3.2, 0));
+  const u = easeInOut(clamp01((rawT - 72) / 4.6));
+  const at = (k) => new THREE.Vector3().lerpVectors(from, to, k).add(new THREE.Vector3(0, Math.sin(k * Math.PI) * 1.2, 0));
+  const pos = at(u);
+  const plane = new THREE.Group(); plane.position.copy(pos);
+  plane.rotation.y = Math.atan2(to.x - from.x, to.z - from.z);
+  plane.rotation.z = Math.sin(clock * 3) * 0.05;
+  plane.visible = rawT < 76.7;
+  scene.add(plane);
+  const body = add(new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 1.7, 6, 18), toon("#fff6ee")), plane);
+  body.rotation.x = Math.PI / 2;
+  const wing = add(new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.06, 0.55), toon("#f7a3b4")), plane);
+  wing.position.set(0, -0.05, 0.1);
+  const fin = add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.55, 0.42), toon("#e0607e")), plane);
+  fin.position.set(0, 0.42, -0.95);
+  const tail = add(new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.05, 0.3), toon("#f7a3b4")), plane);
+  tail.position.set(0, 0.1, -0.95);
+  /* three faces in three windows */
+  ["#ffd27a", "#f7a3b4", "#ffe0c8"].forEach((c, i) => {
+    for (const side of [-1, 1]) {
+      const w = add(new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.02, 16), toon(c)), plane, false);
+      w.rotation.z = Math.PI / 2;
+      w.position.set(side * 0.34, 0.1, 0.45 - i * 0.35);
+    }
+  });
+  /* contrail puffs */
+  for (let i = 1; i <= 10 && rawT < 76.7; i++) {
+    const k = u - i * 0.035;
+    if (k <= 0) break;
+    const puff = new THREE.Mesh(new THREE.SphereGeometry(0.22 * (1 - i / 12), 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 * (1 - i / 11) }));
+    puff.position.copy(at(k)).add(new THREE.Vector3(0, -0.05, 0));
+    scene.add(puff);
+  }
+  advObjects.plane = { g: plane, top: 0.5 };
+
+  /* camera: ride alongside the plane, then settle on the beach */
+  if (rawT < 76.6) {
+    const side = new THREE.Vector3(to.z - from.z, 0, -(to.x - from.x)).normalize();
+    camera.position.copy(pos).add(side.multiplyScalar(-6.5)).add(new THREE.Vector3(0, 1.0, 0));
+    camera.lookAt(pos.clone().add(new THREE.Vector3(0, -0.4, 0)));
+  } else {
+    const k = easeOut(span(76.6, 84, rawT));
+    camera.position.set(SICILY.x + mix(0.4, 0.2, k), mix(2.6, 2.0, k), SICILY.z + mix(8.2, 6.6, k));
+    camera.lookAt(SICILY.x, 0.9, SICILY.z + 0.4);
+  }
+}
+
+// --- clouds ------------------------------------------------------------------
+{
+  const r = rng(5);
+  for (let c = 0; c < 5; c++) {
+    const g = new THREE.Group();
+    const ang = r() * TAU, rad = 18 + r() * 6;
+    const drift = clock * 0.03 * (r() > 0.5 ? 1 : -1);
+    g.position.set(Math.cos(ang + drift) * rad, 6 + r() * 4, -Math.abs(Math.sin(ang + drift)) * rad - 10);
+    for (let i = 0; i < 4; i++) {
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(0.8 + r() * 0.5, 14, 10), toon(mixColor("#fff6ee", "#7c74b8")(night)));
+      puff.position.set(i * 0.9 - 1.3, r() * 0.35, r() * 0.4);
+      g.add(puff);
+    }
+    scene.add(g);
+  }
+}
+
+renderer.render(scene, camera);
+
+// ---------------------------------------------------------------------------
+// DOM: bubbles, captions, chapter cards
+// ---------------------------------------------------------------------------
+const toScreen = (v) => {
+  const p = v.clone().project(camera);
+  return [(p.x * 0.5 + 0.5) * W, (-p.y * 0.5 + 0.5) * H];
+};
+
+const bubbleLayer = document.getElementById("bubbles");
+function drawBubbles(list, now, find) {
+  for (const b of list) {
+    if (now < b.at || now > b.to + 0.3) continue;
+    const c = find(b.who);
+    if (!c) continue;
+    c.g.updateMatrixWorld(true);
+    const head = new THREE.Vector3(0, (c.top || 1.2) + 0.25, 0).applyMatrix4(c.g.matrixWorld);
+    const [x, y] = toScreen(head);
+    const s = popInOut(b.at, b.to, { stiffness: 420, damping: 15 }, 0.3, now);
+    const el = document.createElement("div");
+    el.className = "bubble";
+    el.textContent = b.text;
+    bubbleLayer.append(el);
+    const w = el.offsetWidth, h = el.offsetHeight;
+    el.style.transform = `translate(${x - w / 2}px, ${y - h - 14}px) scale(${Math.max(0, s)})`;
+    el.style.opacity = String(Math.min(1, s * 1.5));
+  }
+}
+if (inAdv) drawBubbles(ADV_BUBBLES, rawT, (who) => advObjects[who]);
+else drawBubbles(BUBBLES, t, (who) => (who === "me" ? ME : who === "anna" ? ANNA : BABY));
+
+const capLayer = document.getElementById("captions");
+capLayer.classList.toggle("night", night > 0.45);
+function drawCaptions(list, now) {
+  for (const c of list) {
+    if (now < c.at || now > c.to + 0.4) continue;
+    const line = document.createElement("div");
+    line.className = "line" + (c.s ? " " + c.s : "");
+    const words = c.text.split(" ");
+    const out = easeIn(span(c.to, c.to + 0.35, now));
+    const stagger = c.s === "big" ? 0.14 : 0.075;
+    words.forEach((w, i) => {
+      const el = document.createElement("span");
+      el.className = "word";
+      el.textContent = w;
+      const e = now - c.at - i * stagger;
+      /* Framer-style pop: y and scale on a bouncy spring, opacity on a quick ease */
+      const y = springAt(e, 1, 0, { stiffness: 380, damping: 13 });
+      const sc = springAt(e, 0.4, 1, { stiffness: 420, damping: 11 });
+      const op = easeOut(clamp01(e / 0.12));
+      el.style.transform = `translateY(${y * 0.6 + out * 0.4}em) scale(${e <= 0 ? 0.4 : sc}) rotate(${(1 - Math.min(1, sc)) * (i % 2 ? 6 : -6)}deg)`;
+      el.style.opacity = String(op * (1 - out));
+      line.append(el);
+    });
+    capLayer.append(line);
+  }
+}
+if (inAdv) drawCaptions(ADV_CAPTIONS, rawT);
+else drawCaptions(CAPTIONS, t);
+
+/* the real photos, as polaroids */
+const pending = [];
+if (rawT >= POLAROID_AT) {
+  const layer = document.getElementById("photos");
+  POLAROIDS.forEach((p, i) => {
+    const e = rawT - POLAROID_AT - i * 0.32;
+    if (e <= 0) return;
+    const el = document.createElement("figure");
+    el.className = "polaroid";
+    const img = new Image();
+    img.src = `photos/${p.src}.jpg`;
+    pending.push(img.decode().catch(() => {}));
+    const cap = document.createElement("figcaption");
+    cap.textContent = p.label;
+    el.append(img, cap);
+    const k = springAt(e, 0, 1, { stiffness: 190, damping: 14 });
+    const fromY = 70 * (1 - k);
+    el.style.left = p.x + "vw";
+    el.style.top = p.y + "vh";
+    el.style.transform = `translate(-50%, calc(-50% + ${fromY}vh)) rotate(${p.r + (1 - k) * (i % 2 ? 22 : -22)}deg) scale(${0.7 + 0.3 * k})`;
+    el.style.opacity = String(clamp01(e / 0.15));
+    layer.append(el);
+  });
+}
+
+const card = document.getElementById("card");
+const CARDS_VIDEO = [
+  ...CARDS.map((c) => ({ ...c, at: c.at >= ADV ? c.at + ADV_LEN : c.at })),
+  { at: ADV, n: "Chapter two and a half", title: "Adventures" },
+];
+for (const c of CARDS_VIDEO) {
+  if (rawT < c.at || rawT >= c.at + CARD_LEN) continue;
+  card.hidden = false;
+  card.querySelector(".n").textContent = c.n;
+  card.querySelector(".t").textContent = c.title;
+  const e = rawT - c.at;
+  const inY = springAt(e, 1, 0, { stiffness: 170, damping: 22 });
+  const outY = easeInOut(span(c.at + CARD_LEN - 0.55, c.at + CARD_LEN, rawT));
+  card.style.transform = `translateY(${(inY * 100 - outY * 100).toFixed(3)}%)`;
+  const inner = springAt(e - 0.25, 0, 1, { stiffness: 300, damping: 12 });
+  card.querySelector(".t").style.transform = `scale(${inner}) rotate(${(1 - inner) * -4}deg)`;
+  card.querySelector(".n").style.opacity = String(clamp01((e - 0.2) / 0.3));
+  card.querySelector("svg").style.transform = `scale(${springAt(e - 0.55, 0, 1, { stiffness: 380, damping: 8 }) * (1 + Math.sin(e * 6) * 0.06)})`;
+}
+
+/* A soft fade in from cream at the very start. */
+if (t < 1) {
+  document.getElementById("fx").style.background =
+    `rgba(255,246,236,${1 - easeOut(t)})`;
+}
+
+await Promise.all(pending);
+document.documentElement.setAttribute("data-seekreel-ready", "1");
+</script>
