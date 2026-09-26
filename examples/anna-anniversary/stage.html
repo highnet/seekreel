@@ -265,6 +265,8 @@ const POLAROIDS = [
   { src: "watermelon", x: 70, y: 19, r: -4, label: "the fry thief" },
   { src: "airport",    x: 27, y: 62, r: -3, label: "row 14 survivors" },
   { src: "bottle",     x: 73, y: 62, r: 4,  label: "breakfast club" },
+  { src: "toast",      x: 43, y: 12, r: -3, label: "toast critic" },
+  { src: "doll",       x: 57, y: 12, r: 3,  label: "on doll duty" },
 ];
 const POLAROID_AT = 148.8;
 
@@ -1183,7 +1185,8 @@ function drawBubbles(list, now, find) {
     el.textContent = b.text;
     bubbleLayer.append(el);
     const w = el.offsetWidth, h = el.offsetHeight;
-    el.style.transform = `translate(${x - w / 2}px, ${y - h - 14}px) scale(${Math.max(0, s)})`;
+    const left = Math.min(W - w - 24, Math.max(24, x - w / 2 + (b.dx || 0)));
+    el.style.transform = `translate(${left}px, ${y - h - 14}px) scale(${Math.max(0, s)})`;
     el.style.opacity = String(Math.min(1, s * 1.5));
   }
 }
