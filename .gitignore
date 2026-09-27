@@ -22,6 +22,3 @@ site/.vercel
 site/next-env.d.ts
 site/*.tsbuildinfo
 motion.js
-examples/anna-anniversary/photos/
-examples/anna-anniversary/*.private.*
-examples/anna-anniversary/previews/
