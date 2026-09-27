@@ -1,4 +1,5 @@
 import Code from '@/components/code';
+import FamilyCast from '@/components/family-cast';
 
 /*
  * The family sample pack: a real rendered film, and the kit it was made from.
@@ -7,9 +8,11 @@ import Code from '@/components/code';
  */
 
 const PACK_SAMPLE = `
-sh family/setup.sh                             # three.js, Motion, React, Strudel, the font
-seekreel probe 6,14,31,46 -c family/movie.config.json
-seekreel build -c family/movie.config.json     # mp4, 9:16, gif and a poster
+# three.js, Motion, React, Strudel and the font
+sh family/setup.sh
+
+# the sample movie: mp4, 9:16, gif and a poster
+seekreel build -c family/movie.config.json
 `.trim();
 
 const CONTENTS: [string, string][] = [
@@ -21,52 +24,67 @@ const CONTENTS: [string, string][] = [
 
 export default function FamilyPack({ repo }: { repo: string }) {
   return (
-    <div className="grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16">
-      <figure className="min-w-0">
-        <video
-          className="block aspect-video w-full bg-stage"
-          src="/family/the-blob-family.mp4"
-          poster="/family/the-blob-family.jpg"
-          controls
-          playsInline
-          preload="none"
-          aria-label="The Blob Family: the family pack's 48-second sample movie"
-        />
-        <figcaption className="mt-3 text-sm text-muted">
-          <span className="data text-ink">family.mp4</span> · 48 s · 1,152 frames · rendered with the
-          pack, unedited
-        </figcaption>
-      </figure>
+    <div className="grid min-w-0 grid-cols-1 gap-16 sm:gap-20">
+      <div className="grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16">
+        <figure className="min-w-0">
+          <video
+            className="block aspect-video w-full bg-stage"
+            src="/family/the-blob-family.mp4"
+            poster="/family/the-blob-family.jpg"
+            controls
+            playsInline
+            preload="none"
+            aria-label="The Blob Family: the family pack's 48-second sample movie"
+          />
+          <figcaption className="mt-3 text-sm text-muted">
+            <span className="data text-ink">family.mp4</span> · 48 s · 1,152 frames · rendered with the
+            pack, unedited
+          </figcaption>
+        </figure>
 
-      <div className="min-w-0">
-        <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
-          Start from a finished film.
-        </h2>
-        <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
-          The family sample pack is everything that went into a real seekreel film, made
-          generic: a cast, three sets, the React components on top, and the soundtrack. The
-          movie on the left is its sample project. Copy it, change the words, hang your own
-          photos, render.
-        </p>
-        <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-          {CONTENTS.map(([name, what]) => (
-            <div key={name} className="flex gap-3">
-              <dt className="data w-12 shrink-0 text-primary">{name}</dt>
-              <dd className="text-sm leading-relaxed text-muted">{what}</dd>
-            </div>
-          ))}
-        </dl>
-        <div className="mt-8">
-          <Code code={PACK_SAMPLE} lang="sh" file="terminal" />
+        <div className="min-w-0">
+          <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
+            Start from a finished film.
+          </h2>
+          <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
+            The family sample pack is everything that went into a real seekreel film, made
+            generic: a cast, three sets, the React components on top, and the soundtrack. This
+            movie is its sample project. Copy it, change the words, hang your own
+            photos, render.
+          </p>
+          <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+            {CONTENTS.map(([name, what]) => (
+              <div key={name} className="flex gap-3">
+                <dt className="data w-12 shrink-0 text-primary">{name}</dt>
+                <dd className="text-sm leading-relaxed text-muted">{what}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-8">
+            <Code code={PACK_SAMPLE} lang="sh" file="terminal" />
+          </div>
+          <p className="mt-6 text-sm leading-relaxed text-muted">
+            It ships with the normal install and stays out of{' '}
+            <span className="data whitespace-nowrap text-ink">--minimal</span>.{' '}
+            <a className="text-primary underline underline-offset-4 hover:text-ink" href={`${repo}/blob/main/family/GUIDE.md`}>
+              Read the guide
+            </a>
+            .
+          </p>
         </div>
-        <p className="mt-6 text-sm leading-relaxed text-muted">
-          It ships with the normal install and stays out of{' '}
-          <span className="data text-ink">--minimal</span>.{' '}
-          <a className="text-primary underline underline-offset-4 hover:text-ink" href={`${repo}/blob/main/family/GUIDE.md`}>
-            Read the guide
-          </a>
-          .
-        </p>
+      </div>
+
+      <div className="grid min-w-0 grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center lg:gap-16">
+        <div className="min-w-0">
+          <h3 className="text-[clamp(1.6rem,3vw,2.2rem)] leading-[1.02] font-bold">The cast, drawn from t.</h3>
+          <p className="mt-5 max-w-[48ch] text-lg leading-relaxed text-muted">
+            These are the pack&apos;s own characters, imported straight from{' '}
+            <span className="data text-ink">family/kit/actors.js</span> and rendered in your browser.
+            Every blink, turn and entrance is computed from the timestamp, so scrub anywhere and you
+            see exactly the frame seekreel would render.
+          </p>
+        </div>
+        <FamilyCast />
       </div>
     </div>
   );

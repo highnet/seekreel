@@ -157,17 +157,17 @@ export async function gallery(world, s, { art = SAMPLE_ART, base = "../", coming
   scene.add(wall);
 
   let me = null, her = null, baby = null;
-  const come = springAt(s - 5.4, 0, 1, { stiffness: 300, damping: 12 });
+  const come = springAt(s - 6.6, 0, 1, { stiffness: 300, damping: 12 });
   if (come > 0.001) {
-    me = kit.glasses(kit.cap(kit.blob({ color: kit.PALETTE.butter, happy: s > 6.4, blush: 0.9 })));
-    her = kit.hairBun(kit.blob({ color: kit.PALETTE.rose, cheek: "#ff6f8e", happy: s > 6.4, blush: 1 }));
+    me = kit.glasses(kit.cap(kit.blob({ color: kit.PALETTE.butter, happy: s > 7.4, blush: 0.9 })));
+    her = kit.hairBun(kit.blob({ color: kit.PALETTE.rose, cheek: "#ff6f8e", happy: s > 7.4, blush: 1 }));
     baby = kit.pacifier(kit.curl(kit.blob({ color: kit.PALETTE.peach, cheek: "#ff9a9a", open: blink(0.6, 3.7, s) })));
     [[me, last - 0.7, 0.95, 0.62, 0.15], [her, last + 0.7, 0.95, 0.62, -0.15], [baby, last, 1.12, 0.36, 0]].forEach(([b, x, z, sc, ry]) => {
       b.group.position.set(x, 0, z); b.group.rotation.y = ry; b.group.scale.setScalar(sc * come); wall.add(b.group);
     });
   }
   const walk = easeInOut(span(0.5, 5.3, s));
-  const push = easeInOut(span(5.0, GALLERY_LENGTH, s));
+  const push = easeInOut(span(4.4, 7.4, s));
   const cx = mix(0, last, walk);
   world.camera.position.set(cx, mix(1.75, 1.35, push), mix(4.6, 6.3, push));
   world.camera.lookAt(cx, mix(1.75, 1.3, push), 0);

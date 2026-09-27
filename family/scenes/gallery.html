@@ -24,7 +24,7 @@ const LINES = [
 function Gallery() {
   return html`<div class="frame" style=${{ background: "#f8d5de" }}>
     <${World} world=${world} />
-    ${cast.baby ? html`<${Bubble} text="!!!" at=${6.6} to=${8.6} xy=${world.above(cast.baby)} now=${t} />` : null}
+    ${cast.baby ? html`<${Bubble} text="!!!" at=${7.4} to=${9.4} xy=${world.above(cast.baby)} now=${t} />` : null}
     <${Captions} lines=${LINES} now=${t} />
   </div>`;
 }
