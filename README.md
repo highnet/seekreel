@@ -581,6 +581,19 @@ it rather than learning it: the contract, the config, the commands, and the
 failure modes that produce a file which is technically valid and visibly wrong.
 The homepage has the same brief behind its *I'm an agent* fork.
 
+Hand it to an agent with one command — print it into the conversation, or save
+it where your agent reads project instructions:
+
+```sh
+# print it into the agent's context
+curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md
+
+# or save a copy beside the project
+curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md -o SKILLS.md
+```
+
+It always serves the latest `main`, so an agent can re-run it to refresh.
+
 ---
 
 ## Licence
