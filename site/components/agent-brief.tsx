@@ -155,7 +155,7 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
       '  curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh',
       'Needs Node 22.18+ (the tool is TypeScript run without a build step), a Chromium, ffmpeg.',
       '',
-      `Full skill file: ${SKILLS_RAW}`,
+      `Full skill file: curl -fsSL ${SKILLS_RAW}`,
       '',
       '## The contract',
       '1. Read t (seconds) from the query string.',
@@ -244,6 +244,19 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
           Show me the human page instead
         </button>
       </div>
+
+      <Section title="Load the skill file">
+        <p className="max-w-[68ch] leading-relaxed text-muted">
+          SKILLS.md is the operating manual: the contract, the config, the commands, the failure
+          modes and the family sample pack. Pull it into your context, or save it beside the
+          project. It always serves the latest <code className="data text-ink">main</code>.
+        </p>
+        <Pre className="mt-5">{`# print it into your context
+curl -fsSL ${SKILLS_RAW}
+
+# or save a copy beside the project
+curl -fsSL ${SKILLS_RAW} -o SKILLS.md`}</Pre>
+      </Section>
 
       <Section title="Install">
         <p className="max-w-[68ch] leading-relaxed text-muted">

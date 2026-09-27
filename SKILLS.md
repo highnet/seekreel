@@ -1,9 +1,14 @@
 # seekreel — a skill file for agents
 
 What this is: the operating manual for driving seekreel without reading the
-homepage's argument or the README's prose. If you are a person, the README is
-friendlier and [seekreel.vercel.app](https://seekreel.vercel.app) is friendlier
-still.
+homepage's argument or the README's prose. Fetch the latest copy at any time:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md
+```
+
+If you are a person, the README is friendlier and
+[seekreel.vercel.app](https://seekreel.vercel.app) is friendlier still.
 
 ## In one paragraph
 
