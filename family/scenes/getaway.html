@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>seekreel family pack — getaway</title>
+<link rel="stylesheet" href="../kit/family.css">
+<script src="../vendor/motion.js"></script>
+<script type="module">
+/*
+ * The getaway set on its own: a plane, a beach, a sunburn, and a postcard.
+ */
+import { html, World, film } from "../kit/react.js";
+import { Sky, Vignette, Captions, Bubble, Photo } from "../kit/ui.js";
+import { createWorld } from "../kit/world.js";
+import { t } from "../kit/timing.js";
+import { getaway } from "../kit/sets.js";
+
+const world = createWorld({ fog: [26, 60] });
+const cast = getaway(world, t);
+
+const LINES = [
+  { at: 0.5, to: 3.8, text: "They took the baby on a plane." },
+  { at: 4.8, to: 7.2, text: "Sun, sea, and zero sleep." },
+  { at: 7.6, to: 9.8, s: "aside", text: "(he was a lobster.)" },
+];
+function Getaway() {
+  return html`<div class="frame">
+    <${Sky} night=${0} now=${t} />
+    <${World} world=${world} />
+    <${Vignette} />
+    <${Bubble} text="WAAAAH" at=${0.8} to=${3.2} xy=${world.above(cast.plane)} now=${t} />
+    <${Bubble} text="sunscreen!" at=${6.0} to=${7.4} xy=${world.above(cast.her)} now=${t} />
+    <${Bubble} text="I'm fine" at=${6.8} to=${8.2} xy=${world.above(cast.me)} now=${t} />
+    <${Photo} src="../photos/beach.svg" x=${14} y=${32} r=${-4} label="wish you were here" at=${5.2} to=${9.4} now=${t} look="polaroid" />
+    <${Captions} lines=${LINES} now=${t} />
+  </div>`;
+}
+film(html`<${Getaway} />`);
+</script>

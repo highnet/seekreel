@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <!-- A sample photo for the family pack: two blobs watching the sunset. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c8b4e6"/><stop offset=".45" stop-color="#f5bfd0"/><stop offset=".75" stop-color="#ffd3b4"/><stop offset="1" stop-color="#ffe8c4"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="750" fill="url(#sky)"/>
+  <circle cx="300" cy="470" r="90" fill="#fff1c4"/>
+  <rect y="480" width="600" height="270" fill="#a8c4ee"/>
+  <rect y="480" width="600" height="10" fill="#fff6ee" opacity=".7"/>
+  <ellipse cx="300" cy="700" rx="360" ry="90" fill="#f6d8a8"/>
+  <ellipse cx="230" cy="600" rx="62" ry="70" fill="#ffd27a"/>
+  <ellipse cx="370" cy="602" rx="62" ry="70" fill="#f7a3b4"/>
+  <path d="M168 584 a62 62 0 0 1 124 0 z" fill="#27304f"/>
+  <circle cx="370" cy="520" r="22" fill="#7a4e33"/>
+  <path d="M312 590 a58 70 0 0 1 116 -8 q-58 -40 -116 8z" fill="#7a4e33"/>
+</svg>

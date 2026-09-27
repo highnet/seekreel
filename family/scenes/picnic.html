@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>seekreel family pack — picnic</title>
+<link rel="stylesheet" href="../kit/family.css">
+<script src="../vendor/motion.js"></script>
+<script type="module">
+/*
+ * The picnic set on its own: the Blobs, a box of fries, a dog with a plan.
+ */
+import { html, World, film } from "../kit/react.js";
+import { Sky, Vignette, Captions, Bubble } from "../kit/ui.js";
+import { createWorld } from "../kit/world.js";
+import { t } from "../kit/timing.js";
+import { picnic } from "../kit/sets.js";
+
+const world = createWorld();
+const cast = picnic(world, t);
+
+const LINES = [
+  { at: 0.6, to: 3.2, text: "Meet the Blobs." },
+  { at: 4.9, to: 7.2, text: "The dog has one hobby." },
+  { at: 7.5, to: 10, s: "aside", text: "(fries. the hobby is fries.)" },
+];
+function Picnic() {
+  return html`<div class="frame">
+    <${Sky} night=${0} now=${t} />
+    <${World} world=${world} />
+    <${Vignette} />
+    <${Bubble} text="hey!" at=${4.8} to=${6.2} xy=${world.above(cast.me)} now=${t} />
+    <${Bubble} text="goo?" at=${9.4} to=${11} xy=${world.above(cast.baby)} now=${t} />
+    <${Captions} lines=${LINES} now=${t} />
+  </div>`;
+}
+film(html`<${Picnic} />`);
+</script>

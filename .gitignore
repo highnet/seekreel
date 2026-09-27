@@ -21,3 +21,4 @@ site/.next
 site/.vercel
 site/next-env.d.ts
 site/*.tsbuildinfo
+motion.js

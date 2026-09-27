@@ -7,6 +7,7 @@ import Timing from '@/components/timing';
 import Shapes from '@/components/shapes';
 import AudienceFork from '@/components/audience';
 import Playground from '@/components/playground';
+import FamilyPack from '@/components/family-pack';
 
 const REPO = 'https://github.com/highnet/seekreel';
 
@@ -337,6 +338,13 @@ If it runs in your browser, it ships as video.
                 <Code code={VARIANTS_SAMPLE} lang="json" file="seekreel.config.json" />
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Fold: the family sample pack — a finished film to start from. */}
+        <section id="family" className="scroll-mt-8 border-t border-rule bg-surface py-20 sm:py-28">
+          <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
+            <FamilyPack repo={REPO} />
           </div>
         </section>
 

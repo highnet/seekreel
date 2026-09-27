@@ -3,6 +3,11 @@
 # seekreel installer.
 #
 #   curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh -s -- --minimal
+#
+# The normal install includes family/, the seekreel family sample pack: a cast
+# of characters, props, sets, React components, music and a sample movie.
+# --minimal leaves it out: the CLI, the examples and the starter template only. Running the installer again switches between the two.
 #
 # Clones the repository, installs the one runtime dependency, and links the CLI
 # onto your PATH. There is no npm registry package and no build step: the tool
@@ -12,7 +17,17 @@
 #   SEEKREEL_HOME   where to clone (default ~/.seekreel)
 #   SEEKREEL_BIN    where to link  (default ~/.local/bin)
 #   SEEKREEL_REF    branch or tag  (default main)
+#   SEEKREEL_MINIMAL=1   same as --minimal
 set -eu
+
+MINIMAL="${SEEKREEL_MINIMAL:-0}"
+for arg in "$@"; do
+  case "$arg" in
+    --minimal) MINIMAL=1 ;;
+    --full) MINIMAL=0 ;;
+    *) printf 'Unknown option: %s (use --minimal or --full)\n' "$arg" >&2; exit 1 ;;
+  esac
+done
 
 REPO="${SEEKREEL_REPO:-https://github.com/highnet/seekreel.git}"
 HOME_DIR="${SEEKREEL_HOME:-$HOME/.seekreel}"
@@ -33,14 +48,26 @@ if [ "$NODE_MAJOR" -lt 22 ] || { [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt
   die "Node $(node -v) is too old. seekreel runs its TypeScript directly, which needs 22.18 or newer."
 fi
 
+# Minimal installs are a sparse checkout: everything except family/.
+choose_files() {
+  if [ "$MINIMAL" = "1" ]; then
+    git -C "$HOME_DIR" sparse-checkout set --no-cone '/*' '!/family/'
+  else
+    git -C "$HOME_DIR" sparse-checkout disable
+  fi
+}
+
 if [ -d "$HOME_DIR/.git" ]; then
   say "Updating $HOME_DIR"
   git -C "$HOME_DIR" fetch --quiet origin "$REF"
+  choose_files
   git -C "$HOME_DIR" checkout --quiet "$REF"
   git -C "$HOME_DIR" reset --hard --quiet "origin/$REF" 2>/dev/null || true
 else
   say "Cloning into $HOME_DIR"
-  git clone --quiet --depth 1 --branch "$REF" "$REPO" "$HOME_DIR"
+  git clone --quiet --depth 1 --branch "$REF" --no-checkout "$REPO" "$HOME_DIR"
+  choose_files
+  git -C "$HOME_DIR" checkout --quiet "$REF"
 fi
 
 # playwright-core is the only runtime dependency, and it is a library rather
@@ -61,7 +88,11 @@ ln -sf "$HOME_DIR/bin/seekreel.ts" "$BIN_DIR/seekreel"
 chmod +x "$HOME_DIR/bin/seekreel.ts"
 
 say ""
-say "seekreel installed."
+if [ "$MINIMAL" = "1" ]; then
+  say "seekreel installed (minimal: without the family pack)."
+else
+  say "seekreel installed, with the family sample pack."
+fi
 say "  source   $HOME_DIR"
 say "  command  $BIN_DIR/seekreel"
 
@@ -73,3 +104,8 @@ esac
 say ""
 say "Check what it can find:"
 say "  seekreel doctor"
+if [ "$MINIMAL" != "1" ]; then
+  say ""
+  say "Render the family pack's sample movie (guide: $HOME_DIR/family/GUIDE.md):"
+  say "  sh $HOME_DIR/family/setup.sh && seekreel build -c $HOME_DIR/family/movie.config.json"
+fi

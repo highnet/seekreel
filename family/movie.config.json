@@ -1,0 +1,27 @@
+{
+  "name": "family",
+  "stage": "movie/stage.html",
+  "duration": 48,
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "webgl": true,
+  "background": "#ffe6ee",
+  "poster": 45.5,
+  "out": "out/movie",
+  "audio": {
+    "engine": "strudel",
+    "pattern": "music/bossa.strudel.js",
+    "bundle": "vendor/strudel.mjs",
+    "cps": 0.5,
+    "wav": "out/family.wav",
+    "peak": 0.8,
+    "fadeIn": 0.05,
+    "fadeOut": 2.5
+  },
+  "variants": [
+    { "name": "" },
+    { "name": "vertical", "ratio": "9:16" },
+    { "name": "loop", "format": "gif", "fps": 12, "size": "960x540" }
+  ]
+}

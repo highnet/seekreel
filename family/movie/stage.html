@@ -1,0 +1,101 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>The Blob Family — a seekreel family pack sample</title>
+<link rel="stylesheet" href="../kit/family.css">
+<script src="../vendor/motion.js"></script>
+<script type="module">
+/*
+ * "The Blob Family": the family pack's sample movie. Forty-eight seconds,
+ * twenty-four bars of bossa nova (music/bossa.strudel.js), three sets and the
+ * cards between them. Start your own film by copying this file.
+ *
+ *   0–4    title over the island
+ *   4–8    card: The picnic
+ *   8–20   picnic set       (local time t - 8)
+ *   20–24  card: The getaway
+ *   24–34  getaway set      (local time t - 24)
+ *   34–38  card: The museum
+ *   38–48  gallery set      (local time t - 38)
+ *
+ * Every cut lands on a bar line (a bar is two seconds), which is what makes a
+ * card arrive on the downbeat instead of near it.
+ */
+import { html, World, film } from "../kit/react.js";
+import { Sky, Vignette, Captions, Bubble, ChapterCard, Photo, Credit, skyStops } from "../kit/ui.js";
+import { createWorld } from "../kit/world.js";
+import { t, span, easeOut, within } from "../kit/timing.js";
+import { picnic, getaway, gallery } from "../kit/sets.js";
+
+const CARDS = [
+  { at: 4,  n: "Chapter one",   title: "The picnic" },
+  { at: 20, n: "Chapter two",   title: "The getaway" },
+  { at: 34, n: "Chapter three", title: "The museum" },
+];
+
+const LINES = [
+  { at: 0.7,  to: 3.7,  s: "title", text: "The Blob Family" },
+  { at: 1.5,  to: 3.7,  s: "aside", text: "(a seekreel family pack sample)" },
+
+  { at: 8.6,  to: 11.2, text: "Meet the Blobs." },
+  { at: 12.9, to: 15.2, text: "The dog has one hobby." },
+  { at: 15.5, to: 17.6, s: "aside", text: "(fries. the hobby is fries.)" },
+  { at: 17.9, to: 19.8, text: "Nobody minds. Mostly." },
+
+  { at: 24.5, to: 27.9, text: "Then they took the baby on a plane." },
+  { at: 28.8, to: 31.2, text: "Sun, sea, and zero sleep." },
+  { at: 31.6, to: 33.8, s: "aside", text: "(he was a lobster.)" },
+
+  { at: 38.8, to: 41.8, text: "Their greatest works, so far." },
+  { at: 42.2, to: 44.2, text: "And coming soon…" },
+  { at: 44.6, to: 47.9, s: "big", text: "A new masterpiece." },
+];
+
+/* Build the 3D world for whichever set is on screen; the cards hide the cuts. */
+let world, cast = {}, set = "island";
+if (t < 20) {
+  world = createWorld({ fogColor: skyStops(0)[3] });
+  cast = picnic(world, Math.max(0, t - 8), { camera: t >= 8 });
+  if (t < 8) {
+    /* the title: the camera descends onto the island */
+    const k = easeOut(span(0, 4));
+    world.camera.position.set(0, 16 - 10.5 * k, 26 - 16 * k);
+    world.camera.lookAt(0, 0.3 * k, 0);
+  }
+} else if (t < 34) {
+  set = "getaway";
+  world = createWorld({ fog: [26, 60], fogColor: skyStops(0)[3] });
+  cast = getaway(world, Math.max(0, t - 24));
+} else {
+  set = "museum";
+  world = createWorld({ fog: null, shadows: false });
+  cast = await gallery(world, Math.max(0, t - 38));
+}
+
+function Movie() {
+  return html`<div class="frame" style=${set === "museum" ? { background: "#f8d5de" } : null}>
+    ${set !== "museum" ? html`<${Sky} night=${0} now=${t} />` : null}
+    <${World} world=${world} />
+    <${Vignette} fade=${t < 1 ? 1 - easeOut(t) : 0} />
+
+    ${set === "island" ? html`
+      <${Bubble} text="hey!" at=${12.8} to=${14.2} xy=${world.above(cast.me)} now=${t} />
+      <${Bubble} text="goo?" at=${17.4} to=${19} xy=${world.above(cast.baby)} now=${t} />
+      <${Photo} src="../photos/picnic.svg" x=${85} y=${30} r=${5} label="exhibit A" at=${15.6} to=${19.5} now=${t} look="polaroid" />
+    ` : null}
+    ${set === "getaway" ? html`
+      <${Bubble} text="WAAAAH" at=${24.8} to=${27.2} xy=${world.above(cast.plane)} now=${t} />
+      <${Bubble} text="sunscreen!" at=${30} to=${31.4} xy=${world.above(cast.her)} now=${t} />
+      <${Bubble} text="I'm fine" at=${30.8} to=${32.2} xy=${world.above(cast.me)} now=${t} />
+      <${Photo} src="../photos/beach.svg" x=${14} y=${32} r=${-4} label="wish you were here" at=${29.2} to=${33.4} now=${t} look="polaroid" index=${1} />
+    ` : null}
+    ${set === "museum" && cast.baby ? html`
+      <${Bubble} text="!!!" at=${45.4} to=${47.4} xy=${world.above(cast.baby)} now=${t} />
+    ` : null}
+
+    <${Captions} lines=${LINES} now=${t} />
+    <${Credit} text="made with seekreel · the family pack" at=${46.2} now=${t} />
+    <${ChapterCard} cards=${CARDS} now=${t} />
+  </div>`;
+}
+film(html`<${Movie} />`);
+</script>

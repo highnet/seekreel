@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <!-- A sample photo for the family pack: the picnic blanket, from above. -->
+  <rect width="600" height="750" fill="#a8d8a0"/>
+  <g transform="rotate(-8 300 375)">
+    <rect x="70" y="160" width="460" height="430" fill="#fff1e2"/>
+    <g fill="#f39aa9"><rect x="100" y="160" width="46" height="430"/><rect x="215" y="160" width="46" height="430"/><rect x="330" y="160" width="46" height="430"/><rect x="445" y="160" width="46" height="430"/></g>
+  </g>
+  <path d="M250 330 h100 l-14 120 h-72z" fill="#e8574f"/>
+  <g fill="#ffd36b"><rect x="268" y="270" width="12" height="80" rx="3"/><rect x="288" y="262" width="12" height="88" rx="3"/><rect x="308" y="276" width="12" height="74" rx="3"/><rect x="326" y="266" width="12" height="84" rx="3"/></g>
+  <circle cx="420" cy="480" r="64" fill="#4f9a5a"/><circle cx="420" cy="480" r="54" fill="#f06a6a"/>
+  <g fill="#2b1a2e"><ellipse cx="400" cy="470" rx="4" ry="7"/><ellipse cx="432" cy="462" rx="4" ry="7"/><ellipse cx="420" cy="498" rx="4" ry="7"/><ellipse cx="444" cy="492" rx="4" ry="7"/></g>
+  <path d="M150 520 q30 -60 70 0" stroke="#e0607e" stroke-width="10" fill="none" stroke-linecap="round"/>
+</svg>

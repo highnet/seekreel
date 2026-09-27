@@ -32,6 +32,7 @@
     "bin",
     "src",
     "templates",
+    "family",
     "install.sh",
     "SKILLS.md",
     "README.md",

@@ -50,6 +50,7 @@ thesis of the tool.
 
 ## Open decisions
 
-- A rendered sample film (real MP4) could replace or accompany the SVG stage
-  once one is small enough to ship.
+- A rendered sample film now accompanies the SVG stage: the family sample
+  pack's movie (720p, 2.4MB, never autoplays) in its own section, beside a live
+  viewer that draws the pack's characters from `t`.
 - The install line changes the day the package is published to npm.

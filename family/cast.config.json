@@ -1,0 +1,23 @@
+{
+  "name": "cast",
+  "stage": "scenes/cast.html",
+  "duration": 6.0,
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "webgl": true,
+  "background": "#ffe6ee",
+  "poster": 4.0,
+  "out": "out/cast",
+  "variants": [
+    {
+      "name": ""
+    },
+    {
+      "name": "loop",
+      "format": "gif",
+      "fps": 12,
+      "size": "960x540"
+    }
+  ]
+}
