@@ -18,6 +18,8 @@ import { useState } from 'react';
 const REPO = 'https://github.com/highnet/seekreel';
 const SKILLS = `${REPO}/blob/main/SKILLS.md`;
 const SKILLS_RAW = 'https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md';
+/* The same file, served by this site: the short URL agents are given. */
+const SKILLS_SITE = 'https://seekreel.vercel.app/SKILLS.md';
 
 const STAGE = `<!-- stage.html — the entire interface -->
 <div id="box"></div>
@@ -155,7 +157,7 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
       '  curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh',
       'Needs Node 22.18+ (the tool is TypeScript run without a build step), a Chromium, ffmpeg.',
       '',
-      `Full skill file: curl -fsSL ${SKILLS_RAW}`,
+      `Full skill file: curl -fsSL ${SKILLS_SITE}`,
       '',
       '## The contract',
       '1. Read t (seconds) from the query string.',
@@ -252,10 +254,13 @@ export default function AgentBrief({ onLeave }: { onLeave: () => void }) {
           project. It always serves the latest <code className="data text-ink">main</code>.
         </p>
         <Pre className="mt-5">{`# print it into your context
-curl -fsSL ${SKILLS_RAW}
+curl -fsSL ${SKILLS_SITE}
 
 # or save a copy beside the project
-curl -fsSL ${SKILLS_RAW} -o SKILLS.md`}</Pre>
+curl -fsSL ${SKILLS_SITE} -o SKILLS.md
+
+# the same file, straight from the repository
+curl -fsSL ${SKILLS_RAW}`}</Pre>
       </Section>
 
       <Section title="Install">

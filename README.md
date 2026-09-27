@@ -586,13 +586,15 @@ it where your agent reads project instructions:
 
 ```sh
 # print it into the agent's context
-curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md
+curl -fsSL https://seekreel.vercel.app/SKILLS.md
 
 # or save a copy beside the project
-curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md -o SKILLS.md
+curl -fsSL https://seekreel.vercel.app/SKILLS.md -o SKILLS.md
 ```
 
-It always serves the latest `main`, so an agent can re-run it to refresh.
+The site serves the copy from its latest deploy of `main`, so an agent can
+re-run it to refresh. The same file is also at
+`https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md`.
 
 ---
 
