@@ -1,0 +1,82 @@
+/*
+ * The family pack's look: one typeface (Bricolage Grotesque), a pink / plum /
+ * butter palette, sizes in vh so a stage works at any resolution.
+ */
+@font-face {
+  font-family: "Bricolage";
+  src: url("../vendor/bricolage.ttf") format("truetype");
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+}
+:root {
+  --plum: #3a1f3d;
+  --plum-soft: #6b4a6e;
+  --rose: #e0607e;
+  --blush: #ffe6ee;
+  --cream: #fff6ec;
+  --gold: #d8b25a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100vw; height: 100vh; overflow: hidden; background: #ffd9b8; }
+body { font-family: "Bricolage", system-ui, sans-serif; color: var(--plum); }
+
+#stage, .frame, .sky, .world, .vignette, .captions, .card, .layer { position: absolute; inset: 0; }
+.world-canvas { display: block; width: 100vw; height: 100vh; }
+
+/* sky */
+.sky i { position: absolute; }
+.sky .sun, .sky .moon { border-radius: 50%; transform: translate(-50%, -50%); }
+.sky .sun { width: 12vh; height: 12vh; background: radial-gradient(circle, #fff7d6 0 45%, #ffd88a 60%, rgba(255,216,138,0) 72%); }
+.sky .moon { width: 8vh; height: 8vh; background: radial-gradient(circle at 38% 38%, #fffaf0 0 50%, #efe4ff 64%, rgba(239,228,255,0) 72%); }
+.sky .star { width: 3px; height: 3px; border-radius: 50%; background: #fff8e8; }
+
+.vignette { pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(80,30,60,.16) 100%); }
+
+/* captions */
+.captions { pointer-events: none; }
+.line {
+  position: absolute; bottom: 7.5vh; left: 8vw; right: 8vw;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .28em;
+  font-size: 5.4vh; font-weight: 780; font-stretch: 92%; letter-spacing: -.025em; line-height: 1.15;
+  color: var(--plum);
+  text-shadow: 0 .25vh 0 rgba(255,246,236,.75), 0 0 2.2vh rgba(255,246,236,.55);
+}
+.line.aside { font-size: 3.8vh; font-weight: 560; color: var(--plum-soft); bottom: 8vh; }
+.line.big { font-size: 10vh; font-weight: 800; font-stretch: 85%; color: var(--rose); bottom: auto; top: 7vh; letter-spacing: -.035em;
+  text-shadow: 0 .5vh 0 rgba(255,246,236,.9), 0 0 4vh rgba(255,246,236,.7); }
+.line.title { font-size: 8.5vh; bottom: auto; top: 9vh; font-stretch: 85%; }
+.night .line { color: var(--cream); text-shadow: 0 .3vh 0 rgba(30,20,60,.7), 0 0 2.4vh rgba(30,20,60,.6); }
+.night .line.aside { color: #e9dcf5; }
+.word { display: inline-block; transform-origin: 50% 90%; }
+
+/* speech bubbles */
+.bubble {
+  position: absolute; padding: .55em .9em .6em;
+  background: var(--cream); border-radius: 1.1em;
+  font-size: 3.1vh; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+  box-shadow: 0 .35vh 0 rgba(58,31,61,.18);
+  transform-origin: 50% 100%;
+}
+.bubble::after {
+  content: ""; position: absolute; left: 50%; bottom: -.9vh; width: 1.8vh; height: 1.8vh;
+  background: var(--cream); transform: translateX(-50%) rotate(45deg); border-radius: .2vh;
+}
+
+/* chapter cards */
+.card { background: var(--blush); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.card .n { font-size: 3.4vh; font-weight: 650; letter-spacing: .02em; color: var(--plum-soft); margin-bottom: 1.2vh; }
+.card .t { font-size: 14vh; font-weight: 800; font-stretch: 80%; letter-spacing: -.04em; color: var(--rose); line-height: 1; }
+.card svg { width: 5vh; height: 5vh; margin-top: 3.4vh; fill: var(--rose); }
+
+/* photos */
+.photo { position: absolute; width: 23vh; background: #fffdf8; }
+.photo img { display: block; width: 100%; height: 24vh; object-fit: cover; }
+.photo figcaption { font-size: 1.9vh; font-weight: 650; color: var(--plum); letter-spacing: -.005em; }
+.photo.frame { padding: 1.4vh; border: .9vh solid var(--gold); box-shadow: 0 1.2vh 2.4vh rgba(58,31,61,.22); }
+.photo.frame figcaption { padding-top: 1.1vh; }
+.photo.polaroid { padding: 1.1vh 1.1vh 0; box-shadow: 0 1.2vh 2.4vh rgba(58,31,61,.22), 0 .2vh .4vh rgba(58,31,61,.15); }
+.photo.polaroid figcaption { text-align: center; padding: .9vh 0 1.2vh; font-size: 2.2vh; }
+
+/* credits and labels */
+.credit { position: absolute; left: 0; right: 0; bottom: 3.2vh; text-align: center; font-size: 2.2vh; font-weight: 600; color: var(--plum-soft); letter-spacing: .01em; }
+.tag { position: absolute; transform: translate(-50%, 0); font-size: 2.4vh; font-weight: 650; color: var(--plum); white-space: nowrap; }

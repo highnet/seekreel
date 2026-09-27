@@ -34,8 +34,9 @@ curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | 
 
 That clones to `~/.seekreel`, installs `playwright-core`, and links the CLI into
 `~/.local/bin`. `SEEKREEL_HOME`, `SEEKREEL_BIN` and `SEEKREEL_REF` override
-where and what. The normal install includes `actors/` (a kit of characters,
-props, sets and sample scenes — see `actors/README.md`); append
+where and what. The normal install includes `family/`, the seekreel family sample pack
+(characters, props, sets, React components, music and a sample movie — see
+`family/GUIDE.md`); append
 `sh -s -- --minimal` to the pipe, or set `SEEKREEL_MINIMAL=1`, to leave it out. To work from a checkout instead, with no install at all:
 
 ```sh

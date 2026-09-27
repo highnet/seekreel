@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>seekreel family pack — the cast</title>
+<link rel="stylesheet" href="../kit/family.css">
+<style>
+  .backdrop { position: absolute; inset: 0; background: linear-gradient(180deg, #ffe6ee, #fff6ec); }
+  h1 { position: absolute; top: 6vh; width: 100%; text-align: center; font-size: 6vh; font-weight: 800; font-stretch: 85%; letter-spacing: -.03em; color: var(--rose); }
+</style>
+<script src="../vendor/motion.js"></script>
+<script type="module">
+/*
+ * The cast: every character in the pack on one turntable, each popping in on
+ * its own spring and labelled with the calls that build it. React draws the
+ * page; the 3D world is one component in it.
+ */
+import { html, World, film } from "../kit/react.js";
+import { createWorld } from "../kit/world.js";
+import { t, springAt, blink } from "../kit/timing.js";
+
+const world = createWorld({ fog: null });
+const { THREE, kit, scene, camera } = world;
+
+const floor = new THREE.Mesh(new THREE.CircleGeometry(9, 64), kit.toon("#f8d5de"));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+/* place the camera first: the labels are projected through it */
+camera.position.set(0, 1.5, 8.8);
+camera.lookAt(0, 0.55, 0);
+
+const turn = Math.sin(t * 0.8) * 0.35;
+const CAST = [
+  { tag: "blob + cap + glasses", make: () => kit.glasses(kit.cap(kit.blob({ color: kit.PALETTE.butter, open: blink(0) }))) },
+  { tag: "blob + hairBun", make: () => kit.hairBun(kit.blob({ color: kit.PALETTE.rose, cheek: "#ff6f8e", open: blink(1.1) })) },
+  { tag: "blob + bow", make: () => kit.bow(kit.blob({ color: "#b6a4e6", happy: true, blush: 0.8 })) },
+  { tag: "blob + sprout", make: () => kit.sprout(kit.blob({ color: "#9fd3a0", open: blink(2.2), mouth: 1 + Math.abs(Math.sin(t * 9)) }), Math.sin(t * 3) * 0.1) },
+  { tag: "baby: curl + pacifier", scale: 0.5, make: () => kit.pacifier(kit.curl(kit.blob({ color: kit.PALETTE.peach, cheek: "#ff9a9a", open: blink(0.6) }))) },
+  { tag: "dog", make: () => kit.dog({ wag: Math.sin(t * 14) * 0.5, ears: 0.35 + Math.sin(t * 7) * 0.08, open: blink(2.3, 4.1) }) },
+];
+const labels = CAST.map((c, i) => {
+  const s = springAt(t - 0.2 - i * 0.18, 0, 1, { stiffness: 320, damping: 11 });
+  const x = (i - (CAST.length - 1) / 2) * 1.5;
+  const g = c.make().group;
+  g.position.set(x, 0, 0);
+  g.rotation.y = turn;
+  g.scale.setScalar(Math.max(0.0001, s * (c.scale ?? 1)));
+  scene.add(g);
+  return { tag: c.tag, xy: world.toScreen(new THREE.Vector3(x, -0.12, 0.2)), s };
+});
+
+function Cast() {
+  return html`<div class="frame">
+    <div class="backdrop"></div>
+    <${World} world=${world} />
+    <h1>The cast</h1>
+    ${labels.map((l) => html`<div key=${l.tag} class="tag" style=${{ left: l.xy[0] + "px", top: l.xy[1] + "px", opacity: Math.min(1, l.s) }}>${l.tag}</div>`)}
+  </div>`;
+}
+film(html`<${Cast} />`);
+</script>

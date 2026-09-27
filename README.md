@@ -32,16 +32,18 @@ npm install --omit=dev               # playwright-core, the one runtime dependen
 node bin/seekreel.ts doctor
 ```
 
-**Normal or minimal.** The normal install above includes [`actors/`](actors/README.md),
-a kit of low-poly characters, props and sets with four sample scenes you can
-render into placeholder assets. If you only want the tool, install without it:
+**Normal or minimal.** The normal install above includes the
+[seekreel family sample pack](family/README.md): a cast of characters, props
+and sets, React components for captions, speech bubbles, chapter cards and
+photos, a Strudel soundtrack, and a 48-second sample movie built from all of
+it. If you only want the tool, install without it:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh -s -- --minimal
 ```
 
-The minimal install is a sparse checkout of everything except `actors/`.
-Running the installer again without the flag (or with `--full`) brings the kit
+The minimal install is a sparse checkout of everything except `family/`.
+Running the installer again without the flag (or with `--full`) brings the pack
 back; `SEEKREEL_MINIMAL=1` does the same as `--minimal`.
 
 There is a homepage too, with a viewer you can scrub:
@@ -60,7 +62,7 @@ There is a homepage too, with a viewer you can scrub:
 - [What you need installed](#what-you-need-installed)
 - [Written in TypeScript](#written-in-typescript)
 - [A full example](#a-full-example)
-- [Actors and sample scenes](#actors-and-sample-scenes)
+- [The family sample pack](#the-family-sample-pack)
 - [Things to know before you start](#things-to-know-before-you-start)
 - [For agents](#for-agents)
 
@@ -515,20 +517,23 @@ seekreel build -c examples/react-stage/seekreel.config.json
 
 ---
 
-## Actors and sample scenes
+## The family sample pack
 
-[`actors/`](actors/README.md) is a small cast for three.js stages: squashy blobs
-with caps, glasses, buns and bows, a baby, a dog, fries and watermelon, an
-island, a beach, a city building, a plane and a gallery wall. Every builder is
-a pure function of its options, so a pose computed from `t` is all a frame
-needs. Four sample scenes render straight into assets:
+[`family/`](family/README.md) is everything that went into a real seekreel film,
+made generic: squashy low-poly characters with caps, glasses, buns and bows, a
+baby, a dog, fries and watermelon, an island, a beach, a city building, a plane
+and a gallery wall; React components for captions that pop in word by word,
+speech bubbles, chapter cards, photos and a sunset sky; a bossa nova soundtrack
+in Strudel; and "The Blob Family", a 48-second sample movie that uses all of it.
 
 ```sh
-sh actors/setup.sh                              # three.js, Motion and the font
-seekreel build -c actors/picnic.config.json     # also cast, getaway, gallery
+sh family/setup.sh                              # three.js, Motion, React, Strudel, the font
+seekreel build -c family/movie.config.json      # or cast / picnic / getaway / gallery
 ```
 
-It is not part of the tool; the minimal install leaves it out.
+[family/GUIDE.md](family/GUIDE.md) walks through the sample movie and how to
+turn it into your own film. The pack is not part of the tool; the minimal
+install leaves it out.
 
 ---
 

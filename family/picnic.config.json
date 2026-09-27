@@ -1,16 +1,23 @@
 {
   "name": "picnic",
   "stage": "scenes/picnic.html",
-  "duration": 8,
+  "duration": 12.0,
   "fps": 24,
   "width": 1920,
   "height": 1080,
   "webgl": true,
   "background": "#ffe6ee",
-  "poster": 6,
+  "poster": 8.0,
   "out": "out/picnic",
   "variants": [
-    { "name": "" },
-    { "name": "loop", "format": "gif", "fps": 12, "size": "960x540" }
+    {
+      "name": ""
+    },
+    {
+      "name": "loop",
+      "format": "gif",
+      "fps": 12,
+      "size": "960x540"
+    }
   ]
 }

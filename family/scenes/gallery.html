@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>seekreel family pack — gallery</title>
+<link rel="stylesheet" href="../kit/family.css">
+<script src="../vendor/motion.js"></script>
+<script type="module">
+/*
+ * The gallery set on its own. Hang your own pictures by passing
+ * gallery(world, t, { art: [{ src: "photos/you.jpg", title, line }, ...] }).
+ */
+import { html, World, film } from "../kit/react.js";
+import { Captions, Bubble } from "../kit/ui.js";
+import { createWorld } from "../kit/world.js";
+import { t } from "../kit/timing.js";
+import { gallery } from "../kit/sets.js";
+
+const world = createWorld({ fog: null, shadows: false });
+const cast = await gallery(world, t);
+
+const LINES = [
+  { at: 0.8, to: 3.8, text: "Their greatest works, so far." },
+  { at: 6.2, to: 9.8, s: "big", text: "A new masterpiece." },
+];
+function Gallery() {
+  return html`<div class="frame" style=${{ background: "#f8d5de" }}>
+    <${World} world=${world} />
+    ${cast.baby ? html`<${Bubble} text="!!!" at=${6.6} to=${8.6} xy=${world.above(cast.baby)} now=${t} />` : null}
+    <${Captions} lines=${LINES} now=${t} />
+  </div>`;
+}
+film(html`<${Gallery} />`);
+</script>

@@ -1,16 +1,23 @@
 {
   "name": "getaway",
   "stage": "scenes/getaway.html",
-  "duration": 8,
+  "duration": 10.0,
   "fps": 24,
   "width": 1920,
   "height": 1080,
   "webgl": true,
   "background": "#ffe6ee",
-  "poster": 6,
+  "poster": 7.0,
   "out": "out/getaway",
   "variants": [
-    { "name": "" },
-    { "name": "loop", "format": "gif", "fps": 12, "size": "960x540" }
+    {
+      "name": ""
+    },
+    {
+      "name": "loop",
+      "format": "gif",
+      "fps": 12,
+      "size": "960x540"
+    }
   ]
 }

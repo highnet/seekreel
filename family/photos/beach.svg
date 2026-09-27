@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <!-- A sample photo for the family pack: striped umbrellas on the beach. -->
+  <rect width="600" height="750" fill="#ffe8c4"/>
+  <path d="M0 330 L120 190 L230 320 L340 170 L470 320 L600 210 V360 H0z" fill="#8dbf8a"/>
+  <rect y="350" width="600" height="140" fill="#a8c4ee"/>
+  <rect y="490" width="600" height="260" fill="#f6d8a8"/>
+  <g>
+    <rect x="178" y="410" width="8" height="200" fill="#fff6ee"/>
+    <path d="M62 420 q120 -120 240 0z" fill="#4f8fe0"/><path d="M122 420 q60 -120 120 0z" fill="#ffffff"/>
+    <rect x="418" y="440" width="8" height="190" fill="#fff6ee"/>
+    <path d="M312 450 q110 -110 220 0z" fill="#4f8fe0"/><path d="M367 450 q55 -110 110 0z" fill="#ffffff"/>
+  </g>
+  <rect x="120" y="630" width="140" height="22" rx="6" fill="#4f8fe0"/>
+  <path d="M470 640 l-30 -52 l60 0z" fill="#f06a6a"/><rect x="438" y="640" width="64" height="10" fill="#4f9a5a"/>
+</svg>

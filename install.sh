@@ -5,9 +5,9 @@
 #   curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh
 #   curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh -s -- --minimal
 #
-# The normal install includes actors/, a kit of low-poly characters, props and
-# sample scenes. --minimal leaves it out: the CLI, the examples and the starter
-# template only. Running the installer again switches between the two.
+# The normal install includes family/, the seekreel family sample pack: a cast
+# of characters, props, sets, React components, music and a sample movie.
+# --minimal leaves it out: the CLI, the examples and the starter template only. Running the installer again switches between the two.
 #
 # Clones the repository, installs the one runtime dependency, and links the CLI
 # onto your PATH. There is no npm registry package and no build step: the tool
@@ -48,10 +48,10 @@ if [ "$NODE_MAJOR" -lt 22 ] || { [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt
   die "Node $(node -v) is too old. seekreel runs its TypeScript directly, which needs 22.18 or newer."
 fi
 
-# Minimal installs are a sparse checkout: everything except actors/.
+# Minimal installs are a sparse checkout: everything except family/.
 choose_files() {
   if [ "$MINIMAL" = "1" ]; then
-    git -C "$HOME_DIR" sparse-checkout set --no-cone '/*' '!/actors/'
+    git -C "$HOME_DIR" sparse-checkout set --no-cone '/*' '!/family/'
   else
     git -C "$HOME_DIR" sparse-checkout disable
   fi
@@ -89,9 +89,9 @@ chmod +x "$HOME_DIR/bin/seekreel.ts"
 
 say ""
 if [ "$MINIMAL" = "1" ]; then
-  say "seekreel installed (minimal: no actors kit)."
+  say "seekreel installed (minimal: without the family pack)."
 else
-  say "seekreel installed, with the actors kit."
+  say "seekreel installed, with the family sample pack."
 fi
 say "  source   $HOME_DIR"
 say "  command  $BIN_DIR/seekreel"
@@ -106,6 +106,6 @@ say "Check what it can find:"
 say "  seekreel doctor"
 if [ "$MINIMAL" != "1" ]; then
   say ""
-  say "Render the sample actors:"
-  say "  sh $HOME_DIR/actors/setup.sh && seekreel build -c $HOME_DIR/actors/picnic.config.json"
+  say "Render the family pack's sample movie (guide: $HOME_DIR/family/GUIDE.md):"
+  say "  sh $HOME_DIR/family/setup.sh && seekreel build -c $HOME_DIR/family/movie.config.json"
 fi
