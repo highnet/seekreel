@@ -280,6 +280,79 @@ than an error.
   no adoption numbers; rendering really does cost about a second per frame. If
   you are writing marketing copy with it, say that.
 
+## The seekreel family sample pack
+
+`family/` is a complete, generic film kit: a 3D cast, sets, React overlay
+components, a Strudel soundtrack, sample photos and a 48-second sample movie
+("The Blob Family"). Reach for it when someone wants a character-driven film
+— a birthday, an anniversary, a family recap, a playful product story — and
+start from the sample movie rather than an empty stage. `family/GUIDE.md` is
+the person-facing walkthrough; this section is the operating summary.
+
+It ships with the normal install and is absent after `install.sh --minimal`.
+If `family/` is missing, re-run the installer without the flag.
+
+```sh
+sh family/setup.sh                              # vendor/: three.js, Motion, React+htm, Strudel, font
+seekreel probe 2,14,31,46 -c family/movie.config.json
+seekreel build -c family/movie.config.json      # deliver/family.mp4, -vertical.mp4, -loop.gif, -poster.png
+```
+
+Layout, and what each file is for:
+
+| Path | Use it for |
+|---|---|
+| `movie/stage.html` + `movie.config.json` | the sample movie — copy the folder and edit this to make a new film |
+| `scenes/{cast,picnic,getaway,gallery}.html` | each set alone (6–12s), with its own config |
+| `kit/actors.js` | 3D builders: `blob`, `cap`, `glasses`, `hairBun`, `bow`, `sprout`, `curl`, `pacifier`, `medal`, `dog`, props (`fryBox`, `melonSlice`, `plane`, …) and sets (`island`, `beach`, `building`, `gallery`, …) |
+| `kit/sets.js` | `picnic(world, s)`, `getaway(world, s)`, `await gallery(world, s, { art })` — `s` is seconds since the set began |
+| `kit/ui.js` | React components: `Sky`, `Vignette`, `Captions`, `Bubble`, `ChapterCard`, `Photo`, `Credit` |
+| `kit/react.js` | `html`, `<World world>` (mounts the canvas), `film(element)` (renders and marks ready) |
+| `kit/world.js` | `createWorld()` → renderer, camera, lights, kit, `toScreen`, `above(actor)` |
+| `kit/timing.js` | `t`, `span`, `springAt`, `popInOut`, `blink`, `hop`, `track`, `shot`, `splice`, `rng` |
+| `music/bossa.strudel.js` | the soundtrack; edit `BARS` and the `bars([a, b])` ranges |
+
+A stage has three steps, always in this order:
+
+```js
+const world = createWorld();
+const cast = picnic(world, t - 8);                  // 1. build the 3D world for this t
+film(html`<div class="frame">                       // 3. render once
+  <${Sky} now=${t} /><${World} world=${world} />    // 2. describe the frame in React
+  <${Bubble} text="hey!" at=${12.8} to=${14.2} xy=${world.above(cast.me)} now=${t} />
+  <${Captions} lines=${LINES} now=${t} />
+</div>`);
+```
+
+Rules that bite:
+
+- **Builders are pure.** Pass the pose in (`blob({ open: blink(0), squash: h.squash })`);
+  never animate inside them with a clock. Randomness goes through `rng(seed)`.
+- **Components take `now`.** Captions, bubbles, cards and photos draw whatever
+  time they are given, which is how a spliced scene runs on its own clock.
+- **Position the camera before projecting.** `world.above()` / `toScreen()`
+  read the camera; set it first, or labels and bubbles land in the wrong place.
+- **Await what the frame shows.** `gallery()` is async: it loads textures and
+  `document.fonts.load(...)` before building. Anything else loaded (a photo
+  texture) must be awaited before `film()`; `<Photo>` images are awaited by
+  `film()` itself.
+- **Cut on bar lines.** `cps 0.5` makes a bar two seconds; put scene changes
+  and cards on even seconds so they land on the downbeat. Keep `duration` and
+  `BARS` in step (`duration = BARS × 2`).
+- **Strudel reads double quotes as patterns.** Plain JS strings in the music
+  file's setup code use single quotes; the last statement is `stack(...)`.
+- **Inserting a scene into a finished film:** `splice([{ at, len, story }])`
+  returns the story time for everything already written, plus the insert's
+  own clock — no renumbering.
+- **Real photos are personal.** When a person supplies photos of themselves or
+  their family, keep them (and any stage that names them) out of git — put
+  them under an ignored path or a `*.private.*` copy — and ask before
+  publishing anything that identifies them.
+
+Budget: the sample movie is 1,152 frames at roughly a second each with WebGL.
+Probe first, split `render a b` across cores, and re-render only the frames
+you changed.
+
 ## Worked examples
 
 - `examples/linkedin-promo` — sixteen seconds, plain JavaScript, a Strudel
@@ -293,6 +366,9 @@ than an error.
   JSON cue sheet lined up with a shot table.
 - `templates/starter` — what `seekreel init` writes: the contract in ninety
   lines with no dependencies.
+- `family/` — the seekreel family sample pack: a 48-second React + three.js
+  film with a cast, three sets, captions, bubbles, cards, photos and a Strudel
+  soundtrack, built to be copied. See the section above and `family/GUIDE.md`.
 
 ## If you are making something for a person to publish
 
