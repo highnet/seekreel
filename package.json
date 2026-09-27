@@ -32,6 +32,7 @@
     "bin",
     "src",
     "templates",
+    "actors",
     "install.sh",
     "SKILLS.md",
     "README.md",

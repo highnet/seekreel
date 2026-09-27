@@ -32,6 +32,18 @@ npm install --omit=dev               # playwright-core, the one runtime dependen
 node bin/seekreel.ts doctor
 ```
 
+**Normal or minimal.** The normal install above includes [`actors/`](actors/README.md),
+a kit of low-poly characters, props and sets with four sample scenes you can
+render into placeholder assets. If you only want the tool, install without it:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/install.sh | sh -s -- --minimal
+```
+
+The minimal install is a sparse checkout of everything except `actors/`.
+Running the installer again without the flag (or with `--full`) brings the kit
+back; `SEEKREEL_MINIMAL=1` does the same as `--minimal`.
+
 There is a homepage too, with a viewer you can scrub:
 **[seekreel.vercel.app](https://seekreel.vercel.app)**
 
@@ -48,6 +60,7 @@ There is a homepage too, with a viewer you can scrub:
 - [What you need installed](#what-you-need-installed)
 - [Written in TypeScript](#written-in-typescript)
 - [A full example](#a-full-example)
+- [Actors and sample scenes](#actors-and-sample-scenes)
 - [Things to know before you start](#things-to-know-before-you-start)
 - [For agents](#for-agents)
 
@@ -499,6 +512,23 @@ modules, htm templates, `flushSync`, done.
 sh examples/react-stage/setup.sh           # react, react-dom and htm, fetched
 seekreel build -c examples/react-stage/seekreel.config.json
 ```
+
+---
+
+## Actors and sample scenes
+
+[`actors/`](actors/README.md) is a small cast for three.js stages: squashy blobs
+with caps, glasses, buns and bows, a baby, a dog, fries and watermelon, an
+island, a beach, a city building, a plane and a gallery wall. Every builder is
+a pure function of its options, so a pose computed from `t` is all a frame
+needs. Four sample scenes render straight into assets:
+
+```sh
+sh actors/setup.sh                              # three.js, Motion and the font
+seekreel build -c actors/picnic.config.json     # also cast, getaway, gallery
+```
+
+It is not part of the tool; the minimal install leaves it out.
 
 ---
 

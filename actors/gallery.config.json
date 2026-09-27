@@ -1,0 +1,16 @@
+{
+  "name": "gallery",
+  "stage": "scenes/gallery.html",
+  "duration": 8,
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "webgl": true,
+  "background": "#ffe6ee",
+  "poster": 6,
+  "out": "out/gallery",
+  "variants": [
+    { "name": "" },
+    { "name": "loop", "format": "gif", "fps": 12, "size": "960x540" }
+  ]
+}
