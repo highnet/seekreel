@@ -4,8 +4,10 @@ What this is: the operating manual for driving seekreel without reading the
 homepage's argument or the README's prose. Fetch the latest copy at any time:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md
+curl -fsSL https://seekreel.vercel.app/SKILLS.md
 ```
+
+(or `https://raw.githubusercontent.com/highnet/seekreel/main/SKILLS.md`)
 
 If you are a person, the README is friendlier and
 [seekreel.vercel.app](https://seekreel.vercel.app) is friendlier still.
