@@ -448,6 +448,28 @@ itself, so `note`, `dur`, `freq` and `seed` work wherever that sound supports
 them. The whole synth is about three hundred lines in `src/audio/synth.py` —
 it is worth reading, and easy to add to.
 
+**Recorded audio on the same sheet.** A voiceover, a line read by a text-to-speech
+service, anything you did not synthesize: list it under `tracks` and it is placed
+by timestamp like a cue. `duck` lowers the bed and the cues while a track is
+sounding, so a voice sits on top of the music rather than fighting it.
+
+```json
+{
+  "duration": 30,
+  "bed": { "tempo": 96, "progression": [{ "tones": ["D3", "F3", "A3", "C4"], "root": "D2" }] },
+  "tracks": [
+    { "at": 1.2, "file": "voice/intro.wav" },
+    { "at": 9.8, "file": "voice/wizard.wav", "gain": 0.9 }
+  ],
+  "duck": { "gain": 0.3, "attack": 0.12, "release": 0.45 }
+}
+```
+
+Tracks are WAV files (PCM, mono or stereo), relative to the cue sheet. Any rate
+works, but one that matches the sheet's `sampleRate` (48000 by default) skips a
+linear resample — convert an MP3 with
+`ffmpeg -i line.mp3 -ar 48000 line.wav`.
+
 This engine needs `python3` (standard library only). The Strudel engine does
 not: it renders in the browser seekreel already drives.
 
