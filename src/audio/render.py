@@ -26,8 +26,17 @@ Schema, all keys optional except `duration`:
         {"at": 19.9, "sound": "pad", "note": "F3", "dur": 5.0, "pan": -0.2},
         {"at": 17.3, "sound": "pip", "freq": 740}
       ],
+      "tracks": [                     recorded audio, placed by time
+        {"at": 2.4, "file": "voice/intro.wav", "gain": 1.0, "pan": 0.0}
+      ],
+      "duck": {"gain": 0.3, "attack": 0.12, "release": 0.45},
       "master": {"fadeIn": 0.15, "fadeOut": 1.1, "peak": 0.72}
     }
+
+`tracks` are WAV files (PCM, 8/16/24/32-bit, mono or stereo, any rate),
+relative to the cue sheet: a voiceover, a recorded line, a sound you did not
+synthesize. `duck` lowers the bed and the cues while any track is sounding, so
+a voice sits on top of the music instead of fighting it.
 
 A cue's extra keys are passed straight to the sound, so `note`, `dur`,
 `freq` and `seed` all work wherever the sound in question takes them.
@@ -125,6 +134,111 @@ def build_bed(mix, bed, duration):
         index += 1
 
 
+def read_wav(file, sample_rate):
+    """
+    A WAV as a list of (left, right) floats at the sheet's rate.
+
+    Standard library only, like the rest of this engine: `wave` reads the
+    container, the samples are unpacked by hand, and a different rate is
+    resampled linearly. Linear is not mastering grade, which is why the
+    pipeline that makes the files should write them at the sheet's rate.
+    """
+    with wave.open(file, "rb") as handle:
+        channels = handle.getnchannels()
+        width = handle.getsampwidth()
+        rate = handle.getframerate()
+        raw = handle.readframes(handle.getnframes())
+
+    count = len(raw) // width
+    if width == 1:
+        values = [(b - 128) / 128.0 for b in raw]
+    elif width == 2:
+        values = [v / 32768.0 for v in struct.unpack(f"<{count}h", raw)]
+    elif width == 3:
+        values = [
+            int.from_bytes(raw[i:i + 3], "little", signed=True) / 8388608.0
+            for i in range(0, len(raw), 3)
+        ]
+    elif width == 4:
+        values = [v / 2147483648.0 for v in struct.unpack(f"<{count}i", raw)]
+    else:
+        raise SystemExit(f"{file}: unsupported sample width {width * 8} bits")
+
+    left = values[0::channels]
+    right = values[1::channels] if channels > 1 else left
+
+    if rate != sample_rate:
+        ratio = rate / sample_rate
+        n = int(len(left) / ratio)
+
+        def resample(src):
+            out = [0.0] * n
+            last = len(src) - 1
+            for i in range(n):
+                x = i * ratio
+                j = int(x)
+                k = x - j
+                out[i] = src[j] * (1 - k) + src[min(j + 1, last)] * k
+            return out
+
+        left, right = resample(left), resample(right)
+    return left, right
+
+
+def place_tracks(mix, tracks, base, duck):
+    """
+    Lay recorded tracks over everything else, ducking what is underneath.
+
+    The duck is an envelope over the spans where a track sounds, with a short
+    attack before it starts and a slower release after it ends, so the bed
+    makes room for a voice instead of being switched off and on.
+    """
+    if not tracks:
+        return
+    spans = []
+    loaded = []
+    for track in tracks:
+        file = os.path.join(base, track["file"])
+        if not os.path.exists(file):
+            raise SystemExit(f"Track not found: {file}")
+        left, right = read_wav(file, mix.sr)
+        loaded.append((track, left, right))
+        spans.append((track["at"], track["at"] + len(left) / mix.sr))
+
+    if duck:
+        floor = duck.get("gain", 0.3)
+        attack = max(1e-3, duck.get("attack", 0.12))
+        release = max(1e-3, duck.get("release", 0.45))
+        depth = [0.0] * mix.n
+        for start, end in spans:
+            first = max(0, int((start - attack) * mix.sr))
+            last = min(mix.n, int((end + release) * mix.sr) + 1)
+            for i in range(first, last):
+                t = i / mix.sr
+                if t < start:
+                    d = 1 - (start - t) / attack
+                elif t > end:
+                    d = 1 - (t - end) / release
+                else:
+                    d = 1.0
+                if d > depth[i]:
+                    depth[i] = d
+        for i, d in enumerate(depth):
+            if d:
+                k = 1 - d * (1 - floor)
+                mix.left[i] *= k
+                mix.right[i] *= k
+
+    for track, left, right in loaded:
+        gain = track.get("gain", 1.0)
+        pan = track.get("pan", 0.0)
+        if left is right:
+            mix.place(track["at"], left, gain, pan)
+        else:
+            mix.place(track["at"], left, gain, -1.0)
+            mix.place(track["at"], right, gain, 1.0)
+
+
 def master(mix, settings):
     """Fades at both ends, then a soft knee so transients cannot clip."""
     fade_in = int(settings.get("fadeIn", 0.15) * mix.sr)
@@ -180,6 +294,13 @@ def main():
         kwargs = {k: v for k, v in cue.items() if k not in MIX_KEYS}
         kwargs.setdefault("sr", sample_rate)
         mix.place(cue["at"], synth.SOUNDS[name](**kwargs), cue.get("gain", 1.0), cue.get("pan", 0.0))
+
+    place_tracks(
+        mix,
+        sheet.get("tracks", []),
+        os.path.dirname(os.path.abspath(args.cues)),
+        sheet.get("duck"),
+    )
 
     frames, peak = master(mix, sheet.get("master", {}))
 

@@ -85,6 +85,56 @@ stack(
 )
 `;
 
+const FOOTAGE_SAMPLE = `
+"duration": "footage",
+"footage": {
+  "out": "footage",
+  "clips": [
+    { "label": "title",  "color": "#0d0d10", "duration": 2 },
+    { "label": "signup", "src": "rec.webm", "from": 1.2, "to": 9.5,
+      "transition": { "type": "fade", "duration": 0.5 } },
+    { "label": "wait",   "src": "rec.webm", "from": 9.5, "to": 190,
+      "speed": 30, "transition": "wipeleft" },
+    { "label": "result", "src": "rec.webm", "from": 190, "to": 204, "hold": 1.5 },
+    { "label": "end",    "still": "cta.png", "duration": 3,
+      "transition": { "type": "fadeblack", "duration": 0.6 } }
+  ]
+}
+`;
+
+const FOOTAGE_STAGE_SAMPLE = `
+import { time, loadFootage, punchIn, shown, captionAt, markReady } from "/_seekreel/stage.js";
+
+const t = time();
+const film = await loadFootage("footage");   // what seekreel footage wrote
+const img = await film.image(t);             // this frame, decoded
+img.style.transformOrigin = "0 0";
+// zoom on the click you logged at 6.1s into the recording
+img.style.transform = punchIn([{ t: film.toFilm("signup", 6.1), x: 1210, y: 640 }], { scale: 1.25 });
+document.body.append(img);
+
+const wait = film.byLabel("wait");
+chip.style.opacity = shown(wait.start, wait.end);        // "30×" while the timelapse runs
+caption.textContent = captionAt(captions, t)?.text ?? "";
+markReady();
+`;
+
+const VOICE_SAMPLE = `
+"tracks": [
+  { "at": 1.2, "file": "voice/intro.wav" },
+  { "at": 9.8, "file": "voice/wizard.wav", "gain": 0.9 }
+],
+"duck": { "gain": 0.3, "attack": 0.12, "release": 0.45 }
+`;
+
+const EDITS: [string, string][] = [
+  ['from / to', 'Trim each clip to its in and out points in the source.'],
+  ['speed', '30 is a timelapse through the waiting; 0.5 is slow motion.'],
+  ['hold', 'Freeze the last frame for as long as the voice needs.'],
+  ['transition', 'A cut, or any ffmpeg xfade: fade, fadeblack, wipeleft, slideup, circleopen, zoomin, pixelize…'],
+  ['still / color', 'Title cards and an end card, between the recordings.'],
+];
+
 const SOUNDS = ['marimba', 'bass', 'pad', 'swell', 'chime', 'pip', 'tick', 'shutter', 'pop', 'whoosh', 'stamp', 'tray', 'shaker'];
 
 export default function Home() {
@@ -109,6 +159,9 @@ export default function Home() {
             </a>
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#playground">
               Playground
+            </a>
+            <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#footage">
+              Screen demos
             </a>
             <a className="hidden transition-opacity hover:opacity-70 sm:inline" href="#formats">
               Formats
@@ -302,6 +355,73 @@ If it runs in your browser, it ships as video.
         </section>
 
 
+        {/* Fold: recorded footage, edited and dressed on the stage. */}
+        <section id="footage" className="scroll-mt-8 border-t border-rule py-20 sm:py-28">
+          <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+              <h2 className="text-[clamp(2rem,4.2vw,3.2rem)] leading-[0.98] font-bold">
+                Already have a screen recording? Cut it here.
+              </h2>
+              <p className="max-w-[58ch] text-lg leading-relaxed text-muted">
+                A product demo is mostly a recording with things on top: a title, captions, a zoom
+                on the button that matters, a timelapse through the boring part. Record the flow
+                with Playwright, have a voice read the script, and describe the cut as an edit list.{' '}
+                <span className="data text-ink">seekreel footage</span> turns it into one JPEG per
+                frame, and the stage draws everything else over it.
+              </p>
+            </div>
+
+            <div className="mt-12 grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
+              <div className="min-w-0">
+                <dl className="grid grid-cols-1 gap-y-3">
+                  {EDITS.map(([key, what]) => (
+                    <div key={key} className="grid grid-cols-1 gap-1 border-t border-rule pt-3 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-4">
+                      <dt className="data text-primary">{key}</dt>
+                      <dd className="leading-relaxed text-muted">{what}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-8 max-w-[52ch] leading-relaxed text-muted">
+                  <span className="data text-ink">&quot;duration&quot;: &quot;footage&quot;</span> makes
+                  the film exactly as long as the cut, so re-trimming a clip never means editing the
+                  length by hand. <span className="data text-ink">seekreel build</span> cuts the
+                  footage first whenever the config has some.
+                </p>
+                <h3 className="mt-10 text-xl font-bold">Why frames, not a &lt;video&gt;</h3>
+                <p className="mt-2 max-w-[52ch] leading-relaxed text-muted">
+                  It was the first thing tried. Headless Chromium reports a seek as done before the
+                  decoded picture is painted, so a seeked video showed the right frame most of the
+                  time — and frame 0 the rest. Open-source Chromium cannot decode H.264 at all. An
+                  image of frame N is right every time.
+                </p>
+              </div>
+              <div className="grid min-w-0 grid-cols-1 content-start gap-8">
+                <Code code={FOOTAGE_SAMPLE} lang="json" file="seekreel.config.json" />
+                <div>
+                  <h3 className="text-xl font-bold">Zooms, overlays and captions, timed to the cut</h3>
+                  <p className="mt-2 max-w-[52ch] leading-relaxed text-muted">
+                    <span className="data text-ink">toFilm</span> says where a moment of the
+                    recording landed after trims and speed changes — log your click times while
+                    recording and <span className="data text-ink">punchIn</span> zooms on each one.{' '}
+                    <span className="data text-ink">shown</span> fades a chip in and out across a
+                    clip; <span className="data text-ink">captionAt</span> picks the line on screen.
+                  </p>
+                  <div className="mt-4 min-w-0">
+                    <Code code={FOOTAGE_STAGE_SAMPLE} lang="js" file="stage.html" />
+                  </div>
+                </div>
+                <p className="leading-relaxed text-muted">
+                  <a className="text-primary underline underline-offset-4" href={`${REPO}/tree/main/examples/screen-demo`}>
+                    examples/screen-demo
+                  </a>{' '}
+                  is a nine-second film that uses all of it — a fade, a 4× timelapse behind a wipe,
+                  a freeze, a punch-in and captions — cut to 16:9 and 9:16 from one render.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Fold: the deliverables, which is what anyone is actually here for. */}
         <section id="formats" className="scroll-mt-8 border-t border-rule py-20 sm:py-28">
           <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
@@ -391,6 +511,18 @@ If it runs in your browser, it ships as video.
               <div className="grid min-w-0 grid-cols-1 content-start gap-6">
                 <Code code={STRUDEL_SAMPLE} lang="js" file="music.strudel.js" />
                 <Code code={CUES_SAMPLE} lang="json" file="cues.json" />
+                <div>
+                  <h3 className="text-xl font-bold">Voiceover, with the music ducking under it</h3>
+                  <p className="mt-2 max-w-[52ch] leading-relaxed text-muted">
+                    A narration you recorded, or lines read by a text-to-speech service, goes on the
+                    same cue sheet as WAV tracks placed by timestamp.{' '}
+                    <span className="data text-ink">duck</span> lowers the bed and the cues while a
+                    voice is sounding.
+                  </p>
+                  <div className="mt-4 min-w-0">
+                    <Code code={VOICE_SAMPLE} lang="json" file="cues.json" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

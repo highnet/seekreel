@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { normalizeFootage } from "./footage.ts";
 import { FORMATS, FORMAT_NAMES, isFormatName, parseRatio, parseSize } from "./formats.ts";
 import { expected } from "./types.ts";
 import type {
@@ -87,7 +89,21 @@ export async function loadConfig(configPath: string): Promise<Config> {
     file,
   } as Config;
 
-  if (!(config.duration > 0)) fail(`duration must be a positive number of seconds`);
+  config.footage = parsed.footage ? normalizeFootage(root, parsed.footage) : null;
+
+  /*
+   * "duration": "footage" takes the film's length from the cut footage, so an
+   * edit that changes length does not also need the config edited by hand.
+   * Before `seekreel footage` has run there is nothing to read; the duration
+   * is 0 until then, and only the commands that need frames complain.
+   */
+  if ((parsed.duration as unknown) === "footage") {
+    if (!config.footage) fail(`duration is "footage" but the config has no footage section`);
+    const index = path.join(config.footage.dir, "footage.json");
+    config.duration = existsSync(index) ? JSON.parse(readFileSync(index, "utf8")).duration : 0;
+  } else if (!(config.duration > 0)) {
+    fail(`duration must be a positive number of seconds, or "footage"`);
+  }
   if (!(config.fps > 0)) fail(`fps must be positive`);
   if (config.width % 2 || config.height % 2) {
     fail(`width and height must both be even — H.264 cannot encode an odd dimension`);

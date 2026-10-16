@@ -29,7 +29,7 @@ leave with the install command.
 ## Proof and constraints
 
 - Everything on the page is true of the tool as published: the three-rule stage
-  contract, the four commands, the JSON cue sheet, the requirements, and the
+  contract, the five commands, footage editing, the JSON cue sheet, the requirements, and the
   honest cost of about a second per frame.
 - seekreel is not on npm yet, so the install line installs from the repository
   and says so.

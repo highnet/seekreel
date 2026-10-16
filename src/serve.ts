@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { readFile, stat } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
 import path from "node:path";
 
 /**
@@ -38,6 +39,9 @@ const TYPES: Record<string, string> = {
   ".otf": "font/otf",
   ".wav": "audio/wav",
   ".mp3": "audio/mpeg",
+  ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".m4a": "audio/mp4",
   ".glb": "model/gltf-binary",
   ".gltf": "model/gltf+json",
   ".hdr": "image/vnd.radiance",
@@ -82,9 +86,12 @@ export async function serveDirectory(
     }
 
     try {
-      const info = await stat(file);
-      if (info.isDirectory()) file = path.join(file, "index.html");
-      response.writeHead(200, {
+      let info = await stat(file);
+      if (info.isDirectory()) {
+        file = path.join(file, "index.html");
+        info = await stat(file);
+      }
+      const headers = {
         "content-type": TYPES[path.extname(file).toLowerCase()] ?? "application/octet-stream",
         /*
          * Nothing here may be cached. A stage edited between two `probe` runs
@@ -92,8 +99,35 @@ export async function serveDirectory(
          * a frame of the wrong film.
          */
         "cache-control": "no-store",
-      });
-      response.end(await readFile(file));
+        "accept-ranges": "bytes",
+      };
+      /*
+       * A <video> on a stage seeks by asking for byte ranges, and Chromium will
+       * not seek a media file served without them. Files are streamed rather
+       * than read whole, so a long screen recording is not loaded into memory
+       * once per frame.
+       */
+      const range = /^bytes=(\d*)-(\d*)$/.exec(request.headers.range ?? "");
+      if (range && (range[1] || range[2])) {
+        const size = info.size;
+        let start = range[1] ? Number(range[1]) : size - Number(range[2]);
+        let end = range[1] && range[2] ? Number(range[2]) : size - 1;
+        start = Math.max(0, start);
+        end = Math.min(end, size - 1);
+        if (start > end) {
+          response.writeHead(416, { "content-range": `bytes */${size}` }).end();
+          return;
+        }
+        response.writeHead(206, {
+          ...headers,
+          "content-range": `bytes ${start}-${end}/${size}`,
+          "content-length": end - start + 1,
+        });
+        createReadStream(file, { start, end }).pipe(response);
+        return;
+      }
+      response.writeHead(200, { ...headers, "content-length": info.size });
+      createReadStream(file).pipe(response);
     } catch {
       response.writeHead(404).end();
     }

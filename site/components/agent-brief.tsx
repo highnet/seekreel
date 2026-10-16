@@ -90,10 +90,11 @@ const COMMANDS: [string, string][] = [
   ['seekreel doctor', 'check Chromium, ffmpeg and the formats before rendering'],
   ['seekreel probe 3.2,9.6', 'render only those timestamps to probe/ — about a second each'],
   ['seekreel render [a] [b]', 'render every frame, or only frames a..b, in place'],
+  ['seekreel footage', 'cut the footage edit list into one JPEG per frame, and print where each clip landed'],
   ['seekreel audio', 'render the soundtrack to a WAV'],
   ['seekreel strudel', 'fetch the Strudel bundle the audio engine needs, once'],
   ['seekreel encode', 'cut every variant from the frames already on disk'],
-  ['seekreel build', 'audio, then render, then encode'],
+  ['seekreel build', 'footage (if configured), then audio, render, encode'],
   ['-c, --config <path>', 'any command, against a config somewhere else'],
 ];
 
@@ -350,6 +351,29 @@ node bin/seekreel.ts doctor
         <Pre className="mt-5">{PATTERN}</Pre>
       </Section>
 
+      <Section title="Footage: screen recordings and editing">
+        <p className="max-w-[68ch] leading-relaxed text-muted">
+          A recording goes into the config as an edit list under{' '}
+          <code className="data text-ink">footage.clips</code>: each clip is a{' '}
+          <code className="data text-ink">src</code> video, a <code className="data text-ink">still</code>{' '}
+          or a <code className="data text-ink">color</code>, with <code className="data text-ink">from</code>/
+          <code className="data text-ink">to</code> trims, <code className="data text-ink">speed</code>,{' '}
+          <code className="data text-ink">hold</code> (freeze the last frame) and a{' '}
+          <code className="data text-ink">transition</code> — <code className="data text-ink">&quot;cut&quot;</code>{' '}
+          or any ffmpeg xfade. <code className="data text-ink">&quot;duration&quot;: &quot;footage&quot;</code>{' '}
+          makes the film as long as the cut. On the stage,{' '}
+          <code className="data text-ink">loadFootage()</code> gives the{' '}
+          <code className="data text-ink">&lt;img&gt;</code> for <code className="data text-ink">t</code>;{' '}
+          <code className="data text-ink">toFilm(label, s)</code> maps a source moment to film time,
+          and <code className="data text-ink">punchIn</code>, <code className="data text-ink">shown</code>{' '}
+          and <code className="data text-ink">captionAt</code> do zooms, timed overlays and captions.
+          Not a seeked <code className="data text-ink">&lt;video&gt;</code>: headless Chromium reports the
+          seek before the picture paints. Voiceover is a WAV under{' '}
+          <code className="data text-ink">tracks</code> on a cue sheet, with{' '}
+          <code className="data text-ink">duck</code> lowering the bed under it.
+        </p>
+      </Section>
+
       <Section title="Commands">
         <dl className="grid grid-cols-1 gap-x-8 gap-y-3">
           {COMMANDS.map(([command, what]) => (
@@ -391,6 +415,7 @@ node bin/seekreel.ts doctor
             ['examples/linkedin-promo', 'sixteen seconds, plain JavaScript, a Strudel soundtrack, five deliverables from one render'],
             ['examples/three-orbit', 'eight seconds of three.js: webgl on, camera angle computed from t, frames identical across processes'],
             ['examples/react-stage', 'six seconds of React with no build step: browser modules, htm templates, flushSync'],
+            ['examples/screen-demo', 'nine seconds of edited screen recording: trims, a timelapse, a freeze, transitions, a punch-in and captions'],
             ['examples/collection-dex', 'forty-three seconds, a paused GSAP timeline, a JSON cue sheet'],
             ['templates/starter', 'what seekreel init writes: the contract in ninety lines, no dependencies'],
           ].map(([where, what]) => (
