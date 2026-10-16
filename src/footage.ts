@@ -157,7 +157,20 @@ export async function cutFootage(
     let args: string[];
     if (clip.kind === "video") {
       const trim = `trim=start=${clip.from}${clip.to != null ? `:end=${clip.to}` : ""}`;
-      args = ["-i", clip.source, "-vf", `${trim},setpts=(PTS-STARTPTS)/${clip.speed},fps=${fps},${shape}${hold}`];
+      if (clip.to != null) {
+        /*
+         * With an out point, the clip's length is decided by the edit list,
+         * not by the source's timestamps: a variable-frame-rate recording
+         * (Playwright, OBS) otherwise rounds to a frame more or less per
+         * clip, and two recordings cut with the same list drift apart.
+         * Pad by cloning the last frame, then cut to exactly this many.
+         */
+        const frames = Math.round(((clip.to - clip.from) / clip.speed + clip.hold) * fps);
+        const pad = `,tpad=stop_mode=clone:stop_duration=${clip.hold + 1}`;
+        args = ["-i", clip.source, "-vf", `${trim},setpts=(PTS-STARTPTS)/${clip.speed},fps=${fps},${shape}${pad}`, "-frames:v", String(frames)];
+      } else {
+        args = ["-i", clip.source, "-vf", `${trim},setpts=(PTS-STARTPTS)/${clip.speed},fps=${fps},${shape}${hold}`];
+      }
     } else if (clip.kind === "still") {
       args = ["-loop", "1", "-framerate", String(fps), "-t", String(clip.duration), "-i", clip.source, "-vf", `fps=${fps},${shape}${hold}`];
     } else {
