@@ -4,7 +4,7 @@ import { Tabs } from '@base-ui/react/tabs';
 import Code from './code';
 
 /*
- * The four commands that matter in order of use. Tabs rather than a table: the
+ * The five commands that matter in order of use. Tabs rather than a table: the
  * interesting part of each command is what it writes, and that needs room.
  */
 const COMMANDS = [
@@ -27,10 +27,16 @@ const COMMANDS = [
     writes: ['out/0480.png … out/0620.png'],
   },
   {
+    id: 'footage',
+    command: 'seekreel footage',
+    blurb: 'Cuts the edit list in the config — trims, speed changes, freezes, transitions — into one JPEG per frame, in seconds, and prints where each clip landed.',
+    writes: ['footage/*.jpg', 'footage/footage.json'],
+  },
+  {
     id: 'build',
     command: 'seekreel build',
-    blurb: 'Audio, then every frame, then ffmpeg — one command from a page to the files you upload.',
-    writes: ['soundtrack.wav', 'out/*.png', 'deliver/reel.mp4', 'deliver/reel-4x5.mp4'],
+    blurb: 'Footage if the config has any, then audio, then every frame, then ffmpeg — one command from a page to the files you upload.',
+    writes: ['footage/*.jpg', 'soundtrack.wav', 'out/*.png', 'deliver/reel.mp4', 'deliver/reel-4x5.mp4'],
   },
 ];
 
