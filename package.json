@@ -46,7 +46,7 @@
     "example": "node bin/seekreel.ts build --config examples/linkedin-promo/seekreel.config.json"
   },
   "dependencies": {
-    "playwright-core": "^1.63.0"
+    "playwright-core": "1.63.0"
   },
   "optionalDependencies": {
     "ffmpeg-static": "^5.3.0"
