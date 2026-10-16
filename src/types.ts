@@ -87,7 +87,8 @@ export type AudioConfig = CuesAudio | StrudelAudio;
 export interface ConfigInput {
   name?: string;
   stage?: string;
-  duration?: number;
+  /** Seconds, or "footage" to take the length of the cut footage. */
+  duration?: number | "footage";
   fps?: number;
   width?: number;
   height?: number;
@@ -103,6 +104,70 @@ export interface ConfigInput {
   poster?: number | null;
   /** WebGL takes a moment to hand over a painted frame; see render.ts. */
   webgl?: boolean;
+  /** Recorded video, cut into a frame sequence the stage can show. See footage.ts. */
+  footage?: FootageInput | null;
+}
+
+/** How one clip enters from the one before it. */
+export interface TransitionInput {
+  /** An ffmpeg xfade name — fade, fadeblack, wipeleft, slideup, circleopen, zoomin… — or "cut". */
+  type: string;
+  /** Seconds the two clips overlap. */
+  duration?: number;
+}
+
+/** One entry on the edit list. Exactly one of src, still or color says what it shows. */
+export interface ClipInput {
+  /** A video file, relative to the config. */
+  src?: string;
+  /** An image, held for `duration`. */
+  still?: string;
+  /** A solid colour, held for `duration`. Any ffmpeg colour. */
+  color?: string;
+  /** In and out points in the source, seconds. Default: the whole file. */
+  from?: number;
+  to?: number;
+  /** Playback speed: 2 is twice as fast, 0.5 is slow motion. */
+  speed?: number;
+  /** Seconds to freeze on the clip's last frame. */
+  hold?: number;
+  /** Length of a still or colour clip. */
+  duration?: number;
+  /** How this clip arrives from the previous one. Default: a cut. */
+  transition?: TransitionInput | string;
+  /** A name the stage can find this clip by. */
+  label?: string;
+}
+
+export interface FootageInput {
+  /** Directory for frames and footage.json, relative to the config. */
+  out?: string;
+  /** cover crops to fill the frame, contain pads with `background`. */
+  fit?: "cover" | "contain";
+  /** JPEG quality, 2 (best) to 31. */
+  quality?: number;
+  clips: ClipInput[];
+}
+
+export interface Clip {
+  index: number;
+  label: string;
+  kind: "video" | "still" | "color";
+  /** Absolute path for video and still clips; the colour for colour clips. */
+  source: string;
+  from: number;
+  to: number | null;
+  speed: number;
+  hold: number;
+  duration: number | null;
+  transition: { type: string; duration: number };
+}
+
+export interface Footage {
+  dir: string;
+  fit: "cover" | "contain";
+  quality: number;
+  clips: Clip[];
 }
 
 /** A config after loadConfig: every path absolute, every default filled in. */
@@ -124,6 +189,7 @@ export interface Config {
   encode: EncodeSettings;
   poster: number | null;
   webgl: boolean;
+  footage: Footage | null;
 
   /** The directory the config file lives in. Every path resolves against it. */
   root: string;

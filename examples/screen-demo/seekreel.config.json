@@ -1,0 +1,22 @@
+{
+  "name": "screen-demo",
+  "stage": "stage.html",
+  "duration": "footage",
+  "fps": 30,
+  "width": 1280,
+  "height": 720,
+  "background": "#0d0d10",
+  "poster": 4,
+  "footage": {
+    "out": "footage",
+    "fit": "contain",
+    "clips": [
+      { "label": "title", "color": "#0d0d10", "duration": 1.5 },
+      { "label": "intro", "src": "recording.webm", "from": 0, "to": 3, "transition": { "type": "fade", "duration": 0.5 } },
+      { "label": "timelapse", "src": "recording.webm", "from": 3, "to": 9, "speed": 4, "transition": { "type": "wipeleft", "duration": 0.4 } },
+      { "label": "detail", "src": "recording.webm", "from": 9, "to": 11, "hold": 1, "transition": "cut" },
+      { "label": "end", "color": "#0d0d10", "duration": 1.5, "transition": { "type": "fadeblack", "duration": 0.6 } }
+    ]
+  },
+  "variants": [{ "name": "" }, { "name": "story", "ratio": "9:16" }]
+}

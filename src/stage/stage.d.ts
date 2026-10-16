@@ -23,3 +23,43 @@ export declare function renderReact(
   element: unknown,
   options?: { ready?: boolean },
 ): void;
+
+export declare function ease(k: number): number;
+export declare function shown(a: number, b: number, fade?: number, t?: number): number;
+
+export interface FootageClip {
+  index: number;
+  label: string;
+  kind: "video" | "still" | "color";
+  start: number;
+  end: number;
+  from: number;
+  to: number | null;
+  speed: number;
+  hold: number;
+  transition: { type: string; duration: number };
+}
+
+export interface LoadedFootage {
+  fps: number;
+  width: number;
+  height: number;
+  frames: number;
+  duration: number;
+  clips: FootageClip[];
+  frameAt(t?: number): number;
+  url(t?: number): string;
+  image(t?: number): Promise<HTMLImageElement>;
+  clip(t?: number): FootageClip;
+  byLabel(label: string): FootageClip | undefined;
+  toFilm(label: string, sourceSeconds: number): number | null;
+}
+
+export declare function loadFootage(dir?: string): Promise<LoadedFootage>;
+
+export declare function punchIn(
+  points: { t: number; x: number; y: number }[],
+  options?: { scale?: number; lead?: number; hold?: number; ease?: number; t?: number },
+): string;
+
+export declare function captionAt<C extends { start: number; end: number }>(cues: C[], t?: number): C | null;

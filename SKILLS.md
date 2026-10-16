@@ -158,6 +158,17 @@ renderReact({ root: createRoot(document.getElementById("stage")), flushSync },
   tagged templates and browser modules to avoid a build step. With a bundler,
   point `stage` at the HTML it writes.
 
+## Footage (screen recordings, editing)
+
+- A config `footage` section is an edit list of clips: `{ src | still | color, from, to, speed, hold, duration, transition, label }`.
+  `transition` is `"cut"` or an ffmpeg xfade name (`fade`, `fadeblack`, `wipeleft`, `slideup`, `circleopen`, `zoomin`, …), or `{ type, duration }`.
+- `seekreel footage` writes `<out>/frames/NNNNN.jpg` (one per film frame) and `<out>/footage.json` (each clip's `start`/`end` in film time). `build` runs it first.
+- `"duration": "footage"` takes the film's length from the cut.
+- In the stage: `const film = await loadFootage("footage")`, then `await film.image(t)` for the frame, `film.byLabel(label)` / `film.clip(t)` / `film.toFilm(label, sourceSeconds)` for timing, `punchIn(points, { scale })` for zooms, `shown(a, b, fade)` for overlays, `captionAt(cues, t)` for captions.
+- Do not put a `<video>` on the stage and seek it: headless Chromium paints the wrong frame some of the time, and cannot decode H.264. Use footage.
+- Voiceover: cue sheet `tracks: [{ at, file }]` (WAV) plus `duck: { gain }` lowers the bed under it.
+- Example: `examples/screen-demo`.
+
 ## Commands
 
 | Command | What it does |

@@ -15,6 +15,7 @@ import { expected } from "../src/types.ts";
  */
 const renderer = () => import("../src/render.ts");
 const encoder = () => import("../src/encode.ts");
+const cutter = () => import("../src/footage.ts");
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE = path.resolve(here, "..");
@@ -25,10 +26,11 @@ Commands
   seekreel init [dir]            create a new project from the starter template
   seekreel probe <t,t,...>       render just those timestamps, into probe/
   seekreel render [a] [b]        render every frame, or only frames a..b, in place
+  seekreel footage               cut the config's recorded clips into frames
   seekreel audio                 render the soundtrack to a WAV file
   seekreel strudel               fetch the Strudel bundle the audio engine needs
   seekreel encode                turn frames (plus the WAV) into deliver/*.mp4
-  seekreel build                 audio, then render, then encode
+  seekreel build                 footage, audio, render, then encode
   seekreel doctor                check that Chromium and ffmpeg are available
 
 Options
@@ -44,6 +46,23 @@ function arg(argv: string[], ...names: string[]): string | null {
     if (at !== -1 && argv[at + 1]) return argv[at + 1];
   }
   return null;
+}
+
+async function doFootage(config: Config): Promise<void> {
+  if (!config.footage) throw expected("This config has no footage section to cut.");
+  const started = Date.now();
+  const result = await (await cutter()).cutFootage(config, {
+    onClip: (clip) =>
+      console.log(
+        `  ${clip.label.padEnd(14)} ${clip.start.toFixed(2).padStart(7)}–${clip.end.toFixed(2).padStart(7)}s` +
+          `${clip.speed !== 1 ? `  ×${clip.speed}` : ""}` +
+          `${clip.transition.duration ? `  ${clip.transition.type} ${clip.transition.duration}s` : ""}`,
+      ),
+  });
+  console.log(
+    `${result.frames} frames, ${result.duration.toFixed(2)}s -> ` +
+      `${path.relative(process.cwd(), config.footage.dir)} in ${Math.round((Date.now() - started) / 1000)}s`,
+  );
 }
 
 function python(script: string, args: string[]): Promise<void> {
@@ -172,9 +191,18 @@ async function main(): Promise<void> {
     return;
   }
 
-  const config = await loadConfig(
-    arg(argv, "-c", "--config") ?? path.resolve("seekreel.config.json"),
-  );
+  const configFile = arg(argv, "-c", "--config") ?? path.resolve("seekreel.config.json");
+  let config = await loadConfig(configFile);
+
+  if (command === "footage" || (command === "build" && config.footage)) {
+    await doFootage(config);
+    // The cut may have changed the film's length ("duration": "footage").
+    config = await loadConfig(configFile);
+    if (command === "footage") return;
+  }
+  if (config.frames === 0 && command !== "audio" && command !== "strudel") {
+    throw expected(`The film is 0 frames long. Run \`seekreel footage\` first, or set a duration.`);
+  }
 
   if (command === "probe") {
     const list = (argv[1] ?? "").split(",").map(Number).filter((n) => !Number.isNaN(n));

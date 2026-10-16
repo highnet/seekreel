@@ -56,6 +56,7 @@ There is a homepage too, with a viewer you can scrub:
 - [Animating with GSAP](#animating-with-gsap)
 - [3D with three.js](#3d-with-threejs)
 - [React stages](#react-stages)
+- [Footage: screen recordings and editing](#footage-screen-recordings-and-editing)
 - [Commands](#commands)
 - [Configuration](#configuration)
 - [Sound](#sound)
@@ -256,6 +257,98 @@ always has.
 
 ---
 
+## Footage: screen recordings and editing
+
+Not every film is drawn from scratch. A product demo is mostly a screen
+recording with things on top of it: a title, captions, a zoom on the button
+that matters, a timelapse through the boring part, a call to action. seekreel
+does that too, without giving up "frame N is always the same picture".
+
+The recording goes into the config as an **edit list**. `seekreel footage`
+cuts it into one JPEG per frame at the film's rate and size, and the stage
+shows the frame for `t` underneath whatever else it draws.
+
+```json
+{
+  "duration": "footage",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "footage": {
+    "out": "footage",
+    "fit": "cover",
+    "clips": [
+      { "label": "title", "color": "#0d0d10", "duration": 2 },
+      { "label": "signup", "src": "rec.webm", "from": 1.2, "to": 9.5, "transition": { "type": "fade", "duration": 0.5 } },
+      { "label": "wait", "src": "rec.webm", "from": 9.5, "to": 190, "speed": 30, "transition": "wipeleft" },
+      { "label": "result", "src": "rec.webm", "from": 190, "to": 204, "hold": 1.5 },
+      { "label": "end", "still": "cta.png", "duration": 3, "transition": { "type": "fadeblack", "duration": 0.6 } }
+    ]
+  }
+}
+```
+
+| Clip key | What it does |
+| --- | --- |
+| `src` / `still` / `color` | What the clip shows: a video file, an image, or a solid colour. Exactly one. |
+| `from`, `to` | In and out points in the source, seconds. |
+| `speed` | `30` is a 30× timelapse; `0.5` is slow motion. |
+| `hold` | Freeze the last frame for this many seconds. |
+| `duration` | Length of a `still` or `color` clip. |
+| `transition` | How the clip arrives from the one before: `"cut"` (default), or any of ffmpeg's xfade transitions — `fade`, `fadeblack`, `fadewhite`, `dissolve`, `wipeleft`, `slideup`, `smoothleft`, `circleopen`, `zoomin`, `pixelize` and more. `{ "type", "duration" }` sets the overlap (default 0.5 s). |
+| `label` | A name the stage can find the clip by. |
+
+`"duration": "footage"` makes the film exactly as long as the cut, so changing
+the edit never means editing the duration by hand. `seekreel build` cuts the
+footage first when there is a `footage` section; `seekreel footage` does only
+that, in seconds, and prints where each clip landed.
+
+The stage helpers do the rest:
+
+```js
+import { time, loadFootage, punchIn, shown, captionAt, markReady } from "/_seekreel/stage.js";
+
+const t = time();
+const film = await loadFootage("footage");    // reads footage/footage.json
+const img = await film.image(t);              // <img> of this frame, decoded
+img.style.transformOrigin = "0 0";
+img.style.transform = punchIn([{ t: film.toFilm("signup", 6.1), x: 1210, y: 640 }], { scale: 1.25 });
+document.body.append(img);
+
+const wait = film.byLabel("wait");             // overlays timed against clips
+chip.style.opacity = shown(wait.start, wait.end);
+caption.textContent = captionAt(cues, t)?.text ?? "";
+markReady();
+```
+
+- `film.clip(t)`, `film.byLabel(name)`: which clip is on screen, and where any
+  clip starts and ends in the film.
+- `film.toFilm(label, sourceSeconds)`: where a moment of the recording
+  landed after trims and speed changes. Log your click times while recording
+  and the stage can zoom on each one.
+- `punchIn(points, opts)`: an eased zoom toward a point and back.
+- `shown(a, b, fade)`: 0 → 1 → 0 across a window, for anything that appears
+  for a while. `ease(k)` is the curve it uses.
+- `captionAt(cues, t)`: the `{ start, end, text }` on screen now.
+
+**Why frames and not a `<video>` on the stage.** It was the first thing tried.
+Headless Chromium reports a seek as done before the decoded picture is
+painted, so a seeked `<video>` showed the right frame most of the time — and
+frame 0 the rest. Open-source Chromium cannot decode H.264 at all. An `<img>`
+of frame N is right every time. The stage server does answer byte-range
+requests now, so `<video>` and `<audio>` load and seek if you need them for
+something that does not have to be frame-exact.
+
+**Voiceover** goes on a cue sheet as a recorded track — see
+[Cue sheets](#cue-sheets--sound-that-lands-on-cuts) — and the music ducks
+under it.
+
+`examples/screen-demo` is a nine-second film that uses all of it:
+`node examples/screen-demo/make-source.ts` makes a stand-in recording, then
+`seekreel build -c examples/screen-demo/seekreel.config.json`.
+
+---
+
 ## Commands
 
 | Command | What it does |
@@ -264,10 +357,11 @@ always has.
 | `seekreel doctor` | Check that Chromium, ffmpeg and python are available |
 | `seekreel probe <t,t,...>` | Render only those timestamps, into `probe/` |
 | `seekreel render [a] [b]` | Render every frame, or just frames `a` to `b`, in place |
+| `seekreel footage` | Cut the config's recorded clips (trims, speed, freezes, transitions) into frames |
 | `seekreel audio` | Render the soundtrack to a WAV file |
 | `seekreel strudel` | Fetch the Strudel bundle the audio engine needs, once |
 | `seekreel encode` | Turn the frames (plus the WAV) into every variant in `deliver/` |
-| `seekreel build` | Audio, then render, then encode |
+| `seekreel build` | Footage, audio, render, then encode |
 
 Use `-c, --config <path>` to point at a config other than
 `./seekreel.config.json`. Paths inside a config are resolved relative to the

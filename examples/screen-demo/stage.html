@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html, body { margin: 0; width: 1280px; height: 720px; overflow: hidden; background: #0d0d10; font-family: system-ui, sans-serif; }
+      #screen { position: absolute; inset: 0; overflow: hidden; }
+      #screen img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+      .card { position: absolute; inset: 0; display: grid; place-content: center; color: #fff; font-size: 64px; font-weight: 700; }
+      .chip { position: absolute; right: 28px; top: 28px; padding: 8px 18px; border-radius: 999px; background: #ffd400; font: 700 24px ui-monospace, monospace; }
+      .caption { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); padding: 8px 20px; border-radius: 10px; background: rgb(0 0 0 / .8); color: #fff; font-size: 30px; white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script type="module">
+      import { time, loadFootage, punchIn, shown, captionAt, markReady } from "/_seekreel/stage.js";
+
+      const t = time();
+      const film = await loadFootage("footage");
+      const clip = film.clip(t);
+
+      // The recorded frame, with a punch-in on one moment of the "detail" clip.
+      const img = await film.image(t);
+      const look = { t: film.toFilm("detail", 9.6), x: 900, y: 500 };
+      img.style.transform = punchIn([look], { scale: 1.35 });
+      document.getElementById("screen").append(img);
+
+      // Overlays are ordinary DOM, timed against the clips they belong to.
+      const add = (cls, text, opacity) => {
+        const node = Object.assign(document.createElement("div"), { className: cls, textContent: text });
+        node.style.opacity = opacity;
+        document.body.append(node);
+      };
+      const title = film.byLabel("title"), end = film.byLabel("end"), lapse = film.byLabel("timelapse");
+      add("card", "Screen demo", shown(title.start, title.end + 0.4));
+      add("chip", `▶▶ ${lapse.speed}×`, shown(lapse.start, lapse.end, 0.25));
+      add("card", "The end", shown(end.start + 0.3, end.end + 1, 0.3));
+
+      const captions = [
+        { start: 1.6, end: 4.2, text: "Trimmed from the recording, faded in" },
+        { start: lapse.start, end: lapse.end, text: "Six seconds at four times speed" },
+        { start: film.byLabel("detail").start, end: end.start, text: "A cut, a punch-in, a freeze" },
+      ];
+      const cue = captionAt(captions, t);
+      if (cue) add("caption", cue.text, 1);
+
+      markReady();
+    </script>
+  </body>
+</html>
