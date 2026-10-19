@@ -85,8 +85,8 @@ gives you three things:
 - **Re-render a single shot.** Changed the middle of the film?
   `seekreel render 480 620` redraws only those frames, in place.
 - **Keep the film in your repo.** The page is the source. It diffs, it gets
-  reviewed, and it rebuilds in CI — nobody has to remember how the video was
-  made.
+  reviewed, and because the frames are deterministic it can be rebuilt in CI —
+  nobody has to remember how the video was made.
 
 The trade-off: rendering means one screenshot per frame, so budget roughly a
 second per frame. A 43-second film at 24fps takes about twenty minutes. That is
