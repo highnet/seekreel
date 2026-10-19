@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://seekreel.vercel.app'),
   title: 'seekreel — render an animated web page to video, one frame at a time',
   description:
-    'seekreel asks a web page to draw itself at every timestamp in a film, screenshots each one, and hands the stack to ffmpeg. Deterministic frames, re-renderable shots, a film that rebuilds in CI.',
+    'seekreel asks a web page to draw itself at every timestamp in a film, screenshots each one, and hands the stack to ffmpeg. Deterministic frames, re-renderable shots, a film that can rebuild in CI.',
   keywords: ['video', 'animation', 'gsap', 'playwright', 'ffmpeg', 'mp4', 'deterministic rendering'],
   authors: [{ name: 'highnet', url: 'https://highnet.at' }],
   openGraph: {
