@@ -47,6 +47,16 @@ nothing in it.
 | `getaway.config.json` | 10s | a plane crosses the sea; a beach; one blob turns into a lobster |
 | `gallery.config.json` | 10s | a pink museum wall, a slow pan, the family at an empty "coming soon" frame |
 | `movie.config.json` | 48s | all three in a row, with cards, captions and the soundtrack |
+| `sisters.config.json` | 3 min | **Big Sister**: a one-year-old looks after her newborn sister in four chapters (meeting, sharing, a picnic with Grandma, a lullaby), with its own waltz, `sisters/lullaby.strudel.js` |
+
+### Making Big Sister about your own family
+
+The names in `sisters/names.js` are placeholders. To use real ones without
+committing them, copy `sisters/stage.html` to `sisters/stage.private.html`,
+add `<script>window.SISTERS_NAMES = { big: "…", little: "…", grandma: "…" };</script>`
+before the module script, and copy `sisters.config.json` to
+`sisters.private.config.json` with `"stage": "sisters/stage.private.html"`.
+Anything matching `*.private.*` is git-ignored.
 
 ## Characters, props and sets (`kit/actors.js`)
 

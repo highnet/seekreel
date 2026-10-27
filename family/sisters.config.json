@@ -1,0 +1,31 @@
+{
+  "name": "big-sister",
+  "stage": "sisters/stage.html",
+  "duration": 212,
+  "fps": 24,
+  "width": 1920,
+  "height": 1080,
+  "webgl": true,
+  "background": "#ffe6ee",
+  "poster": 73,
+  "out": "out/sisters",
+  "audio": {
+    "engine": "strudel",
+    "pattern": "sisters/lullaby.strudel.js",
+    "bundle": "vendor/strudel.mjs",
+    "cps": 0.5,
+    "wav": "out/sisters.wav",
+    "peak": 0.8,
+    "fadeIn": 0.05,
+    "fadeOut": 3
+  },
+  "variants": [
+    {
+      "name": ""
+    },
+    {
+      "name": "vertical",
+      "ratio": "9:16"
+    }
+  ]
+}

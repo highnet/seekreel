@@ -22,3 +22,6 @@ site/.vercel
 site/next-env.d.ts
 site/*.tsbuildinfo
 motion.js
+
+# private copies (real names, photos) never get committed
+*.private.*
